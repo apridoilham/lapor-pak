@@ -5,6 +5,8 @@ namespace App\Repositories;
 use App\Interfaces\ResidentRepositoryInterface;
 use App\Models\Resident;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class ResidentRepository implements ResidentRepositoryInterface
 {
@@ -32,6 +34,11 @@ class ResidentRepository implements ResidentRepositoryInterface
     public function updateResident(array $data, int $id)
     {
         $resident = $this->getResidentById($id);
+
+        $resident->user->update([
+            'name' => $data['name'],
+            'password' => isset($data['password']) ? bcrypt($data['password']) : $resident->user->password,
+        ]);
 
         return $resident->update($data);
     }
