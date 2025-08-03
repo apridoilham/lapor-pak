@@ -3,7 +3,7 @@
 @section('title', 'Tambah Data Masyarakat')
 
 @section('content')
-    <a href="list.html" class="btn btn-danger mb-3">Kembali</a>
+    <a href="{{ route('admin.resident.index') }}" class="btn btn-danger mb-3">Kembali</a>
 
 
     <!-- DataTales Example -->

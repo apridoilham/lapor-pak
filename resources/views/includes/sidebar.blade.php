@@ -25,5 +25,11 @@
             <span>Data Masyarakat</span></a>
     </li>
 
+    <li class="nav-item {{ request()->is('admin/report-category*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('admin.report-category.index') }}">
+            <i class="fas fa-fw fa-table"></i>
+            <span>Data kategori</span></a>
+    </li>
+
 
 </ul>
