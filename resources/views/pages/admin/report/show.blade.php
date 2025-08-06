@@ -58,6 +58,57 @@
             </table>
         </div>
     </div>
+
+        <div class="card shadow mb-5">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Progress Laporan</h6>
+        </div>
+        <div class="card-body">
+            <a href="{{ route('admin.report-status.create', $report->id) }}" class="btn btn-primary mb-3">Tambah Progress</a>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Bukti</th>
+                            <th>Status</th>
+                            <th>Deskripsi</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($report->reportStatuses as $status)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>
+                                    @if ($status->image)
+                                        <img src="{{ asset('storage/' . $status->image) }}" alt="image" width="100">
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                                <td>
+                                    {{ $status->status }}
+                                </td>
+                                <td>
+                                    {{ $status->description }}
+                                </td>
+                                <td>
+                                    <a href="{{ route('admin.report-status.edit', $status->id) }}" class="btn btn-warning">Edit</a>
+
+                                    <form action="{{ route('admin.report-status.destroy', $status->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('scripts')

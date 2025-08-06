@@ -27,6 +27,7 @@ class ReportController extends Controller
         $this->reportCategoryRepository = $reportCategoryRepository;
         $this->residentRepository = $residentRepository;
     }
+    
     /**
      * Display a listing of the resource.
      */
