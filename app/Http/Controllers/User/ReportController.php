@@ -16,6 +16,14 @@ class ReportController extends Controller
         $this->reportRepository = $reportRepository;
     }
 
+
+    public function index()
+    {
+        $reports = $this->reportRepository->getAllReports();
+
+        return view('pages.app.report.index', compact('reports'));
+    }
+
     public function show($code) 
     {
         $report = $this->reportRepository->getReportByCode($code);

@@ -22,7 +22,7 @@
 <div class="py-3" id="reports">
     <div class="d-flex justify-content-between align-items-center">
         <h6>Pengaduan terbaru</h6>
-        <a href="reports.html" class="text-primary text-decoration-none show-more">
+        <a href="{{ route('report.index') }}" class="text-primary text-decoration-none show-more">
             Lihat semua
         </a>
     </div>

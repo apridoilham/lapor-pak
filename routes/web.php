@@ -12,6 +12,7 @@ use App\Http\Controllers\User\HomeController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+Route::get('/reports', [UserReportController::class, 'index'])->name('report.index');
 Route::get('/report/{code}', [UserReportController::class, 'show'])->name('report.show');
 
 Route::get('/login', [LoginController::class, 'index'])->name('login');
