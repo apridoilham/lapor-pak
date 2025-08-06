@@ -7,10 +7,12 @@ use App\Http\Controllers\Admin\ReportCategoryController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReportStatusController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\User\ReportController as UserReportController;
+use App\Http\Controllers\User\HomeController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+Route::get('/report/{code}', [UserReportController::class, 'show'])->name('report.show');
 
 Route::get('/login', [LoginController::class, 'index'])->name('login');
 Route::post('/login', [LoginController::class, 'store'])->name('login.store');
