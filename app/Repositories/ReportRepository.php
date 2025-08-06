@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Interfaces\ReportRepositoryInterface;
+use App\Models\ReportCategory;
 use App\Models\Report;
 
 
@@ -26,6 +27,13 @@ class ReportRepository implements ReportRepositoryInterface
     public function getReportByCode(string $code)
     {
         return Report::where('code', $code)->first();
+    }
+
+    public function getReportsByCategory(string $category)
+    {
+        $category = ReportCategory::where('name', $category)->first();
+
+        return Report::where('report_category_id', $category->id)->get();
     }
 
     public function createReport(array $data)

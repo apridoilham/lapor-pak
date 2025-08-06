@@ -14,6 +14,9 @@
 
         </div>
 
+        @if (request()->category) 
+            <p>Kategori {{ request()->category }}</p>
+        @endif
         <div class="d-flex flex-column gap-3 mt-3">
             @foreach($reports as $report)
                 <div class="card card-report border-0 shadow-none">
