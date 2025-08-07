@@ -4,7 +4,20 @@
 
 @section('content')
     <div class="d-flex flex-column justify-content-center align-items-center gap-2">
-        <img src="{{ asset('storage/' . Auth::user()->resident->avatar) }}" alt="avatar" class="avatar">
+        
+        {{-- BAGIAN YANG DIPERBAIKI --}}
+        @php
+            $resident = Auth::user()->resident;
+        @endphp
+
+        @if ($resident && $resident->avatar)
+            <img src="{{ asset('storage/' . $resident->avatar) }}" alt="avatar" class="avatar">
+        @else
+            {{-- Menampilkan gambar default jika pengguna tidak punya avatar/profil resident --}}
+            <img src="{{ asset('assets/app/images/default-avatar.png') }}" alt="avatar" class="avatar">
+        @endif
+        {{-- AKHIR BAGIAN PERBAIKAN --}}
+        
         <h5>{{ Auth::user()->name }}</h5>
     </div>
 

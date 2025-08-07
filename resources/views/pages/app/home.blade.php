@@ -35,23 +35,27 @@
                         <div class="card-report-image position-relative mb-2">
                             <img src="{{ asset('storage/' . $report->image) }}" alt="">
 
-                            @if ($report->reportStatuses->last()->status === 'delivered')
-                                <div class="badge-status on-process">
-                                    Terkirim
-                                </div>
-                            @endif
+                            {{-- BAGIAN YANG DIPERBAIKI --}}
+                            @php
+                                $lastStatus = $report->reportStatuses->last();
+                            @endphp
 
-                            @if ($report->reportStatuses->last()->status === 'in_process')
-                                <div class="badge-status on-process">
-                                    Sedang diproses
-                                </div>
+                            @if ($lastStatus)
+                                @if ($lastStatus->status === 'delivered')
+                                    <div class="badge-status on-process">
+                                        Terkirim
+                                    </div>
+                                @elseif ($lastStatus->status === 'in_process')
+                                    <div class="badge-status on-process">
+                                        Sedang diproses
+                                    </div>
+                                @elseif ($lastStatus->status === 'completed')
+                                    <div class="badge-status done">
+                                        Selesai
+                                    </div>
+                                @endif
                             @endif
-
-                            @if ($report->reportStatuses->last()->status === 'completed')
-                                <div class="badge-status done">
-                                    Selesai
-                                </div>
-                            @endif
+                            {{-- AKHIR BAGIAN PERBAIKAN --}}
 
                         </div>
 
@@ -59,7 +63,7 @@
                             <div class="d-flex align-items-center ">
                                 <img src="{{ asset('assets/app/images/icons/MapPin.png') }}" alt="map pin" class="icon me-2">
                                 <p class="text-primary city">
-                                    {{ $report->address }}
+                                    {{ \Str::substr($report->address, 0, 20) }}{{ strlen($report->address) > 20 ? '...' : '' }}
                                 </p>
                             </div>
 

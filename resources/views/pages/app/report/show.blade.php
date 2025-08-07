@@ -8,7 +8,7 @@
             <img src="{{ asset('assets/app/images/icons/ArrowLeft.svg') }}" alt="arrow-left">
         </a>
 
-        <h1>Detail Lapora {{ $report->code }}</h1>
+        <h1>Detail Laporan {{ $report->code }}</h1>
     </div>
 
     <img src="{{ asset('storage/' . $report->image) }}" alt="" class="report-image mt-5">
@@ -69,36 +69,37 @@
                     <span class="me-2">
                         :
                     </span>
+                    
+                    {{-- BAGIAN YANG DIPERBAIKI --}}
+                    @php
+                        $lastStatus = $report->reportStatuses->last();
+                    @endphp
 
-                    @if ($report->reportStatuses->last()->status === 'delivered')
-                        <div class="badge-pending ">
-                            <img src="{{ asset('assets/app/images/icons/CircleNotch.svg') }}" alt="pending">
-
-                            <p>Terkirim</p>
-                        </div>
+                    @if ($lastStatus)
+                        @if ($lastStatus->status === 'delivered')
+                            <div class="badge-pending ">
+                                <img src="{{ asset('assets/app/images/icons/CircleNotch.svg') }}" alt="pending">
+                                <p>Terkirim</p>
+                            </div>
+                        @elseif ($lastStatus->status === 'in_process')
+                            <div class="badge-pending ">
+                                <img src="{{ asset('assets/app/images/icons/CircleNotch.svg') }}" alt="pending">
+                                <p>Sedang diproses</p>
+                            </div>
+                        @elseif ($lastStatus->status === 'completed')
+                            <div class="badge-success ">
+                                <img src="{{ asset('assets/app/images/icons/Checks.svg') }}" alt="success">
+                                <p>Selesai</p>
+                            </div>
+                        @elseif ($lastStatus->status === 'rejected')
+                            <div class="badge-danger">
+                                <p>Ditolak</p>
+                            </div>
+                        @endif
+                    @else
+                        <p>Belum ada status</p>
                     @endif
-
-                    @if ($report->reportStatuses->last()->status === 'in_process')
-                        <div class="badge-pending ">
-                            <img src="{{ asset('assets/app/images/icons/CircleNotch.svg') }}" alt="pending">
-
-                            <p>Sedang diproses</p>
-                        </div>
-                    @endif
-
-                    @if ($report->reportStatuses->last()->status === 'completed')
-                        <div class="badge-success ">
-                            <img src="{{ asset('assets/app/images/icons/Checks.svg') }}" alt="pending">
-
-                            <p>Selesai</p>
-                        </div>
-                    @endif
-
-                    @if ($report->reportStatuses->last()->status === 'rejected')
-                        <div class="badge-pending ">
-                            <p>Selesai</p>
-                        </div>
-                    @endif
+                    {{-- AKHIR BAGIAN PERBAIKAN --}}
                     
                 </div>
             </div>
@@ -110,7 +111,7 @@
             <div class="card-title mb-4 fw-bold">Riwayat Perkembangan</div>
 
             <ul class="timeline">
-                @foreach ($report->reportStatuses as $status)
+                @forelse ($report->reportStatuses as $status)
                     <li class="timeline-item">
                         <div class="timeline-item-content">
                             @if ($status->image)
@@ -120,7 +121,9 @@
                             <span class="timeline-event">{{ $status->description }}</span>
                         </div>
                     </li>
-                @endforeach
+                @empty
+                    <li class="text-center text-secondary">Belum ada riwayat perkembangan.</li>
+                @endforelse
             </ul>
         </div>
     </div>

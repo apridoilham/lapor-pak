@@ -12,7 +12,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\User\HomeController;
 use App\Http\Controllers\User\ProfileController;
 
-Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home')->middleware('auth');
 
 Route::get('/reports', [UserReportController::class, 'index'])->name('report.index');
 Route::get('/report/{code}', [UserReportController::class, 'show'])->name('report.show');
@@ -22,6 +22,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/preview', [UserReportController::class, 'preview'])->name('report.preview');
     Route::get('/create-report', [UserReportController::class, 'create'])->name('report.create');
     Route::post('/create-report', [UserReportController::class, 'store'])->name('report.store');
+    Route::get('/report-success', [UserReportController::class, 'success'])->name('report.success');
 
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
 });
