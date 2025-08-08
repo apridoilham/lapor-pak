@@ -8,15 +8,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Resident extends Model
 {
-
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'user_id',
         'avatar',
     ];
 
-    // Mehubungkan dengan model User
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -24,7 +22,6 @@ class Resident extends Model
 
     public function reports()
     {
-        // Satu resident memiliki banyak laporan
         return $this->hasMany(Report::class);
     }
 }

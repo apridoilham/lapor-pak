@@ -8,8 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ReportCategory extends Model
 {
-
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -18,7 +17,6 @@ class ReportCategory extends Model
 
     public function reports()
     {
-        // Satu category memiliki banyak laporan
         return $this->hasMany(Report::class);
     }
 }

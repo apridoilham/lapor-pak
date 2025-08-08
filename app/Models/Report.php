@@ -4,12 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Report extends Model
 {
-
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'code',
@@ -23,22 +25,23 @@ class Report extends Model
         'address',
     ];
 
-    // Menghubungkan dengan model Resident dan ReportCategory
-    public function resident()
+    public function resident(): BelongsTo
     {
-        // satu laporan dimiliki oleh satu resident
         return $this->belongsTo(Resident::class);
     }
 
-    public function reportCategory()
+    public function reportCategory(): BelongsTo
     {
-        // satu laporan memiliki satu kategori laporan
         return $this->belongsTo(ReportCategory::class);
     }
 
-    public function reportStatuses()
+    public function reportStatuses(): HasMany
     {
-        // satu laporan memiliki banyak status laporan
-        return $this->hasMany(ReportStatus::class);
+        return $this->hasMany(ReportStatus::class)->orderBy('created_at', 'desc');
+    }
+
+    public function latestStatus(): HasOne
+    {
+        return $this->hasOne(ReportStatus::class)->latestOfMany();
     }
 }

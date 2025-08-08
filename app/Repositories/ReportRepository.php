@@ -2,53 +2,54 @@
 
 namespace App\Repositories;
 
+use App\Enums\ReportStatusEnum;
 use App\Interfaces\ReportRepositoryInterface;
 use App\Models\ReportCategory;
 use App\Models\Report;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth; 
-
+use Illuminate\Support\Facades\Auth;
 
 class ReportRepository implements ReportRepositoryInterface
 {
     public function getAllReports()
     {
-        return Report::all();
+        return Report::with('resident', 'reportCategory', 'latestStatus')->latest()->get();
     }
 
     public function getLatesReports()
     {
-        return Report::latest()->get()->take(5);
+        return Report::with('resident', 'reportCategory', 'latestStatus')->latest()->take(5)->get();
     }
 
-    public function getReportByResidentId(string $status)
+    public function getReportByResidentId(?string $status)
     {
-        return Report::where('resident_id', Auth::user()->resident->id)
-            ->whereHas('reportStatuses', function (Builder $query) use ($status) {
-                $query->where('status', $status)
-                    ->whereIn('id', function ($subQuery) {
-                        $subQuery->selectRaw('MAX(id)')
-                            ->from('report_statuses')
-                            ->groupBy('report_id');
-                    });
-            })->get();
+        $query = Report::where('resident_id', Auth::user()->resident->id)->with('latestStatus');
+
+        if ($status) {
+            $query->whereHas('latestStatus', function (Builder $query) use ($status) {
+                $query->where('status', $status);
+            });
+        }
+
+        return $query->latest()->get();
     }
 
     public function getReportById(int $id)
     {
-        return Report::where('id', $id)->first();
+        return Report::with('resident', 'reportCategory', 'reportStatuses')->findOrFail($id);
     }
 
     public function getReportByCode(string $code)
     {
-        return Report::where('code', $code)->first();
+        return Report::with('resident', 'reportCategory', 'reportStatuses')->where('code', $code)->firstOrFail();
     }
 
-    public function getReportsByCategory(string $category)
+    public function getReportsByCategory(string $categoryName)
     {
-        $category = ReportCategory::where('name', $category)->first();
-
-        return Report::where('report_category_id', $category->id)->get();
+        return Report::with('resident', 'reportCategory', 'latestStatus')
+            ->whereHas('reportCategory', function (Builder $query) use ($categoryName) {
+                $query->where('name', $categoryName);
+            })->latest()->get();
     }
 
     public function createReport(array $data)
@@ -56,8 +57,8 @@ class ReportRepository implements ReportRepositoryInterface
         $report = Report::create($data);
 
         $report->reportStatuses()->create([
-            'status' => 'delivered',
-            'description' => 'Laporan berhasil diterima',
+            'status' => ReportStatusEnum::DELIVERED,
+            'description' => 'Laporan berhasil diterima oleh sistem dan akan segera diproses.',
         ]);
 
         return $report;
@@ -65,15 +66,11 @@ class ReportRepository implements ReportRepositoryInterface
 
     public function updateReport(array $data, int $id)
     {
-        $report = $this->getReportById($id);
-
-        return $report->update($data);
+        return Report::findOrFail($id)->update($data);
     }
 
     public function deleteReport(int $id)
     {
-        $report = $this->getReportById($id);
-
-        return $report->delete();
+        return Report::findOrFail($id)->delete();
     }
 }
