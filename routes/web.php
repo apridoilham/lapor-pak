@@ -25,7 +25,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/report-success', [UserReportController::class, 'success'])->name('report.success');
 
     Route::get('/my-reports', [UserReportController::class, 'myReport'])->name('report.myreport');
+    
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+
+    // ▼▼▼ TAMBAHKAN DUA BARIS DI BAWAH INI ▼▼▼
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 });
 
 Route::get('/login', [LoginController::class, 'index'])->name('login');

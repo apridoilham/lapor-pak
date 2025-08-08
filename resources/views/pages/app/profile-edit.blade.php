@@ -1,0 +1,187 @@
+@extends('layouts.app')
+
+@section('title', 'Edit Profil')
+
+@push('styles')
+<style>
+    .avatar-upload-container {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin: 0 auto;
+    }
+
+    .avatar-upload-container .avatar-preview {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 4px solid #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .avatar-upload-container .avatar-edit-button {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        background-color: var(--primary);
+        color: white;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid white;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .avatar-upload-container .avatar-edit-button:hover {
+        background-color: var(--primaryHover);
+    }
+</style>
+@endpush
+
+
+@section('content')
+    <div class="header-nav mb-4">
+        <a href="{{ route('profile') }}" class="text-decoration-none">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <h1>Edit Profil</h1>
+    </div>
+
+    <form action="{{ route('profile.update') }}" method="POST" class="mt-4" enctype="multipart/form-data" id="profile-form">
+        @csrf
+        @method('PUT')
+
+        <div class="avatar-upload-container mb-4">
+            <img src="{{ asset('storage/' . $user->resident->avatar) }}" alt="avatar" class="avatar-preview" id="avatar-preview">
+            <label for="avatar" class="avatar-edit-button">
+                <i class="fa-solid fa-camera"></i>
+            </label>
+            <input type="file" name="avatar" id="avatar" class="form-control d-none @error('avatar') is-invalid @enderror">
+        </div>
+        @error('avatar')
+            <div class="invalid-feedback d-block text-center mb-3">{{ $message }}</div>
+        @enderror
+
+        <div class="mb-3">
+            <label for="name" class="form-label">Nama Lengkap</label>
+            <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $user->name) }}" required>
+            @error('name')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email', $user->email) }}" required>
+            @error('email')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <hr class="my-4">
+
+        <p class="text-muted">Kosongkan jika tidak ingin mengubah password.</p>
+
+        <div class="mb-3">
+            <label for="current_password" class="form-label">Password Lama</label>
+            <small class="d-block text-muted mb-1">Wajib diisi jika Anda ingin mengubah password.</small>
+            <input type="password" class="form-control @error('current_password') is-invalid @enderror" id="current_password" name="current_password" autocomplete="new-password">
+            @error('current_password')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="mb-3">
+            <label for="password" class="form-label">Password Baru</label>
+            <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" autocomplete="new-password">
+            @error('password')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="mb-3">
+            <label for="password_confirmation" class="form-label">Konfirmasi Password Baru</label>
+            <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" autocomplete="new-password">
+        </div>
+
+        <div class="d-grid gap-2 mt-4">
+             <button class="btn btn-primary py-2" type="submit" id="save-changes-btn" disabled>Simpan Perubahan</button>
+             
+             {{-- PERUBAHAN DI SINI: Mengubah gaya tombol Kembali --}}
+             <a href="{{ route('profile') }}" class="btn btn-outline-primary py-2">Kembali</a>
+        </div>
+    </form>
+@endsection
+
+@section('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @include('sweetalert::alert')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('profile-form');
+            const saveButton = document.getElementById('save-changes-btn');
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('email');
+            const avatarInput = document.getElementById('avatar');
+            const currentPasswordInput = document.getElementById('current_password');
+            const newPasswordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('password_confirmation');
+            const initialValues = {
+                name: nameInput.value,
+                email: emailInput.value,
+            };
+            function checkForChanges() {
+                const nameChanged = nameInput.value !== initialValues.name;
+                const emailChanged = emailInput.value !== initialValues.email;
+                const avatarChanged = avatarInput.files.length > 0;
+                const passwordFieldsFilled = currentPasswordInput.value.length > 0 || newPasswordInput.value.length > 0 || confirmPasswordInput.value.length > 0;
+
+                if (nameChanged || emailChanged || avatarChanged || passwordFieldsFilled) {
+                    saveButton.disabled = false;
+                } else {
+                    saveButton.disabled = true;
+                }
+            }
+            const fieldsToMonitor = [nameInput, emailInput, avatarInput, currentPasswordInput, newPasswordInput, confirmPasswordInput];
+            fieldsToMonitor.forEach(field => {
+                field.addEventListener('input', checkForChanges);
+            });
+            avatarInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('avatar-preview').src = e.target.result;
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+            form.addEventListener('submit', function(event) {
+                if (saveButton.disabled) {
+                    event.preventDefault();
+                    return;
+                }
+                event.preventDefault();
+                Swal.fire({
+                    title: 'Simpan Perubahan?',
+                    text: "Apakah Anda yakin ingin menyimpan perubahan pada profil Anda?",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#16752B',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, Simpan!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    </script>
+@endsection

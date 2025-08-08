@@ -5,8 +5,8 @@ namespace App\Repositories;
 use App\Interfaces\ResidentRepositoryInterface;
 use App\Models\Resident;
 use App\Models\User;
-use Illuminate\Support\Facades\DB; // <-- DITAMBAHKAN
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage; // <-- DITAMBAHKAN
 
 class ResidentRepository implements ResidentRepositoryInterface
 {
@@ -20,16 +20,13 @@ class ResidentRepository implements ResidentRepositoryInterface
         return Resident::where('id', $id)->first();
     }
 
-    /**
-     * PERUBAHAN DI SINI: Dibungkus dalam transaksi dan bcrypt() dihapus.
-     */
     public function createResident(array $data)
     {
         return DB::transaction(function () use ($data) {
             $user = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
-                'password' => $data['password'], // Model User akan melakukan hash secara otomatis
+                'password' => $data['password'],
             ]);
 
             $user->assignRole('resident');
@@ -39,43 +36,53 @@ class ResidentRepository implements ResidentRepositoryInterface
     }
 
     /**
-     * PERUBAHAN DI SINI: Logika update password diperbaiki dan bcrypt() dihapus.
+     * PERUBAHAN TOTAL DI SINI:
+     * Logika update dibuat lebih robust untuk menangani pembaruan parsial
+     * dan sekaligus menghapus avatar lama.
      */
     public function updateResident(array $data, int $id)
     {
-        $resident = $this->getResidentById($id);
+        return DB::transaction(function () use ($data, $id) {
+            $resident = $this->getResidentById($id);
 
-        $userData = [
-            'name' => $data['name'],
-        ];
+            // 1. Menyiapkan dan memperbarui data untuk tabel 'users'
+            $userData = [];
+            if (isset($data['name'])) {
+                $userData['name'] = $data['name'];
+            }
+            if (isset($data['email'])) {
+                $userData['email'] = $data['email'];
+            }
+            if (!empty($data['password'])) {
+                $userData['password'] = $data['password'];
+            }
 
-        // Hanya update password jika diisi dan tidak kosong
-        if (!empty($data['password'])) {
-            $userData['password'] = $data['password'];
-        }
+            if (!empty($userData)) {
+                $resident->user->update($userData);
+            }
 
-        $resident->user->update($userData);
+            // 2. Menyiapkan dan memperbarui data untuk tabel 'residents' (avatar)
+            if (isset($data['avatar'])) {
+                // Hapus avatar lama jika ada dan bukan file default
+                if ($resident->avatar && Storage::disk('public')->exists($resident->avatar)) {
+                    Storage::disk('public')->delete($resident->avatar);
+                }
 
-        // Hapus password dari array data agar tidak mencoba mengupdate kolom
-        // password di tabel residents.
-        unset($data['password']);
+                // Update dengan path avatar yang baru
+                $resident->update(['avatar' => $data['avatar']]);
+            }
 
-        return $resident->update($data);
+            return $resident;
+        });
     }
 
-    /**
-     * PERUBAHAN DI SINI: Dibungkus dalam transaksi dan User ikut dihapus.
-     */
     public function deleteResident(int $id)
     {
         return DB::transaction(function () use ($id) {
             $resident = $this->getResidentById($id);
 
             if ($resident) {
-                // Lakukan soft delete pada user yang berelasi
                 $resident->user()->delete();
-
-                // Lakukan soft delete pada resident
                 return $resident->delete();
             }
 

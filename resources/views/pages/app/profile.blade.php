@@ -36,7 +36,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-4">
             <div class="card profile-stats">
                 <div class="card-body">
@@ -47,12 +47,19 @@
         </div>
     </div>
 
-    <div class="mt-5">
+    <div class="mt-5 d-grid gap-2">
+        <a href="{{ route('profile.edit') }}" class="btn btn-primary rounded-pill">Edit Profil</a>
+
         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
             @csrf
         </form>
-        <button class="btn btn-outline-danger w-100 rounded-pill" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+        <button class="btn btn-outline-danger rounded-pill" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
             Keluar
         </button>
     </div>
+@endsection
+
+{{-- ▼▼▼ TAMBAHKAN SECTION BARU DI BAWAH INI ▼▼▼ --}}
+@section('scripts')
+    @include('sweetalert::alert')
 @endsection
