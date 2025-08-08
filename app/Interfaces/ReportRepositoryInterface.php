@@ -8,8 +8,9 @@ interface ReportRepositoryInterface
 
     public function getLatesReports();
 
-    public function getReportByResidentId(string $status);
-    
+    // PERUBAHAN DI SINI: Tambahkan parameter int $residentId
+    public function getReportByResidentId(int $residentId, ?string $status);
+
     public function getReportById(int $id);
 
     public function getReportByCode(string $code);

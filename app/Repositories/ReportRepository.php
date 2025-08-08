@@ -19,10 +19,14 @@ class ReportRepository implements ReportRepositoryInterface
     {
         return Report::with('resident', 'reportCategory', 'latestStatus')->latest()->take(5)->get();
     }
-    
-    public function getReportByResidentId(?string $status)
+
+    /**
+     * PERUBAHAN DI SINI: Method ini sekarang menerima $residentId
+     * dan tidak lagi menggunakan Auth::user()
+     */
+    public function getReportByResidentId(int $residentId, ?string $status)
     {
-        $query = Report::where('resident_id', Auth::user()->resident->id)->with('latestStatus');
+        $query = Report::where('resident_id', $residentId)->with('latestStatus');
 
         if ($status) {
             $query->whereHas('latestStatus', function (Builder $query) use ($status) {

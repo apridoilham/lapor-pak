@@ -37,6 +37,16 @@ class ViewReportTest extends TestCase
             'resident_id' => $this->residentUser->resident->id,
             'report_category_id' => $this->category->id,
         ]);
+
+        /**
+         * PERUBAHAN DI SINI:
+         * Tambahkan status awal 'delivered' ke laporan yang dibuat oleh factory,
+         * agar sesuai dengan logika baru di controller.
+         */
+        $this->userReport->reportStatuses()->create([
+            'status' => 'delivered',
+            'description' => 'Laporan dibuat untuk testing.'
+        ]);
     }
 
     public function test_an_authenticated_user_can_view_their_own_reports_list(): void

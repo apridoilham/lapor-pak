@@ -9,7 +9,8 @@
             <div class="card">
                 <div class="card-body">
                     <h6 class="card-title">Total Kategori Laporan</h6>
-                    <p class="card-text">{{ \App\Models\ReportCategory::count() }}</p>
+                    {{-- PERUBAHAN DI SINI --}}
+                    <p class="card-text">{{ $reportCategoryCount }}</p>
                 </div>
             </div>
         </div>
@@ -18,7 +19,8 @@
             <div class="card">
                 <div class="card-body">
                     <h6 class="card-title">Total Laporan</h6>
-                    <p class="card-text">{{ \App\Models\Report::count() }}</p>
+                    {{-- PERUBAHAN DI SINI --}}
+                    <p class="card-text">{{ $reportCount }}</p>
                 </div>
             </div>
         </div>
@@ -27,7 +29,8 @@
             <div class="card">
                 <div class="card-body">
                     <h6 class="card-title">Total Masyarakat</h6>
-                    <p class="card-text">{{ \App\Models\Resident::count() }}</p>
+                    {{-- PERUBAHAN DI SINI --}}
+                    <p class="card-text">{{ $residentCount }}</p>
                 </div>
             </div>
         </div>

@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreResidentRequest;
 use App\Http\Requests\UpdateResidentRequest;
 use App\Interfaces\ResidentRepositoryInterface;
+use App\Traits\FileUploadTrait; // <-- DITAMBAHKAN
 use RealRashid\SweetAlert\Facades\Alert as Swal;
 
 class ResidentController extends Controller
 {
+    use FileUploadTrait; // <-- DITAMBAHKAN
 
     private ResidentRepositoryInterface $residentRepository;
 
@@ -18,9 +20,6 @@ class ResidentController extends Controller
         $this->residentRepository = $residentRepository;
     }
     
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $residents = $this->residentRepository->getAllResidents();
@@ -28,22 +27,19 @@ class ResidentController extends Controller
         return view('pages.admin.resident.index', compact('residents'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('pages.admin.resident.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreResidentRequest $request)
     {
         $data = $request->validated();
 
-        $data['avatar'] = $request->file('avatar')->store('assets/avatar', 'public');
+        // PERUBAHAN DI SINI
+        if ($path = $this->handleFileUpload($request, 'avatar', 'assets/avatar')) {
+            $data['avatar'] = $path;
+        }
 
         $this->residentRepository->createResident($data);
 
@@ -52,9 +48,6 @@ class ResidentController extends Controller
         return redirect()->route('admin.resident.index');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         $resident = $this->residentRepository->getResidentById($id);
@@ -62,9 +55,6 @@ class ResidentController extends Controller
         return view('pages.admin.resident.show', compact('resident'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id)
     {
         $resident = $this->residentRepository->getResidentById($id);
@@ -72,27 +62,22 @@ class ResidentController extends Controller
         return view('pages.admin.resident.edit', compact('resident'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdateResidentRequest $request, string $id)
     {
         $data = $request->validated();
 
-        if ($request->avatar) {
-            $data['avatar'] = $request->file('avatar')->store('assets/avatar', 'public');
+        // PERUBAHAN DI SINI
+        if ($path = $this->handleFileUpload($request, 'avatar', 'assets/avatar')) {
+            $data['avatar'] = $path;
         }
 
         $this->residentRepository->updateResident($data, $id);
 
-                Swal::success('Success', 'Data masyarakat berhasil diubah!')->timerProgressBar();
+        Swal::success('Success', 'Data masyarakat berhasil diubah!')->timerProgressBar();
 
         return redirect()->route('admin.resident.index');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         $this->residentRepository->deleteResident($id);

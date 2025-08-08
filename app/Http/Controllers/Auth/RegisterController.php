@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreResidentRequest;
 use App\Interfaces\ResidentRepositoryInterface;
+use App\Traits\FileUploadTrait; // <-- DITAMBAHKAN
 use RealRashid\SweetAlert\Facades\Alert as Swal;
 use Illuminate\Http\Request;
 
 class RegisterController extends Controller
 {
+    use FileUploadTrait; // <-- DITAMBAHKAN
 
     private ResidentRepositoryInterface $residentRepository;
 
@@ -27,7 +29,10 @@ class RegisterController extends Controller
     {
         $data = $request->validated();
 
-        $data['avatar'] = $request->file('avatar')->store('assets/avatar', 'public');
+        // PERUBAHAN DI SINI
+        if ($path = $this->handleFileUpload($request, 'avatar', 'assets/avatar')) {
+            $data['avatar'] = $path;
+        }
 
         $this->residentRepository->createResident($data);
 

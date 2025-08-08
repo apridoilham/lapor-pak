@@ -6,11 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreReportCategoryRequest;
 use App\Http\Requests\UpdateReportCategoryRequest;
 use App\Interfaces\ReportCategoryRepositoryInterface;
+use App\Traits\FileUploadTrait; // <-- DITAMBAHKAN
 use Illuminate\Http\Request;
 use RealRashid\SweetAlert\Facades\Alert as Swal;
 
 class ReportCategoryController extends Controller
 {
+    use FileUploadTrait; // <-- DITAMBAHKAN
 
     private ReportCategoryRepositoryInterface $reportCategoryRepository;
 
@@ -19,9 +21,6 @@ class ReportCategoryController extends Controller
         $this->reportCategoryRepository = $reportCategoryRepository;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $categories = $this->reportCategoryRepository->getAllReportCategories();
@@ -29,22 +28,19 @@ class ReportCategoryController extends Controller
         return view('pages.admin.category.index', compact('categories'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('pages.admin.category.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreReportCategoryRequest $request)
     {
         $data = $request->validated();
-
-        $data['image'] = $request->file('image')->store('assets/report-category/image', 'public');
+        
+        // PERUBAHAN DI SINI
+        if ($path = $this->handleFileUpload($request, 'image', 'assets/report-category/image')) {
+            $data['image'] = $path;
+        }
 
         $this->reportCategoryRepository->createReportCategory($data);
 
@@ -53,9 +49,6 @@ class ReportCategoryController extends Controller
         return redirect()->route('admin.report-category.index');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         $category = $this->reportCategoryRepository->getReportCategoryById($id);
@@ -63,38 +56,29 @@ class ReportCategoryController extends Controller
         return view('pages.admin.category.show', compact('category'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id)
     {
         $category = $this->reportCategoryRepository->getReportCategoryById($id);
 
         return view('pages.admin.category.edit', compact('category'));
     }
-    
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdateReportCategoryRequest $request, string $id)
     {
         $data = $request->validated();
 
-        if ($request->image) {
-            $data['image'] = $request->file('image')->store('assets/report-category/image', 'public');
+        // PERUBAHAN DI SINI
+        if ($path = $this->handleFileUpload($request, 'image', 'assets/report-category/image')) {
+            $data['image'] = $path;
         }
 
         $this->reportCategoryRepository->updateReportCategory($data, $id);
 
-                Swal::success('Success', 'Data kategori berhasil diubah!')->timerProgressBar();
+        Swal::success('Success', 'Data kategori berhasil diubah!')->timerProgressBar();
 
         return redirect()->route('admin.report-category.index');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         $this->reportCategoryRepository->deleteReportCategory($id);
