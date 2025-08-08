@@ -20,71 +20,66 @@
 
             <div class="row mb-3">
                 <div class="col-4 text-secondary">Kode</div>
-                <div class="col-8 d-flex">
-                    <span class="me-2">:</span>
-                    <p>{{ $report->code }}</p>
+                <div class="col-8">
+                    <p class="mb-0">: {{ $report->code }}</p>
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col-4 text-secondary">Tanggal</div>
-                <div class="col-8 d-flex">
-                    <span class="me-2">:</span>
-                    <p>{{ \Carbon\Carbon::parse($report->created_at)->format('d M Y H:i') }}</p>
+                <div class="col-8">
+                    <p class="mb-0">: {{ \Carbon\Carbon::parse($report->created_at)->tz('Asia/Jakarta')->isoFormat('dddd, D MMMM YYYY, HH:mm') }}</p>
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col-4 text-secondary">Kategori</div>
-                <div class="col-8 d-flex">
-                    <span class="me-2">:</span>
-                    <p>{{ $report->reportCategory->name }}</p>
+                <div class="col-8">
+                    <p class="mb-0">: {{ $report->reportCategory->name }}</p>
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col-4 text-secondary">Deskripsi</div>
-                <div class="col-8 d-flex">
-                    <span class="me-2">:</span>
-                    <p>{{ $report->description }}</p>
+                <div class="col-8">
+                    <p class="mb-0">: {{ $report->description }}</p>
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col-4 text-secondary">Lokasi</div>
-                <div class="col-8 d-flex">
-                    <span class="me-2">:</span>
-                    <p>{{ $report->address }}</p>
+                <div class="col-8">
+                    <p class="mb-0">: {{ $report->address }}</p>
                 </div>
             </div>
-            <div class="row mb-3">
+            <div class="row mb-3 align-items-center">
                 <div class="col-4 text-secondary">Status</div>
-                <div class="col-8 d-flex">
+                <div class="col-8 d-flex align-items-center">
                     <span class="me-2">:</span>
-                    @if ($report->latestStatus)
-                        @switch($report->latestStatus->status)
-                            @case(\App\Enums\ReportStatusEnum::DELIVERED)
-                                <div class="badge-pending">
-                                    <img src="{{ asset('assets/app/images/icons/CircleNotch.svg') }}" alt="pending">
-                                    <p>Terkirim</p>
-                                </div>
-                            @break
-                            @case(\App\Enums\ReportStatusEnum::IN_PROCESS)
-                                <div class="badge-pending">
-                                    <img src="{{ asset('assets/app/images/icons/CircleNotch.svg') }}" alt="pending">
-                                    <p>Sedang diproses</p>
-                                </div>
-                            @break
-                            @case(\App\Enums\ReportStatusEnum::COMPLETED)
-                                <div class="badge-success">
-                                    <img src="{{ asset('assets/app/images/icons/Checks.svg') }}" alt="success">
-                                    <p>Selesai</p>
-                                </div>
-                            @break
-                            @case(\App\Enums\ReportStatusEnum::REJECTED)
-                                <div class="badge-danger">
-                                    <p>Ditolak</p>
-                                </div>
-                            @break
-                        @endswitch
+                    @if($report->latestStatus)
+                        @php
+                            $statusValue = $report->latestStatus->status->value;
+                        @endphp
+
+                        @if ($statusValue === 'delivered')
+                            <div class="badge-status status-delivered">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <span>Terkirim</span>
+                            </div>
+                        @elseif ($statusValue === 'in_process')
+                            <div class="badge-status status-processing">
+                                <i class="fa-solid fa-spinner"></i>
+                                <span>Diproses</span>
+                            </div>
+                        @elseif ($statusValue === 'completed')
+                            <div class="badge-status status-completed">
+                                <i class="fa-solid fa-check-double"></i>
+                                <span>Selesai</span>
+                            </div>
+                        @elseif ($statusValue === 'rejected')
+                            <div class="badge-status status-rejected">
+                                <i class="fa-solid fa-xmark"></i>
+                                <span>Ditolak</span>
+                            </div>
+                        @endif
                     @else
-                        <p>Belum ada status</p>
+                        <span>Belum ada status</span>
                     @endif
                 </div>
             </div>
@@ -101,8 +96,8 @@
                             @if ($status->image)
                                 <img src="{{ asset('storage/' . $status->image) }}" alt="status" class="img-fluid">
                             @endif
-                            <span class="timeline-date">{{ \Carbon\Carbon::parse($status->created_at)->format('d M Y H:i') }}</span>
-                            <h6 class="timeline-status">{{ $status->status->value }}</h6>
+                            <span class="timeline-date">{{ \Carbon\Carbon::parse($status->created_at)->tz('Asia/Jakarta')->isoFormat('dddd, D MMMM YYYY, HH:mm') }}</span>
+                            <h6 class="timeline-status text-capitalize">{{ $status->status->value }}</h6>
                             <span class="timeline-event">{{ $status->description }}</span>
                         </div>
                     </li>

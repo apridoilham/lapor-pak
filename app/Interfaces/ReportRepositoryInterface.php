@@ -21,4 +21,6 @@ interface ReportRepositoryInterface
     public function updateReport(array $data, int $id);
 
     public function deleteReport(int $id);
+
+    public function countStatusesByResidentId(int $residentId): array;
 }

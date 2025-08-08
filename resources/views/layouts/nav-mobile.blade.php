@@ -1,34 +1,34 @@
-<div class="floating-button-container d-flex" onclick="window.location.href = 'take-report'">
+<div class="floating-button-container d-flex" onclick="window.location.href = '{{ route('report.take') }}'">
     <button class="floating-button">
         <i class="fa-solid fa-camera"></i>
     </button>
 </div>
-<nav class="nav-mobile d-flex">
-    <a href="{{ route('home')}}" class="{{ request()->is('/') ? 'active' : '' }}">
+<nav class="nav-mobile">
+    <a href="{{ route('home')}}" class="{{ request()->routeIs('home') ? 'active' : '' }}">
         <i class="fas fa-house"></i>
-        Beranda
+        <span>Beranda</span>
     </a>
-    <a href="{{ route('report.myreport', ['status' => 'delivered']) }}" class="">
+    <a href="{{ route('report.myreport', ['status' => 'delivered']) }}" class="{{ request()->routeIs('report.myreport*') ? 'active' : '' }}">
         <i class="fas fa-solid fa-clipboard-list"></i>
-        Laporanmu
+        <span>Laporanmu</span>
     </a>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <a href="" class="">
+    
+    <a href="#" class="nav-placeholder"></a>
+
+    <a href="#" class="{{ request()->routeIs('notification*') ? 'active' : '' }}">
         <i class="fas fa-bell"></i>
-        Notifikasi
+        <span>Notifikasi</span>
     </a>
+    
     @auth
-        <a href=" {{ route('profile') }}" class="">
+        <a href="{{ route('profile') }}" class="{{ request()->routeIs('profile') ? 'active' : '' }}">
             <i class="fas fa-user"></i>
-            Profil
+            <span>Profil</span>
         </a>
     @else
-        <a href="{{ route('register') }}" class="">
+        <a href="{{ route('register') }}" class="{{ request()->routeIs('register') ? 'active' : '' }}">
             <i class="fas fa-right-to-bracket"></i>
-            Daftar
+            <span>Daftar</span>
         </a>
     @endauth
 </nav>

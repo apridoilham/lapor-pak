@@ -4,7 +4,6 @@ namespace App\Repositories;
 
 use App\Enums\ReportStatusEnum;
 use App\Interfaces\ReportRepositoryInterface;
-use App\Models\ReportCategory;
 use App\Models\Report;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +19,7 @@ class ReportRepository implements ReportRepositoryInterface
     {
         return Report::with('resident', 'reportCategory', 'latestStatus')->latest()->take(5)->get();
     }
-
+    
     public function getReportByResidentId(?string $status)
     {
         $query = Report::where('resident_id', Auth::user()->resident->id)->with('latestStatus');
@@ -72,5 +71,32 @@ class ReportRepository implements ReportRepositoryInterface
     public function deleteReport(int $id)
     {
         return Report::findOrFail($id)->delete();
+    }
+
+    public function countStatusesByResidentId(int $residentId): array
+    {
+        $active = Report::where('resident_id', $residentId)
+            ->whereHas('latestStatus', function (Builder $query) {
+                $query->whereIn('status', [ReportStatusEnum::DELIVERED, ReportStatusEnum::IN_PROCESS]);
+            })
+            ->count();
+
+        $completed = Report::where('resident_id', $residentId)
+            ->whereHas('latestStatus', function (Builder $query) {
+                $query->where('status', ReportStatusEnum::COMPLETED);
+            })
+            ->count();
+
+        $rejected = Report::where('resident_id', $residentId)
+            ->whereHas('latestStatus', function (Builder $query) {
+                $query->where('status', ReportStatusEnum::REJECTED);
+            })
+            ->count();
+
+        return [
+            'active' => $active,
+            'completed' => $completed,
+            'rejected' => $rejected,
+        ];
     }
 }

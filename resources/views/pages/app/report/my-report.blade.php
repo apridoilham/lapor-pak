@@ -4,7 +4,7 @@
 
 @section('content')
     <h3 class="mb-3">Laporanmu</h3>
-    
+
     <ul class="nav nav-tabs" id="filter-tab" role="tablist">
         <li class="nav-item" role="presentation">
             <a class="nav-link {{ request('status', 'delivered') === 'delivered' ? 'active' : '' }}"
@@ -31,7 +31,7 @@
             </a>
         </li>
     </ul>
-    
+
     <div class="d-flex flex-column gap-3 mt-4">
         @forelse ($reports as $report)
             <div class="card card-report border-0 shadow-none">
@@ -39,20 +39,32 @@
                     <div class="card-body p-0">
                         <div class="card-report-image position-relative mb-2">
                             <img src="{{ asset('storage/' . $report->image) }}" alt="{{ $report->title }}">
-                            
-                            @php
-                                $lastStatus = $report->reportStatuses->last();
-                            @endphp
 
-                            @if ($lastStatus)
-                                @if ($lastStatus->status === 'delivered')
-                                    <div class="badge-status on-process">Terkirim</div>
-                                @elseif ($lastStatus->status === 'in_process')
-                                    <div class="badge-status on-process">Sedang diproses</div>
-                                @elseif ($lastStatus->status === 'completed')
-                                    <div class="badge-status done">Selesai</div>
-                                @elseif ($lastStatus->status === 'rejected')
-                                    <div class="badge-status rejected">Ditolak</div>
+                            @if($report->latestStatus)
+                                @php
+                                    $statusValue = $report->latestStatus->status->value;
+                                @endphp
+
+                                @if ($statusValue === 'delivered')
+                                    <div class="badge-status status-delivered">
+                                        <i class="fa-solid fa-paper-plane"></i>
+                                        <span>Terkirim</span>
+                                    </div>
+                                @elseif ($statusValue === 'in_process')
+                                    <div class="badge-status status-processing">
+                                        <i class="fa-solid fa-spinner"></i>
+                                        <span>Diproses</span>
+                                    </div>
+                                @elseif ($statusValue === 'completed')
+                                    <div class="badge-status status-completed">
+                                        <i class="fa-solid fa-check-double"></i>
+                                        <span>Selesai</span>
+                                    </div>
+                                @elseif ($statusValue === 'rejected')
+                                    <div class="badge-status status-rejected">
+                                        <i class="fa-solid fa-xmark"></i>
+                                        <span>Ditolak</span>
+                                    </div>
                                 @endif
                             @endif
                         </div>
@@ -65,7 +77,7 @@
                                 </p>
                             </div>
                             <p class="text-secondary date">
-                                {{ \Carbon\Carbon::parse($report->created_at)->format('d M Y') }}
+                                {{ \Carbon\Carbon::parse($report->created_at)->diffForHumans() }}
                             </p>
                         </div>
                         <h1 class="card-title">{{ $report->title }}</h1>
@@ -96,7 +108,6 @@
                 renderer: 'svg',
                 loop: true,
                 autoplay: true,
-                // PATH DIPERBAIKI SESUAI NAMA FILE ANDA
                 path: '{{ asset('assets/app/lottie/not-found.json') }}'
             });
         }
