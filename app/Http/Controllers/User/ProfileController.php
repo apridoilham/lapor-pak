@@ -6,14 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Interfaces\ReportRepositoryInterface;
 use App\Interfaces\ResidentRepositoryInterface;
-use App\Traits\FileUploadTrait; // <-- DITAMBAHKAN
+use App\Models\Rt;
+use App\Models\Rw;
+use App\Traits\FileUploadTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use RealRashid\SweetAlert\Facades\Alert as Swal;
 
 class ProfileController extends Controller
 {
-    use FileUploadTrait; // <-- DITAMBAHKAN
+    use FileUploadTrait;
 
     private ReportRepositoryInterface $reportRepository;
     private ResidentRepositoryInterface $residentRepository;
@@ -30,12 +32,10 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
 
-        // Jika yang login adalah admin atau super-admin
         if ($user->hasAnyRole(['admin', 'super-admin'])) {
             return view('pages.admin.profile', ['user' => $user]);
         }
 
-        // Jika yang login adalah resident
         $stats = $this->reportRepository->countStatusesByResidentId($user->resident->id);
 
         return view('pages.app.profile', [
@@ -47,8 +47,13 @@ class ProfileController extends Controller
 
     public function edit()
     {
+        $rts = Rt::orderBy('number')->get();
+        $rws = Rw::orderBy('number')->get();
+
         return view('pages.app.profile-edit', [
-            'user' => Auth::user()
+            'user' => Auth::user(),
+            'rts' => $rts,
+            'rws' => $rws,
         ]);
     }
 

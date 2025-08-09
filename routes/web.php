@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReportExportController;
 use App\Http\Controllers\Admin\ReportStatusController;
 use App\Http\Controllers\Admin\ResidentController;
+use App\Http\Controllers\Admin\RtRwController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\User\HomeController;
@@ -49,7 +50,6 @@ Route::post('/register', [RegisterController::class, 'store'])->name('register.s
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin|super-admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Route untuk edit profil admin sendiri
     Route::get('/profile/edit', [AdminProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/update', [AdminProfileController::class, 'update'])->name('profile.update');
 
@@ -66,4 +66,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin|super-ad
     Route::resource('/report-status', ReportStatusController::class)->except('create');
 
     Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
+
+    // Route untuk Manajemen RT/RW
+    Route::get('/rtrw', [RtRwController::class, 'index'])->name('rtrw.index');
+    Route::post('/rt', [RtRwController::class, 'storeRt'])->name('rt.store');
+    Route::delete('/rt/{rt}', [RtRwController::class, 'destroyRt'])->name('rt.destroy');
+    Route::post('/rw', [RtRwController::class, 'storeRw'])->name('rw.store');
+    Route::delete('/rw/{rw}', [RtRwController::class, 'destroyRw'])->name('rw.destroy');
 });

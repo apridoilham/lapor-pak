@@ -32,29 +32,21 @@ class ReportController extends Controller
         if ($request->category) {
             $reports = $this->reportRepository->getReportsByCategory($request->category);
         } else {
-            $reports = $this->reportRepository->getAllReports();
+            $reports = $this->reportRepository->getAllReports($request);
         }
 
-        return view('pages.app.report.index', compact('reports'));
+        // Ambil semua kategori untuk modal filter
+        $categories = $this->reportCategoryRepository->getAllReportCategories();
+
+        return view('pages.app.report.index', compact('reports', 'categories'));
     }
 
-    /**
-     * PERUBAHAN DI SINI:
-     * Menggunakan ReportStatusEnum untuk memastikan nilai status yang diterima dari request selalu valid.
-     */
     public function myReport(Request $request)
     {
         $residentId = Auth::user()->resident->id;
-
-        // Ambil status dari request, dengan default 'delivered'
         $statusValue = $request->query('status', ReportStatusEnum::DELIVERED->value);
-
-        // Coba untuk mencocokkan nilai string dengan Enum case.
-        // Jika tidak valid (misal, URL diketik manual dengan status salah), akan kembali ke nilai default.
         $statusEnum = ReportStatusEnum::tryFrom($statusValue) ?? ReportStatusEnum::DELIVERED;
-
         $reports = $this->reportRepository->getReportByResidentId($residentId, $statusEnum->value);
-
         return view('pages.app.report.my-report', compact('reports'));
     }
 

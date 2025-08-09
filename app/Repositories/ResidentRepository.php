@@ -6,7 +6,7 @@ use App\Interfaces\ResidentRepositoryInterface;
 use App\Models\Resident;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage; // <-- DITAMBAHKAN
+use Illuminate\Support\Facades\Storage;
 
 class ResidentRepository implements ResidentRepositoryInterface
 {
@@ -35,42 +35,33 @@ class ResidentRepository implements ResidentRepositoryInterface
         });
     }
 
-    /**
-     * PERUBAHAN TOTAL DI SINI:
-     * Logika update dibuat lebih robust untuk menangani pembaruan parsial
-     * dan sekaligus menghapus avatar lama.
-     */
     public function updateResident(array $data, int $id)
     {
         return DB::transaction(function () use ($data, $id) {
             $resident = $this->getResidentById($id);
 
-            // 1. Menyiapkan dan memperbarui data untuk tabel 'users'
-            $userData = [];
-            if (isset($data['name'])) {
-                $userData['name'] = $data['name'];
-            }
-            if (isset($data['email'])) {
-                $userData['email'] = $data['email'];
-            }
+            $userData = [
+                'name' => $data['name'],
+                'email' => $data['email'],
+            ];
+
             if (!empty($data['password'])) {
                 $userData['password'] = $data['password'];
             }
+            $resident->user->update($userData);
 
-            if (!empty($userData)) {
-                $resident->user->update($userData);
-            }
-
-            // 2. Menyiapkan dan memperbarui data untuk tabel 'residents' (avatar)
+            $residentData = [
+                'rt_id' => $data['rt_id'],
+                'rw_id' => $data['rw_id'],
+                'address' => $data['address'],
+            ];
             if (isset($data['avatar'])) {
-                // Hapus avatar lama jika ada dan bukan file default
                 if ($resident->avatar && Storage::disk('public')->exists($resident->avatar)) {
                     Storage::disk('public')->delete($resident->avatar);
                 }
-
-                // Update dengan path avatar yang baru
-                $resident->update(['avatar' => $data['avatar']]);
+                $residentData['avatar'] = $data['avatar'];
             }
+            $resident->update($residentData);
 
             return $resident;
         });

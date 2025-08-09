@@ -29,7 +29,8 @@ a:hover {
 
 .max-w-screen-sm {
     max-width: 480px;
-    margin-bottom: 4rem;
+    /* ▼▼▼ PERUBAHAN DI SINI ▼▼▼ */
+    margin-bottom: 7rem; /* Diperbesar dari 4rem */
 }
 
 .vh-75 {
@@ -337,7 +338,6 @@ textarea.form-control {
     font-weight: 600;
 }
 
-/* GAYA BARU UNTUK EDIT PROFIL */
 .avatar-upload-container {
     position: relative;
     width: 120px;
@@ -374,8 +374,6 @@ textarea.form-control {
 .avatar-upload-container .avatar-edit-button:hover {
     background-color: var(--primaryHover);
 }
-/* AKHIR GAYA BARU */
-
 
 /* === Components === */
 .category {
@@ -478,7 +476,7 @@ textarea.form-control {
 .take-photo-container {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 8rem); /* Mengurangi tinggi bottom nav */
+    height: calc(100vh - 8rem);
     padding: 1rem;
     box-sizing: border-box;
 }
@@ -501,7 +499,7 @@ textarea.form-control {
 }
 
 .take-photo-container .camera-preview {
-    flex-grow: 1; /* Membuat preview mengisi sisa ruang */
+    flex-grow: 1;
     width: 100%;
     overflow: hidden;
     border-radius: 20px;
@@ -594,6 +592,7 @@ textarea.form-control {
     z-index: 0;
 }
 
+/* === Notifikasi === */
 .nav-notification {
     position: relative;
 }
