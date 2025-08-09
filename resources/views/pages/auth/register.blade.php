@@ -37,8 +37,17 @@
         </div>
         <div class="mb-3"><label for="address" class="form-label">Alamat Lengkap (Nama Jalan, No. Rumah)</label><textarea name="address" id="address" class="form-control @error('address') is-invalid @enderror" rows="3" required placeholder="Contoh: Jl. Merdeka No. 12">{{ old('address') }}</textarea>@error('address')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
         
-        <div class="mb-3"><label for="password" class="form-label">Password</label><input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" required>@error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
-        <div class="mb-3"><label for="password_confirmation" class="form-label">Konfirmasi Password</label><input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required></div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            {{-- ▼▼▼ PERUBAHAN DI SINI ▼▼▼ --}}
+            <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" required autocomplete="new-password">
+            @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        </div>
+        <div class="mb-3">
+            <label for="password_confirmation" class="form-label">Konfirmasi Password</label>
+            {{-- ▼▼▼ PERUBAHAN DI SINI ▼▼▼ --}}
+            <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required autocomplete="new-password">
+        </div>
         
         <button class="btn btn-primary w-100 mt-2" type="submit">Daftar</button>
         <div class="d-flex justify-content-center mt-3"><a href="{{ route('login') }}" class="text-decoration-none text-primary">Sudah punya akun? Masuk</a></div>
