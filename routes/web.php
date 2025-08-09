@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ReportCategoryController;
@@ -34,7 +35,6 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    // Route baru untuk menandai notifikasi sebagai "terbaca"
     Route::get('/notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
 });
 
@@ -59,4 +59,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin|super-ad
 
     Route::get('/report-status/{reportId}/create', [ReportStatusController::class, 'create'])->name('report-status.create');
     Route::resource('/report-status', ReportStatusController::class)->except('create');
+
+    // Route baru untuk halaman Activity Log
+    Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
 });

@@ -4,7 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes; // <-- DITAMBAHKAN
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -12,7 +12,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, Hasroles, SoftDeletes; // <-- DITAMBAHKAN
+    use HasFactory, Notifiable, HasRoles, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -48,8 +48,19 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Relasi ke data resident (untuk pengguna biasa).
+     */
     public function resident()
     {
         return $this->hasOne(Resident::class);
+    }
+
+    /**
+     * Relasi ke riwayat aktivitas login.
+     */
+    public function loginActivities()
+    {
+        return $this->hasMany(LoginActivity::class);
     }
 }
