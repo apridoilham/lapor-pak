@@ -18,11 +18,12 @@ class UpdateReportRequest extends FormRequest
             'resident_id' => 'required|exists:residents,id',
             'report_category_id' => 'required|exists:report_categories,id',
             'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'image' => 'nullable|file',
-            'latitude' => 'required|string',
-            'longitude' => 'required|string',
-            'address' => 'required|string'
+            // ▼▼▼ PERUBAHAN DI SINI ▼▼▼
+            'description' => 'required|string|max:5000',
+            'image' => 'nullable|file|image|max:2048', // Image tidak wajib, tapi jika ada harus valid
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+            'address' => 'required|string|max:500'
         ];
     }
 }

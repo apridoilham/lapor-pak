@@ -24,9 +24,9 @@ return [
     'before' => ':attribute harus berupa tanggal sebelum :date.',
     'before_or_equal' => ':attribute harus berupa tanggal sebelum atau sama dengan :date.',
     'between' => [
-        'numeric' => ':attribute harus antara :min dan :max.',
-        'file' => ':attribute harus antara :min dan :max kilobita.',
-        'string' => ':attribute harus antara :min dan :max karakter.',
+        'numeric' => ':attribute harus bernilai antara :min dan :max.',
+        'file' => ':attribute harus berukuran antara :min dan :max kilobita.',
+        'string' => ':attribute harus berisi antara :min dan :max karakter.',
         'array' => ':attribute harus memiliki antara :min dan :max item.',
     ],
     'boolean' => ':attribute harus berupa true atau false.',
@@ -122,6 +122,11 @@ return [
     |--------------------------------------------------------------------------
     | Atribut Validasi Kustom
     |--------------------------------------------------------------------------
+    |
+    | Baris berikut digunakan untuk menukar placeholder atribut kita
+    | dengan sesuatu yang lebih mudah dibaca seperti "Alamat E-Mail"
+    | daripada "email". Ini hanya membantu kita membuat pesan lebih ekspresif.
+    |
     */
 
     'attributes' => [
@@ -134,6 +139,10 @@ return [
         'description' => 'Deskripsi',
         'image' => 'Gambar',
         'address' => 'Alamat',
+        'latitude' => 'Latitude',
+        'longitude' => 'Longitude',
+        'report_category_id' => 'Kategori Laporan',
+        'resident_id' => 'Pelapor',
     ],
 
 ];
