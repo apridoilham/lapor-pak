@@ -4,10 +4,9 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreLoginRequest;
-use App\Interfaces\AuthRepositoryInterface; 
+use App\Interfaces\AuthRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
 
 class LoginController extends Controller
 {
@@ -23,11 +22,16 @@ class LoginController extends Controller
         return view('pages.auth.login');
     }
 
+    /**
+     * PERUBAHAN DI SINI:
+     * Menggunakan hasAnyRole untuk memeriksa 'admin' atau 'super-admin'.
+     */
     public function store(StoreLoginRequest $request){
         $credentials = $request->validated();
 
         if ($this->authRepository->login($credentials)) {
-            if (Auth::user()->hasRole('admin')) {
+            // Cek apakah pengguna memiliki peran 'admin' ATAU 'super-admin'
+            if (Auth::user()->hasAnyRole(['admin', 'super-admin'])) {
                 return redirect()->route('admin.dashboard');
             }
 

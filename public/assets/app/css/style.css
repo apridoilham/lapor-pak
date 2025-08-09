@@ -593,3 +593,71 @@ textarea.form-control {
 .leaflet-bottom {
     z-index: 0;
 }
+
+.nav-notification {
+    position: relative;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: 15px;
+    background-color: #dc3545; /* Merah */
+    color: white;
+    border-radius: 50%;
+    padding: 0.1em 0.45em;
+    font-size: 0.7rem;
+    font-weight: bold;
+    border: 1px solid white;
+}
+
+.notification-list {
+    border-radius: 1rem;
+    overflow: hidden;
+    background-color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.notification-list .notification-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.notification-list .notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-list .notification-item.unread {
+    background-color: #e8f5e9; /* Warna hijau muda untuk notif belum dibaca */
+}
+
+.notification-list .notification-item:hover {
+    background-color: #f8f9fa;
+}
+
+.notification-item .notification-icon {
+    background-color: #e9ecef;
+    min-width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary);
+    font-size: 1.1rem;
+}
+
+.notification-item.unread .notification-icon {
+    background-color: var(--primary);
+    color: white;
+}
+
+.notification-content p {
+    font-size: 0.9rem;
+}
+.notification-content small {
+    font-size: 0.75rem;
+}

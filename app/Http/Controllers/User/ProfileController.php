@@ -6,15 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Interfaces\ReportRepositoryInterface;
 use App\Interfaces\ResidentRepositoryInterface;
-use App\Traits\FileUploadTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use RealRashid\SweetAlert\Facades\Alert as Swal;
 
 class ProfileController extends Controller
 {
-    use FileUploadTrait;
-
     private ReportRepositoryInterface $reportRepository;
     private ResidentRepositoryInterface $residentRepository;
 
@@ -26,9 +23,22 @@ class ProfileController extends Controller
         $this->residentRepository = $residentRepository;
     }
 
+    /**
+     * PERUBAHAN DI SINI:
+     * Membedakan tampilan profil untuk admin dan resident.
+     */
     public function index()
     {
-        $stats = $this->reportRepository->countStatusesByResidentId(Auth::user()->resident->id);
+        $user = Auth::user();
+
+        // Jika yang login adalah admin atau super-admin
+        if ($user->hasAnyRole(['admin', 'super-admin'])) {
+            // Arahkan ke view profil khusus admin
+            return view('pages.admin.profile', ['user' => $user]);
+        }
+
+        // Jika yang login adalah resident (logika yang sudah ada)
+        $stats = $this->reportRepository->countStatusesByResidentId($user->resident->id);
 
         return view('pages.app.profile', [
             'activeReportsCount' => $stats['active'],
@@ -37,6 +47,10 @@ class ProfileController extends Controller
         ]);
     }
 
+    /**
+     * Method edit ini hanya untuk resident.
+     * Admin akan punya cara edit profilnya sendiri di menu Manajemen Admin.
+     */
     public function edit()
     {
         return view('pages.app.profile-edit', [
@@ -44,6 +58,9 @@ class ProfileController extends Controller
         ]);
     }
 
+    /**
+     * Method update ini hanya untuk resident.
+     */
     public function update(UpdateProfileRequest $request)
     {
         $validatedData = $request->validated();
@@ -55,8 +72,7 @@ class ProfileController extends Controller
 
         $this->residentRepository->updateResident($validatedData, $resident->id);
 
-        // ▼▼▼ TAMBAHKAN BARIS INI UNTUK MENGIRIM NOTIFIKASI SUKSES ▼▼▼
-        Swal::success('Berhasil', 'Profil Anda telah berhasil diperbarui.');
+        Swal::success('Berhasil', 'Profil Anda berhasil diperbarui.');
 
         return redirect()->route('profile');
     }

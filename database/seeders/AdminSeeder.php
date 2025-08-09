@@ -13,10 +13,11 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
+        // Membuat user dan memberikannya peran 'super-admin'
         User::create([
-            'name' => 'Admin Lapor Pak',
+            'name' => 'Super Admin Lapor Pak',
             'email' => 'admin@laporpak.com',
-            'password' => bcrypt('password')
-        ])->assignRole('admin');
+            'password' => 'password' // Model akan hash otomatis
+        ])->assignRole('super-admin');
     }
 }

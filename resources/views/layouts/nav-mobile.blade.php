@@ -8,14 +8,25 @@
         <i class="fas fa-house"></i>
         <span>Beranda</span>
     </a>
-    <a href="{{ route('report.myreport', ['status' => 'delivered']) }}" class="{{ request()->routeIs('report.myreport*') ? 'active' : '' }}">
+    <a href="{{ route('report.myreport') }}" class="{{ request()->routeIs('report.myreport*') ? 'active' : '' }}">
         <i class="fas fa-solid fa-clipboard-list"></i>
         <span>Laporanmu</span>
     </a>
     
     <a href="#" class="nav-placeholder"></a>
 
-    <a href="#" class="{{ request()->routeIs('notification*') ? 'active' : '' }}">
+    <a href="{{ route('notifications.index') }}" class="nav-notification {{ request()->routeIs('notifications.index') ? 'active' : '' }}">
+        @auth
+            @php
+                // Ambil jumlah notifikasi yang belum dibaca
+                $unreadNotificationsCount = Auth::user()->unreadNotifications->count();
+            @endphp
+            
+            {{-- Tampilkan badge hanya jika ada notifikasi belum dibaca --}}
+            @if ($unreadNotificationsCount > 0)
+                <span class="notification-badge">{{ $unreadNotificationsCount }}</span>
+            @endif
+        @endauth
         <i class="fas fa-bell"></i>
         <span>Notifikasi</span>
     </a>

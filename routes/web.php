@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ResidentController;
@@ -10,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\User\ReportController as UserReportController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\User\HomeController;
+use App\Http\Controllers\User\NotificationController;
 use App\Http\Controllers\User\ProfileController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home')->middleware('auth');
@@ -27,10 +29,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/my-reports', [UserReportController::class, 'myReport'])->name('report.myreport');
     
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
-
-    // ▼▼▼ TAMBAHKAN DUA BARIS DI BAWAH INI ▼▼▼
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    
+    // ▼▼▼ ROUTE BARU UNTUK NOTIFIKASI ▼▼▼
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
 });
 
 Route::get('/login', [LoginController::class, 'index'])->name('login');
@@ -40,12 +43,14 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 Route::get('/register', [RegisterController::class, 'index'])->name('register');
 Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin|super-admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('/resident', ResidentController::class);
     Route::resource('/report-category', ReportCategoryController::class);
     Route::resource('/report', ReportController::class);
+
+    Route::resource('/admin-user', AdminUserController::class)->middleware('role:super-admin');
 
     Route::get('/report-status/{reportId}/create', [ReportStatusController::class, 'create'])->name('report-status.create');
     Route::resource('/report-status', ReportStatusController::class)->except('create');
