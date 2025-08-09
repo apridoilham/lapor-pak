@@ -7,7 +7,9 @@ use App\Interfaces\ReportRepositoryInterface;
 use App\Models\Report;
 use App\Models\ReportCategory;
 use App\Models\Resident;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -20,7 +22,7 @@ class DashboardController extends Controller
 
     public function index()
     {
-        // Data untuk kartu statistik
+        // ▼▼▼ KEMBALIKAN 3 BARIS INI ▼▼▼
         $reportCategoryCount = ReportCategory::count();
         $reportCount = Report::count();
         $residentCount = Resident::count();
@@ -28,22 +30,41 @@ class DashboardController extends Controller
         // Data untuk tabel laporan terbaru
         $latestReports = $this->reportRepository->getLatesReports();
 
-        // ▼▼▼ KODE BARU UNTUK MENYIAPKAN DATA GRAFIK ▼▼▼
-        // Ambil semua kategori beserta jumlah laporannya menggunakan withCount()
+        // Data untuk Pie Chart Kategori
         $categoriesWithCount = ReportCategory::withCount('reports')->get();
-
-        // Pisahkan data menjadi label (nama kategori) dan data (jumlah laporan)
         $categoryLabels = $categoriesWithCount->pluck('name')->toArray();
         $categoryData = $categoriesWithCount->pluck('reports_count')->toArray();
-        // ▲▲▲ AKHIR DARI KODE BARU ▲▲▲
 
+        // Data untuk Bar Chart Laporan Harian
+        $reportDaily = Report::query()
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
+            ->where('created_at', '>=', Carbon::now()->subDays(6))
+            ->groupBy('date')
+            ->orderBy('date', 'ASC')
+            ->get()
+            ->pluck('count', 'date');
+
+        $dailyLabels = [];
+        $dailyData = [];
+
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i);
+            $dateString = $date->format('Y-m-d');
+            
+            $dailyLabels[] = $date->isoFormat('D MMM');
+            $dailyData[] = $reportDaily[$dateString] ?? 0;
+        }
+
+        // ▼▼▼ KEMBALIKAN VARIABEL STATISTIK KE DALAM compact() ▼▼▼
         return view('pages.admin.dashboard', compact(
             'reportCategoryCount',
             'reportCount',
             'residentCount',
             'latestReports',
-            'categoryLabels', // <-- Kirim data label ke view
-            'categoryData'    // <-- Kirim data jumlah ke view
+            'categoryLabels',
+            'categoryData',
+            'dailyLabels',
+            'dailyData'
         ));
     }
 }
