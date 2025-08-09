@@ -8,10 +8,30 @@
     --secondary: #878787;
 }
 
+/* Pengaturan Layout Dasar */
+html,
+body {
+    height: 100%;
+}
+
 body {
     font-family: 'Poppins', sans-serif;
     background-color: #f7f7f7;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
 }
+
+.main-content {
+    flex-grow: 1; /* Membuat konten tumbuh mengisi ruang kosong */
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 1rem;
+    padding-bottom: 8rem; /* Memberi ruang aman di bawah agar tidak tertutup navigasi */
+}
+
 
 h1,
 h2,
@@ -25,12 +45,6 @@ p {
 
 a:hover {
     color: var(--primary);
-}
-
-.max-w-screen-sm {
-    max-width: 480px;
-    /* ▼▼▼ PERUBAHAN DI SINI ▼▼▼ */
-    margin-bottom: 7rem; /* Diperbesar dari 4rem */
 }
 
 .vh-75 {
@@ -104,14 +118,28 @@ a:hover {
     font-size: 14px;
 }
 
+.form-control, .form-select, textarea.form-control {
+    border-radius: 50px;
+}
+
 .form-control:focus,
 .form-select:focus {
     border-color: var(--primary);
     box-shadow: none;
 }
 
-textarea.form-control {
-    border-radius: 20px;
+/* Placeholder untuk Pratinjau Gambar */
+.image-placeholder-box {
+    width: 100%;
+    height: 200px;
+    border: 2px dashed #e0e0e0;
+    border-radius: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    cursor: default;
 }
 
 /* === Typography === */
@@ -149,13 +177,13 @@ textarea.form-control {
     transform: translateX(-50%);
     z-index: 999;
     width: 480px;
-    padding: 1rem 0;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+    padding: 0.5rem 0;
+    box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
     display: flex;
     justify-content: space-around;
     align-items: center;
-    border-top-left-radius: 1rem;
-    border-top-right-radius: 1rem;
+    border-top-left-radius: 1.5rem;
+    border-top-right-radius: 1.5rem;
 }
 
 .nav-mobile a {
@@ -168,6 +196,7 @@ textarea.form-control {
     font-size: 0.6rem;
     gap: 0.3rem;
     width: 80px;
+    padding: 0.5rem 0;
 }
 
 .nav-mobile a.active {
@@ -182,12 +211,6 @@ textarea.form-control {
 .nav-mobile a span {
     display: block;
 }
-
-.nav-placeholder {
-    width: 60px;
-    visibility: hidden;
-}
-
 
 @media (max-width: 480px) {
     .nav-mobile {
@@ -300,23 +323,19 @@ textarea.form-control {
 
 .badge-status.status-delivered {
     background-color: #0d6efd;
-    /* Biru */
 }
 
 .badge-status.status-processing {
     background-color: #ffc107;
-    /* Kuning */
     color: #000;
 }
 
 .badge-status.status-completed {
     background-color: #198754;
-    /* Hijau */
 }
 
 .badge-status.status-rejected {
     background-color: #dc3545;
-    /* Merah */
 }
 
 /* === Profile === */
@@ -448,17 +467,25 @@ textarea.form-control {
     background-color: var(--primary);
 }
 
-/* === Floating Action Button === */
+/* === Floating Action Button & Nav Notch === */
+.nav-fab-container {
+    width: 70px;
+    flex-shrink: 0;
+    position: relative;
+    height: 60px;
+}
+
 .floating-button-container {
-    position: fixed;
-    bottom: 35px;
+    position: absolute;
+    bottom: 15px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1050;
     background-color: white;
     padding: 0.5rem;
     border-radius: 50%;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
 }
 
 .floating-button {
@@ -468,66 +495,50 @@ textarea.form-control {
     border-radius: 50%;
     width: 60px;
     height: 60px;
-    font-size: 18px;
+    font-size: 24px;
     cursor: pointer;
-}
-
-/* === Take Photo Page === */
-.take-photo-container {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 8rem);
-    padding: 1rem;
-    box-sizing: border-box;
-}
-
-.take-photo-container .camera-header {
-    margin-bottom: 1rem;
-}
-
-.take-photo-container .btn-back-circle {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    background-color: #eee;
-    border-radius: 50%;
-    color: #333;
-    text-decoration: none;
-    font-size: 16px;
 }
 
-.take-photo-container .camera-preview {
+/* === Halaman Kamera & Preview === */
+.camera-container, .preview-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.camera-preview {
     flex-grow: 1;
     width: 100%;
+    background-color: #000;
+    border-radius: 1rem;
     overflow: hidden;
-    border-radius: 20px;
     position: relative;
-    background-color: #333;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.take-photo-container .camera-preview video,
-.take-photo-container .camera-preview canvas,
-.take-photo-container .image-result img {
+.camera-preview video {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.take-photo-container .camera-footer {
+.camera-footer {
+    padding-top: 2rem;
+    padding-bottom: 1rem;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding-top: 2rem;
 }
 
-.take-photo-container .btn-snap {
-    background-color: var(--primary);
-    border: 4px solid white;
-    outline: 2px solid var(--primary);
-    color: white;
+.btn-snap {
+    background-color: white;
+    border: 4px solid var(--primary);
+    color: var(--primary);
     border-radius: 50%;
     width: 70px;
     height: 70px;
@@ -536,49 +547,11 @@ textarea.form-control {
     display: flex;
     justify-content: center;
     align-items: center;
+    transition: background-color 0.2s;
 }
 
-.take-photo-container .button-group {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    width: 100%;
-}
-
-.take-photo-container .btn-retake,
-.take-photo-container .btn-use {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: none;
-    border: none;
-    color: var(--secondary);
-    font-size: 14px;
-    font-weight: 500;
-    gap: 8px;
-    cursor: pointer;
-}
-
-.take-photo-container .btn-retake i,
-.take-photo-container .btn-use i {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background-color: #eee;
-    font-size: 20px;
-    color: var(--secondary);
-}
-
-.take-photo-container .btn-use {
-    color: var(--primary);
-}
-
-.take-photo-container .btn-use i {
-    background-color: var(--primary);
-    color: white;
+.btn-snap:hover {
+    background-color: #f0f0f0;
 }
 
 

@@ -1,8 +1,3 @@
-<div class="floating-button-container d-flex" onclick="window.location.href = '{{ route('report.take') }}'">
-    <button class="floating-button">
-        <i class="fa-solid fa-camera"></i>
-    </button>
-</div>
 <nav class="nav-mobile">
     <a href="{{ route('home')}}" class="{{ request()->routeIs('home') ? 'active' : '' }}">
         <i class="fas fa-house"></i>
@@ -13,16 +8,20 @@
         <span>Laporanmu</span>
     </a>
     
-    <a href="#" class="nav-placeholder"></a>
+    {{-- Container untuk tombol kamera yang sekarang menjadi bagian dari navigasi --}}
+    <div class="nav-fab-container">
+        <div class="floating-button-container" onclick="window.location.href = '{{ route('report.take') }}'">
+            <button class="floating-button">
+                <i class="fa-solid fa-camera"></i>
+            </button>
+        </div>
+    </div>
 
     <a href="{{ route('notifications.index') }}" class="nav-notification {{ request()->routeIs('notifications.index') ? 'active' : '' }}">
         @auth
             @php
-                // Ambil jumlah notifikasi yang belum dibaca
                 $unreadNotificationsCount = Auth::user()->unreadNotifications->count();
             @endphp
-            
-            {{-- Tampilkan badge hanya jika ada notifikasi belum dibaca --}}
             @if ($unreadNotificationsCount > 0)
                 <span class="notification-badge">{{ $unreadNotificationsCount }}</span>
             @endif

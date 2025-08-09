@@ -9,10 +9,12 @@
     <link rel="stylesheet" href="{{ asset('assets/app/css/bootstrap.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/app/css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    @stack('styles')
 </head>
 
 <body>
-    <div class="max-w-screen-sm mx-auto bg-white min-vh-100 p-3">
+    {{-- Kita ganti div pembungkus utama dengan class 'main-content' --}}
+    <div class="main-content">
         @yield('content')
     </div>
 
