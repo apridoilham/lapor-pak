@@ -85,14 +85,36 @@ class ReportRepository implements ReportRepositoryInterface
         return Report::findOrFail($id)->delete();
     }
 
+    /**
+     * ▼▼▼ KEMBALIKAN LOGIKA DI DALAM METHOD INI ▼▼▼
+     */
     public function countStatusesByResidentId(int $residentId): array
     {
-        // ... (kode method ini tidak berubah)
+        $active = Report::where('resident_id', $residentId)
+            ->whereHas('latestStatus', function (Builder $query) {
+                $query->whereIn('status', [ReportStatusEnum::DELIVERED, ReportStatusEnum::IN_PROCESS]);
+            })
+            ->count();
+
+        $completed = Report::where('resident_id', $residentId)
+            ->whereHas('latestStatus', function (Builder $query) {
+                $query->where('status', ReportStatusEnum::COMPLETED);
+            })
+            ->count();
+
+        $rejected = Report::where('resident_id', $residentId)
+            ->whereHas('latestStatus', function (Builder $query) {
+                $query->where('status', ReportStatusEnum::REJECTED);
+            })
+            ->count();
+
+        return [
+            'active' => $active,
+            'completed' => $completed,
+            'rejected' => $rejected,
+        ];
     }
 
-    /**
-     * Mengambil data laporan dengan filter dinamis untuk ekspor.
-     */
     public function getFilteredReports(array $filters)
     {
         $query = Report::with('resident.user', 'reportCategory', 'latestStatus');

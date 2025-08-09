@@ -12,7 +12,8 @@
 
     <div class="notification-list">
         @forelse ($notifications as $notification)
-            <a href="{{ route('report.show', $notification->data['report_code']) }}" class="notification-item text-decoration-none {{ !$notification->read_at ? 'unread' : '' }}">
+            {{-- Link sekarang mengarah ke route 'notifications.read' --}}
+            <a href="{{ route('notifications.read', $notification->id) }}" class="notification-item text-decoration-none {{ !$notification->read_at ? 'unread' : '' }}">
                 <div class="notification-icon">
                     <i class="fa-solid fa-file-alt"></i>
                 </div>

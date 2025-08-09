@@ -34,6 +34,8 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    // Route baru untuk menandai notifikasi sebagai "terbaca"
+    Route::get('/notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
 });
 
 Route::get('/login', [LoginController::class, 'index'])->name('login');
@@ -50,7 +52,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin|super-ad
     Route::resource('/report-category', ReportCategoryController::class);
     Route::resource('/report', ReportController::class);
 
-    // Route baru untuk halaman dan proses ekspor
     Route::get('/export-reports', [ReportExportController::class, 'create'])->name('report.export.create');
     Route::post('/export-reports', [ReportExportController::class, 'store'])->name('report.export.store');
 
