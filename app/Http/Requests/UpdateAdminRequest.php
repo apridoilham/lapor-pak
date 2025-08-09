@@ -12,7 +12,6 @@ class UpdateAdminRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Hanya super-admin yang boleh mengedit admin
         return $this->user()->hasRole('super-admin');
     }
 
@@ -23,8 +22,8 @@ class UpdateAdminRequest extends FormRequest
      */
     public function rules(): array
     {
-        // Mendapatkan ID user dari parameter route, contoh: admin/admin-user/{admin_user}
-        $userId = $this->route('admin_user');
+        // Mendapatkan ID user dari route parameter, contoh: admin/admin-user/{admin_user}
+        $userId = $this->route('admin_user')->id;
 
         return [
             'name' => 'required|string|max:255',
@@ -33,7 +32,7 @@ class UpdateAdminRequest extends FormRequest
                 'email',
                 Rule::unique('users')->ignore($userId),
             ],
-            'password' => 'nullable|min:8|confirmed',
+            'password' => 'nullable|min:8|confirmed', // Password boleh kosong
         ];
     }
 }

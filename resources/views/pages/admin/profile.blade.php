@@ -30,9 +30,9 @@
                             </td>
                         </tr>
                     </table>
-                    {{-- Tombol Edit mengarah ke Manajemen Admin jika super-admin --}}
-                    @role('super-admin')
-                        <a href="{{ route('admin.admin-user.edit', $user->id) }}" class="btn btn-primary">Edit Profil</a>
+                    {{-- Tombol ini sekarang bisa dilihat semua admin dan mengarah ke route baru --}}
+                    @role('admin|super-admin')
+                        <a href="{{ route('admin.profile.edit') }}" class="btn btn-primary">Edit Profil</a>
                     @endrole
                 </div>
             </div>

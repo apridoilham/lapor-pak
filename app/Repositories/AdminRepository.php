@@ -4,19 +4,24 @@ namespace App\Repositories;
 
 use App\Interfaces\AdminRepositoryInterface;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth; // <-- DITAMBAHKAN
 use Illuminate\Support\Facades\DB;
 
 class AdminRepository implements AdminRepositoryInterface
 {
     public function getAllAdmins()
     {
-        // Mengambil semua user yang memiliki peran 'admin'
-        return User::role('admin')->get();
+        // PERUBAHAN DI SINI:
+        // Ambil semua user dengan peran 'admin' ATAU 'super-admin',
+        // KECUALI user yang sedang login saat ini.
+        return User::role(['admin', 'super-admin'])
+            ->where('id', '!=', Auth::id())
+            ->get();
     }
 
     public function getAdminById(int $id)
     {
-        return User::role('admin')->findOrFail($id);
+        return User::role(['admin', 'super-admin'])->findOrFail($id);
     }
 
     public function createAdmin(array $data): User
@@ -28,6 +33,7 @@ class AdminRepository implements AdminRepositoryInterface
                 'password' => $data['password'], // Model akan hash otomatis
             ]);
 
+            // Saat membuat user baru dari form ini, berikan peran 'admin' biasa
             $user->assignRole('admin');
 
             return $user;
@@ -53,6 +59,6 @@ class AdminRepository implements AdminRepositoryInterface
     public function deleteAdmin(int $id): bool
     {
         $user = $this->getAdminById($id);
-        return $user->delete(); // Ini adalah soft delete karena model User sudah pakai trait
+        return $user->delete();
     }
 }

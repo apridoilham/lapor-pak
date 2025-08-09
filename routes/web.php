@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\ReportCategoryController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReportExportController;
@@ -48,6 +49,10 @@ Route::post('/register', [RegisterController::class, 'store'])->name('register.s
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin|super-admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Route untuk edit profil admin sendiri
+    Route::get('/profile/edit', [AdminProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/update', [AdminProfileController::class, 'update'])->name('profile.update');
+
     Route::resource('/resident', ResidentController::class);
     Route::resource('/report-category', ReportCategoryController::class);
     Route::resource('/report', ReportController::class);
@@ -60,6 +65,5 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin|super-ad
     Route::get('/report-status/{reportId}/create', [ReportStatusController::class, 'create'])->name('report-status.create');
     Route::resource('/report-status', ReportStatusController::class)->except('create');
 
-    // Route baru untuk halaman Activity Log
     Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
 });
