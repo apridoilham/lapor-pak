@@ -33,7 +33,12 @@
             <span>Data Laporan</span></a>
     </li>
 
-    {{-- Menu ini hanya akan tampil jika user adalah super-admin --}}
+    <li class="nav-item {{ request()->is('admin/export-reports*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('admin.report.export.create') }}">
+            <i class="fas fa-fw fa-download"></i>
+            <span>Ekspor Laporan</span></a>
+    </li>
+
     @role('super-admin')
     <li class="nav-item {{ request()->is('admin/admin-user*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('admin.admin-user.index') }}">

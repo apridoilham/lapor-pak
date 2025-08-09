@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\ReportsExport;
 use App\Http\Controllers\Controller;
 use App\Interfaces\ReportRepositoryInterface;
 use App\Interfaces\ReportCategoryRepositoryInterface;
@@ -10,6 +11,7 @@ use App\Http\Requests\StoreReportRequest;
 use App\Http\Requests\UpdateReportRequest;
 use App\Traits\FileUploadTrait;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 use RealRashid\SweetAlert\Facades\Alert as Swal;
 
 class ReportController extends Controller
@@ -29,10 +31,10 @@ class ReportController extends Controller
         $this->reportCategoryRepository = $reportCategoryRepository;
         $this->residentRepository = $residentRepository;
     }
-
-    public function index()
+    
+    public function index(Request $request)
     {
-        $reports = $this->reportRepository->getAllReports();
+        $reports = $this->reportRepository->getAllReports($request);
 
         return view('pages.admin.report.index', compact('reports'));
     }
@@ -49,7 +51,6 @@ class ReportController extends Controller
     {
         $data = $request->validated();
         
-        // PERUBAHAN DI SINI
         $data['code'] = config('report.code_prefix.admin') . mt_rand(100000, 999999);
 
         if ($path = $this->handleFileUpload($request, 'image', 'assets/report/image')) {
@@ -83,7 +84,7 @@ class ReportController extends Controller
     public function update(UpdateReportRequest $request, string $id)
     {
         $data = $request->validated();
-
+        
         if ($path = $this->handleFileUpload($request, 'image', 'assets/report/image')) {
             $data['image'] = $path;
         }
@@ -102,5 +103,13 @@ class ReportController extends Controller
         Swal::success('Success', 'Data laporan berhasil dihapus!')->timerProgressBar();
 
         return redirect()->route('admin.report.index');
+    }
+
+    /**
+     * Method baru untuk menangani ekspor data laporan ke Excel.
+     */
+    public function export()
+    {
+        return Excel::download(new ReportsExport, 'laporan-' . now()->format('d-m-Y') . '.xlsx');
     }
 }

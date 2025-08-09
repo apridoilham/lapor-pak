@@ -2,15 +2,16 @@
 
 namespace App\Interfaces;
 
+use Illuminate\Http\Request;
+
 interface ReportRepositoryInterface
 {
-    public function getAllReports();
+    public function getAllReports(Request $request);
 
     public function getLatesReports();
 
-    // PERUBAHAN DI SINI: Tambahkan parameter int $residentId
     public function getReportByResidentId(int $residentId, ?string $status);
-
+    
     public function getReportById(int $id);
 
     public function getReportByCode(string $code);
@@ -24,4 +25,6 @@ interface ReportRepositoryInterface
     public function deleteReport(int $id);
 
     public function countStatusesByResidentId(int $residentId): array;
+
+    public function getFilteredReports(array $filters); // <-- Method Baru
 }
