@@ -6,17 +6,19 @@ use Illuminate\Http\Request;
 
 interface ReportRepositoryInterface
 {
-    public function getAllReports(Request $request);
+    public function getAllReportsForAdmin(Request $request, int $rwId = null);
 
-    public function getLatestReports(Request $request = null);
+    public function getAllReportsForUser(Request $request);
+
+    public function getLatestReportsForAdmin(int $rwId = null);
+
+    public function getLatestReportsForUser(Request $request);
 
     public function getReportByResidentId(int $residentId, ?string $status);
     
     public function getReportById(int $id);
 
     public function getReportByCode(string $code);
-
-    public function getReportsByCategory(string $category);
 
     public function createReport(array $data);
 

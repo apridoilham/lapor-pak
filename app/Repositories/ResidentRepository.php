@@ -10,9 +10,16 @@ use Illuminate\Support\Facades\Storage;
 
 class ResidentRepository implements ResidentRepositoryInterface
 {
-    public function getAllResidents()
+    public function getAllResidents(int $rwId = null, int $rtId = null)
     {
-        return Resident::all();
+        return Resident::with(['user', 'rt', 'rw'])
+            ->when($rtId, function ($query) use ($rtId) {
+                return $query->where('rt_id', $rtId);
+            })
+            ->when($rwId && !$rtId, function ($query) use ($rwId) {
+                return $query->where('rw_id', $rwId);
+            })
+            ->get();
     }
 
     public function getResidentById(int $id)

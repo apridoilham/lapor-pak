@@ -18,9 +18,10 @@
     <li class="nav-item {{ request()->routeIs('admin.resident.*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('admin.resident.index') }}">
             <i class="fas fa-fw fa-users"></i>
-            <span>Data Masyarakat</span></a>
+            <span>Data Pelapor</span></a>
     </li>
 
+    @role('super-admin')
     <li class="nav-item {{ request()->routeIs('admin.rtrw.*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('admin.rtrw.index') }}">
             <i class="fas fa-fw fa-map-marker-alt"></i>
@@ -32,6 +33,7 @@
             <i class="fas fa-fw fa-tags"></i>
             <span>Data Kategori</span></a>
     </li>
+    @endrole
 
     <li class="nav-item {{ request()->routeIs('admin.report.*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('admin.report.index') }}">

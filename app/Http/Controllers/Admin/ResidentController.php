@@ -9,6 +9,8 @@ use App\Interfaces\ResidentRepositoryInterface;
 use App\Models\Rt;
 use App\Models\Rw;
 use App\Traits\FileUploadTrait;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use RealRashid\SweetAlert\Facades\Alert as Swal;
 
 class ResidentController extends Controller
@@ -22,10 +24,22 @@ class ResidentController extends Controller
         $this->residentRepository = $residentRepository;
     }
     
-    public function index()
+    public function index(Request $request)
     {
-        $residents = $this->residentRepository->getAllResidents();
-        return view('pages.admin.resident.index', compact('residents'));
+        $user = Auth::user();
+        $rws = [];
+        $residents = [];
+
+        if ($user->hasRole('super-admin')) {
+            $rwId = $request->input('rw');
+            $rtId = $request->input('rt');
+            $residents = $this->residentRepository->getAllResidents($rwId, $rtId);
+            $rws = Rw::orderBy('number')->get();
+        } else {
+            $residents = $this->residentRepository->getAllResidents($user->rw_id);
+        }
+
+        return view('pages.admin.resident.index', compact('residents', 'rws'));
     }
 
     public function create()
@@ -46,15 +60,10 @@ class ResidentController extends Controller
         return redirect()->route('admin.resident.index');
     }
 
-    /**
-     * PERUBAHAN DI SINI:
-     * Muat relasi 'reports' saat mengambil data resident.
-     */
     public function show(string $id)
     {
         $resident = $this->residentRepository->getResidentById($id);
         
-        // Memuat data laporan yang berelasi dengan resident ini
         $resident->load(['reports.latestStatus', 'reports.reportCategory']);
 
         return view('pages.admin.resident.show', compact('resident'));

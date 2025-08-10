@@ -4,7 +4,7 @@ namespace App\Interfaces;
 
 interface ResidentRepositoryInterface
 {
-    public function getAllResidents();
+    public function getAllResidents(int $rwId = null, int $rtId = null);
 
     public function getResidentById(int $id);
 

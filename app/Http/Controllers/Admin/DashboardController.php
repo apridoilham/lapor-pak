@@ -61,9 +61,7 @@ class DashboardController extends Controller
         $reportCategoryCount = ReportCategory::count();
         $reportCount = $this->reportRepository->countReports($rwId);
         $residentCount = $this->residentRepository->countResidents($rwId);
-        $latestReports = $this->reportRepository->getLatestReports(
-            $rwId ? new Request(['rw' => $rwId]) : null
-        );
+        $latestReports = $this->reportRepository->getLatestReportsForAdmin($rwId);
         
         $statusCounts = $this->reportRepository->getStatusCounts($rwId);
 

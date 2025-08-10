@@ -27,7 +27,7 @@ class HomeController extends Controller
     public function index(Request $request)
     {
         $categories = $this->reportCategoryRepository->getAllReportCategories();
-        $reports = $this->reportRepository->getLatesReports($request);
+        $reports = $this->reportRepository->getLatestReportsForUser($request);
         $rws = Rw::orderBy('number')->get();
         
         $rtId = $request->input('rt');

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Exports\ReportsExport;
 use App\Http\Controllers\Controller;
 use App\Interfaces\ReportRepositoryInterface;
 use App\Interfaces\ReportCategoryRepositoryInterface;
@@ -11,6 +10,7 @@ use App\Http\Requests\StoreReportRequest;
 use App\Http\Requests\UpdateReportRequest;
 use App\Traits\FileUploadTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use RealRashid\SweetAlert\Facades\Alert as Swal;
 
@@ -34,7 +34,9 @@ class ReportController extends Controller
     
     public function index(Request $request)
     {
-        $reports = $this->reportRepository->getAllReports($request);
+        $user = Auth::user();
+        $rwId = $user->hasRole('admin') ? $user->rw_id : null;
+        $reports = $this->reportRepository->getAllReportsForAdmin($request, $rwId);
 
         return view('pages.admin.report.index', compact('reports'));
     }
@@ -103,13 +105,5 @@ class ReportController extends Controller
         Swal::success('Success', 'Data laporan berhasil dihapus!')->timerProgressBar();
 
         return redirect()->route('admin.report.index');
-    }
-
-    /**
-     * Method baru untuk menangani ekspor data laporan ke Excel.
-     */
-    public function export()
-    {
-        return Excel::download(new ReportsExport, 'laporan-' . now()->format('d-m-Y') . '.xlsx');
     }
 }
