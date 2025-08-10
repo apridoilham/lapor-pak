@@ -6,9 +6,12 @@ use App\Enums\ReportStatusEnum;
 use App\Enums\ReportVisibilityEnum;
 use App\Interfaces\ReportRepositoryInterface;
 use App\Models\Report;
+use App\Models\ReportCategory;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ReportRepository implements ReportRepositoryInterface
 {
@@ -79,7 +82,7 @@ class ReportRepository implements ReportRepositoryInterface
         return $query->latest()->get();
     }
 
-    public function getLatesReports(Request $request = null)
+    public function getLatestReports(Request $request = null)
     {
         $query = Report::with('resident.user', 'reportCategory', 'latestStatus');
         
@@ -214,5 +217,83 @@ class ReportRepository implements ReportRepositoryInterface
         }
 
         return $query->get();
+    }
+
+    public function countReports(int $rwId = null): int
+    {
+        return Report::when($rwId, function ($query) use ($rwId) {
+            $query->whereHas('resident', function ($q) use ($rwId) {
+                $q->where('rw_id', $rwId);
+            });
+        })->count();
+    }
+
+    public function getCategoryReportCounts(int $rwId = null)
+    {
+        return ReportCategory::withCount(['reports' => function ($query) use ($rwId) {
+            if ($rwId) {
+                $query->whereHas('resident', function ($q) use ($rwId) {
+                    $q->where('rw_id', $rwId);
+                });
+            }
+        }])->get();
+    }
+
+    public function getDailyReportCounts(int $rwId = null)
+    {
+        return Report::query()
+            ->when($rwId, function ($query) use ($rwId) {
+                $query->whereHas('resident', function ($q) use ($rwId) {
+                    $q->where('rw_id', $rwId);
+                });
+            })
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
+            ->where('created_at', '>=', Carbon::now()->subDays(6))
+            ->groupBy('date')
+            ->orderBy('date', 'ASC')
+            ->get()
+            ->pluck('count', 'date');
+    }
+
+    public function getReportCountsByRw()
+    {
+        return Report::query()
+            ->join('residents', 'reports.resident_id', '=', 'residents.id')
+            ->join('rws', 'residents.rw_id', '=', 'rws.id')
+            ->select('rws.number as rw_number', DB::raw('count(*) as count'))
+            ->groupBy('rws.number')
+            ->orderBy('rws.number')
+            ->get();
+    }
+
+    public function getStatusCounts(int $rwId = null): array
+    {
+        $query = Report::query();
+
+        if ($rwId) {
+            $query->whereHas('resident', function ($q) use ($rwId) {
+                $q->where('rw_id', $rwId);
+            });
+        }
+
+        $reports = $query->with('latestStatus')->get();
+
+        $counts = [
+            ReportStatusEnum::DELIVERED->value => 0,
+            ReportStatusEnum::IN_PROCESS->value => 0,
+            ReportStatusEnum::COMPLETED->value => 0,
+            ReportStatusEnum::REJECTED->value => 0,
+        ];
+
+        foreach ($reports as $report) {
+            if ($report->latestStatus) {
+                $statusValue = $report->latestStatus->status->value;
+                if (isset($counts[$statusValue])) {
+                    $counts[$statusValue]++;
+                }
+            }
+        }
+
+        return $counts;
     }
 }

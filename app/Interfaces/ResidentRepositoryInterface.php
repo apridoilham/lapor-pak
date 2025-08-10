@@ -13,4 +13,6 @@ interface ResidentRepositoryInterface
     public function updateResident(array $data, int $id);
 
     public function deleteResident(int $id);
+
+    public function countResidents(int $rwId = null): int;
 }

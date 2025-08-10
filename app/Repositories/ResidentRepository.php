@@ -80,4 +80,11 @@ class ResidentRepository implements ResidentRepositoryInterface
             return false;
         });
     }
+
+    public function countResidents(int $rwId = null): int
+    {
+        return Resident::when($rwId, function ($query) use ($rwId) {
+            $query->where('rw_id', $rwId);
+        })->count();
+    }
 }

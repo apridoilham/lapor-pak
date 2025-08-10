@@ -2,48 +2,76 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\ReportStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Interfaces\ReportRepositoryInterface;
-use App\Models\Report;
+use App\Interfaces\ResidentRepositoryInterface;
 use App\Models\ReportCategory;
-use App\Models\Resident;
+use App\Models\Rw;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     private ReportRepositoryInterface $reportRepository;
+    private ResidentRepositoryInterface $residentRepository;
 
-    public function __construct(ReportRepositoryInterface $reportRepository)
+    public function __construct(ReportRepositoryInterface $reportRepository, ResidentRepositoryInterface $residentRepository)
     {
         $this->reportRepository = $reportRepository;
+        $this->residentRepository = $residentRepository;
     }
 
     public function index()
     {
-        // ▼▼▼ KEMBALIKAN 3 BARIS INI ▼▼▼
-        $reportCategoryCount = ReportCategory::count();
-        $reportCount = Report::count();
-        $residentCount = Resident::count();
-        
-        // Data untuk tabel laporan terbaru
-        $latestReports = $this->reportRepository->getLatesReports();
+        $user = Auth::user();
+        $viewData = [];
 
-        // Data untuk Pie Chart Kategori
-        $categoriesWithCount = ReportCategory::withCount('reports')->get();
+        if ($user->hasRole('super-admin')) {
+            $viewData = $this->getSuperAdminDashboardData();
+        } else {
+            $viewData = $this->getAdminDashboardData($user->rw_id);
+        }
+
+        return view('pages.admin.dashboard', $viewData);
+    }
+
+    private function getSuperAdminDashboardData(): array
+    {
+        $data = $this->getCommonDashboardData();
+        $reportsByRw = $this->reportRepository->getReportCountsByRw();
+        $data['rwLabels'] = $reportsByRw->pluck('rw_number')->map(fn($num) => "RW {$num}")->toArray();
+        $data['rwData'] = $reportsByRw->pluck('count')->toArray();
+        $data['rwNumber'] = null;
+        
+        return $data;
+    }
+
+    private function getAdminDashboardData(int $rwId): array
+    {
+        $data = $this->getCommonDashboardData($rwId);
+        $rw = Rw::find($rwId);
+        $data['rwNumber'] = $rw ? $rw->number : '';
+        return $data;
+    }
+
+    private function getCommonDashboardData(int $rwId = null): array
+    {
+        $reportCategoryCount = ReportCategory::count();
+        $reportCount = $this->reportRepository->countReports($rwId);
+        $residentCount = $this->residentRepository->countResidents($rwId);
+        $latestReports = $this->reportRepository->getLatestReports(
+            $rwId ? new Request(['rw' => $rwId]) : null
+        );
+        
+        $statusCounts = $this->reportRepository->getStatusCounts($rwId);
+
+        $categoriesWithCount = $this->reportRepository->getCategoryReportCounts($rwId);
         $categoryLabels = $categoriesWithCount->pluck('name')->toArray();
         $categoryData = $categoriesWithCount->pluck('reports_count')->toArray();
 
-        // Data untuk Bar Chart Laporan Harian
-        $reportDaily = Report::query()
-            ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
-            ->where('created_at', '>=', Carbon::now()->subDays(6))
-            ->groupBy('date')
-            ->orderBy('date', 'ASC')
-            ->get()
-            ->pluck('count', 'date');
-
+        $reportDaily = $this->reportRepository->getDailyReportCounts($rwId);
         $dailyLabels = [];
         $dailyData = [];
 
@@ -55,8 +83,7 @@ class DashboardController extends Controller
             $dailyData[] = $reportDaily[$dateString] ?? 0;
         }
 
-        // ▼▼▼ KEMBALIKAN VARIABEL STATISTIK KE DALAM compact() ▼▼▼
-        return view('pages.admin.dashboard', compact(
+        $data = compact(
             'reportCategoryCount',
             'reportCount',
             'residentCount',
@@ -65,6 +92,13 @@ class DashboardController extends Controller
             'categoryData',
             'dailyLabels',
             'dailyData'
-        ));
+        );
+        
+        $data['deliveredCount'] = $statusCounts[ReportStatusEnum::DELIVERED->value];
+        $data['inProcessCount'] = $statusCounts[ReportStatusEnum::IN_PROCESS->value];
+        $data['completedCount'] = $statusCounts[ReportStatusEnum::COMPLETED->value];
+        $data['rejectedCount'] = $statusCounts[ReportStatusEnum::REJECTED->value];
+
+        return $data;
     }
 }
