@@ -41,10 +41,11 @@ class ReportStatusUpdatedNotification extends Notification implements ShouldQueu
     public function toArray(object $notifiable): array
     {
         return [
+            'type' => 'status_update',
             'report_id' => $this->report->id,
             'report_code' => $this->report->code,
             'title' => 'Status laporan ' . $this->report->code . ' telah diperbarui.',
-            'message' => $this->report->latestStatus->status->value, // HANYA NILAI STATUS
+            'message' => $this->report->latestStatus->status->value,
         ];
     }
 }

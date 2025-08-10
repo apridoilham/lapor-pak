@@ -7,13 +7,14 @@ use App\Http\Requests\StoreReportStatusRequest;
 use App\Interfaces\ReportStatusRepositoryInterface;
 use App\Interfaces\ReportRepositoryInterface;
 use App\Traits\FileUploadTrait;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use App\Http\Requests\UpdateReportStatusRequest;
 use RealRashid\SweetAlert\Facades\Alert as Swal;
 
 class ReportStatusController extends Controller
 {
-    use FileUploadTrait;
+    use FileUploadTrait, AuthorizesRequests;
 
     private ReportRepositoryInterface $reportRepository;
     private ReportStatusRepositoryInterface $reportStatusRepository;

@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\ResidentController;
 use App\Http\Controllers\Admin\RtRwController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\User\CommentController;
 use App\Http\Controllers\User\HomeController;
 use App\Http\Controllers\User\NotificationController;
 use App\Http\Controllers\User\ProfileController;
@@ -19,8 +20,8 @@ use App\Http\Controllers\User\ReportController as UserReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home')->middleware(['auth', 'role:resident']);
-Route::get('/reports', [UserReportController::class, 'index'])->name('report.index');
-Route::get('/report/{code}', [UserReportController::class, 'show'])->name('report.show');
+Route::get('/reports', [UserReportController::class, 'index'])->name('report.index')->middleware(['auth', 'role:resident']);
+Route::get('/report/{code}', [UserReportController::class, 'show'])->name('report.show')->middleware(['auth']);
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/take-report', [UserReportController::class, 'take'])->name('report.take');
@@ -35,11 +36,13 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/my-reports/{report}', [UserReportController::class, 'destroy'])->name('report.destroy');
     Route::get('/my-reports/{report}/complete', [UserReportController::class, 'showCompleteForm'])->name('report.complete.form');
     Route::post('/my-reports/{report}/complete', [UserReportController::class, 'complete'])->name('report.complete');
+    Route::post('/report/{report}/comments', [CommentController::class, 'store'])->name('report.comments.store');
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
+    Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 });
 
 Route::get('/login', [LoginController::class, 'index'])->name('login');

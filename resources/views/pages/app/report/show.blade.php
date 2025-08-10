@@ -2,6 +2,54 @@
 
 @section('title', $report->code)
 
+@push('styles')
+<style>
+    .comment-container {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.25rem;
+    }
+    .comment-container.is-owner {
+        flex-direction: row-reverse;
+    }
+    .comment-content {
+        display: flex;
+        flex-direction: column;
+    }
+    .comment-container.is-owner .comment-content {
+        align-items: flex-end;
+    }
+    .comment-container.is-other .comment-content {
+        align-items: flex-start;
+    }
+    .comment-bubble {
+        padding: 0.6rem 0.8rem;
+        border-radius: 12px;
+        max-width: 100%;
+        overflow-wrap: break-word;
+    }
+    .comment-bubble.is-owner {
+        background-color: #DCF8C6;
+    }
+    .comment-bubble.is-other {
+        background-color: #F3F4F6;
+    }
+    .comment-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+    .comment-meta {
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+        padding: 0 0.5rem;
+    }
+</style>
+@endpush
+
 @section('content')
     <div class="header-nav">
         <a href="{{ url()->previous() }}">
@@ -17,7 +65,6 @@
     <div class="card card-report-information mt-4">
         <div class="card-body">
             <div class="card-title mb-4 fw-bold">Detail Informasi</div>
-
             <div class="row mb-3">
                 <div class="col-4 text-secondary">Kode</div>
                 <div class="col-8">
@@ -49,7 +96,7 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-4 text-secondary">Lokasi Laporan</div>
+                <div class="col-4 text-secondary">Lokasi</div>
                 <div class="col-8">
                     <p class="mb-0">: {{ $report->address }}</p>
                 </div>
@@ -92,7 +139,7 @@
         </div>
     </div>
 
-    <div class="card card-report-information mt-4">
+    <div class="card card-report-information mt-4" id="riwayat-perkembangan">
         <div class="card-body">
             <div class="card-title mb-4 fw-bold">Riwayat Perkembangan</div>
             <ul class="timeline">
@@ -125,4 +172,46 @@
             </ul>
         </div>
     </div>
+    
+    @if($report->visibility !== \App\Enums\ReportVisibilityEnum::PRIVATE)
+        <div class="card card-report-information mt-4" id="komentar">
+            <div class="card-body">
+                <div class="card-title mb-4 fw-bold">Komentar ({{ $report->comments->count() }})</div>
+                
+                @can('create', [\App\Models\Comment::class, $report])
+                <form action="{{ route('report.comments.store', $report) }}" method="POST" class="mb-4">
+                    @csrf
+                    <div class="mb-2">
+                        <textarea name="body" class="form-control" rows="3" placeholder="Tulis komentar Anda..." required></textarea>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary btn-sm">Kirim Komentar</button>
+                    </div>
+                </form>
+                @else
+                <div class="alert alert-warning small">
+                    Anda tidak memiliki izin untuk berkomentar pada laporan ini.
+                </div>
+                @endcan
+
+                @forelse ($report->comments as $comment)
+                    @php
+                        $isOwner = $comment->user_id === auth()->id();
+                    @endphp
+                    <div class="comment-container {{ $isOwner ? 'is-owner' : '' }}">
+                        <img src="{{ $comment->user->resident->avatar ? asset('storage/' . $comment->user->resident->avatar) : asset('assets/app/images/default-avatar.png') }}" alt="avatar" class="comment-avatar">
+                        <div class="comment-content">
+                            <div class="comment-bubble {{ $isOwner ? 'is-owner' : 'is-other' }}">
+                                <span class="fw-bold small d-block">{{ $isOwner ? 'Anda' : $comment->user->name }}</span>
+                                <p class="mb-0">{{ $comment->body }}</p>
+                            </div>
+                             <small class="text-muted comment-meta">{{ $comment->created_at->diffForHumans() }}</small>
+                        </div>
+                    </div>
+                @empty
+                    <p class="text-center text-secondary">Belum ada komentar.</p>
+                @endforelse
+            </div>
+        </div>
+    @endif
 @endsection
