@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 
 interface ReportRepositoryInterface
 {
-    public function getAllReportsForAdmin(Request $request, int $rwId = null);
+    public function getAllReportsForAdmin(Request $request, int $rwId = null, int $rtId = null);
 
     public function getAllReportsForUser(Request $request);
 
@@ -39,4 +39,6 @@ interface ReportRepositoryInterface
     public function getReportCountsByRw();
 
     public function getStatusCounts(int $rwId = null): array;
+
+    public function getReportCountsByRt(int $rwId);
 }

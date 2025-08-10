@@ -28,6 +28,7 @@ class ResidentController extends Controller
     {
         $user = Auth::user();
         $rws = [];
+        $rts = [];
         $residents = [];
 
         if ($user->hasRole('super-admin')) {
@@ -36,10 +37,12 @@ class ResidentController extends Controller
             $residents = $this->residentRepository->getAllResidents($rwId, $rtId);
             $rws = Rw::orderBy('number')->get();
         } else {
-            $residents = $this->residentRepository->getAllResidents($user->rw_id);
+            $rtId = $request->input('rt');
+            $residents = $this->residentRepository->getAllResidents($user->rw_id, $rtId);
+            $rts = Rt::where('rw_id', $user->rw_id)->orderBy('number')->get();
         }
 
-        return view('pages.admin.resident.index', compact('residents', 'rws'));
+        return view('pages.admin.resident.index', compact('residents', 'rws', 'rts'));
     }
 
     public function create()

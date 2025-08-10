@@ -7,22 +7,13 @@ use Illuminate\Validation\Rule;
 
 class UpdateAdminRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return $this->user()->hasRole('super-admin');
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
-        // Mendapatkan ID user dari route parameter, contoh: admin/admin-user/{admin_user}
         $userId = $this->route('admin_user')->id;
 
         return [
@@ -32,7 +23,8 @@ class UpdateAdminRequest extends FormRequest
                 'email',
                 Rule::unique('users')->ignore($userId),
             ],
-            'password' => 'nullable|min:8|confirmed', // Password boleh kosong
+            'rw_id' => 'required|exists:rws,id',
+            'password' => 'nullable|min:8|confirmed',
         ];
     }
 }

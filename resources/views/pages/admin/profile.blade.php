@@ -29,8 +29,13 @@
                                 @endforeach
                             </td>
                         </tr>
+                        @if ($user->rw)
+                        <tr>
+                            <th>Wilayah RW</th>
+                            <td>RW {{ $user->rw->number }}</td>
+                        </tr>
+                        @endif
                     </table>
-                    {{-- Tombol ini sekarang bisa dilihat semua admin dan mengarah ke route baru --}}
                     @role('admin|super-admin')
                         <a href="{{ route('admin.profile.edit') }}" class="btn btn-primary">Edit Profil</a>
                     @endrole

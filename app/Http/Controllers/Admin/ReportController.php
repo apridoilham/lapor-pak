@@ -8,6 +8,8 @@ use App\Interfaces\ReportCategoryRepositoryInterface;
 use App\Interfaces\ResidentRepositoryInterface;
 use App\Http\Requests\StoreReportRequest;
 use App\Http\Requests\UpdateReportRequest;
+use App\Models\Rt;
+use App\Models\Rw;
 use App\Traits\FileUploadTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -35,10 +37,22 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $rwId = $user->hasRole('admin') ? $user->rw_id : null;
-        $reports = $this->reportRepository->getAllReportsForAdmin($request, $rwId);
+        $rws = [];
+        $rts = [];
+        $reports = [];
 
-        return view('pages.admin.report.index', compact('reports'));
+        $filterRwId = $request->input('rw');
+        $filterRtId = $request->input('rt');
+
+        if ($user->hasRole('super-admin')) {
+            $reports = $this->reportRepository->getAllReportsForAdmin($request, $filterRwId, $filterRtId);
+            $rws = Rw::orderBy('number')->get();
+        } else {
+            $reports = $this->reportRepository->getAllReportsForAdmin($request, $user->rw_id, $filterRtId);
+            $rts = Rt::where('rw_id', $user->rw_id)->orderBy('number')->get();
+        }
+
+        return view('pages.admin.report.index', compact('reports', 'rws', 'rts'));
     }
 
     public function create()

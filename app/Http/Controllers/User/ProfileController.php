@@ -30,7 +30,7 @@ class ProfileController extends Controller
 
     public function index()
     {
-        $user = Auth::user();
+        $user = Auth::user()->load('rw', 'resident.rt', 'resident.rw');
 
         if ($user->hasAnyRole(['admin', 'super-admin'])) {
             return view('pages.admin.profile', ['user' => $user]);
@@ -39,6 +39,7 @@ class ProfileController extends Controller
         $stats = $this->reportRepository->countStatusesByResidentId($user->resident->id);
 
         return view('pages.app.profile', [
+            'user' => $user,
             'activeReportsCount' => $stats['active'],
             'completedReportsCount' => $stats['completed'],
             'rejectedReportsCount' => $stats['rejected'],

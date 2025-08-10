@@ -226,9 +226,28 @@
         </div>
     </div>
     @endrole
+
+    @role('admin')
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Total Laporan per RT di RW {{ $rwNumber }}</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-bar">
+                        <canvas id="rtReportsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endrole
 @endsection
 
 @section('scripts')
+    <script src="{{ asset('assets/admin/js/demo/chart-area-demo.js') }}"></script>
+    <script src="{{ asset('assets/admin/js/demo/chart-pie-demo.js') }}"></script>
     <script>
         var ctxBar = document.getElementById("dailyReportsChart");
         var dailyReportsChart = new Chart(ctxBar, {
@@ -337,6 +356,57 @@
                     xAxes: [{
                         gridLines: { display: false, drawBorder: false },
                         ticks: { maxTicksLimit: 10 }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            maxTicksLimit: 5,
+                            padding: 10,
+                            beginAtZero: true,
+                            callback: function(value) { if (Number.isInteger(value)) { return value; } },
+                        },
+                        gridLines: {
+                            color: "rgb(234, 236, 244)",
+                            zeroLineColor: "rgb(234, 236, 244)",
+                            drawBorder: false,
+                            borderDash: [2],
+                            zeroLineBorderDash: [2]
+                        }
+                    }],
+                },
+                legend: { display: false },
+                tooltips: {
+                    intersect: false,
+                    mode: 'index',
+                }
+            }
+        });
+    </script>
+    @endrole
+
+    @role('admin')
+    <script>
+        var ctxRtBar = document.getElementById("rtReportsChart");
+        var rtReportsChart = new Chart(ctxRtBar, {
+            type: 'bar',
+            data: {
+                labels: {!! json_encode($rtLabels) !!},
+                datasets: [{
+                    label: "Jumlah Laporan",
+                    backgroundColor: "#f6c23e",
+                    hoverBackgroundColor: "#dda20a",
+                    borderColor: "#f6c23e",
+                    data: {!! json_encode($rtData) !!},
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+                layout: {
+                    padding: { left: 10, right: 25, top: 25, bottom: 0 }
+                },
+                scales: {
+                    xAxes: [{
+                        gridLines: { display: false, drawBorder: false },
+                        ticks: { maxTicksLimit: 15 }
                     }],
                     yAxes: [{
                         ticks: {

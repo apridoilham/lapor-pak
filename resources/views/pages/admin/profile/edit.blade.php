@@ -23,6 +23,15 @@
                     <input type="email" class="form-control" id="email" name="email" value="{{ $user->email }}" disabled>
                     <small class="form-text text-muted">Email tidak dapat diubah.</small>
                 </div>
+
+                @if ($user->rw)
+                <div class="form-group">
+                    <label for="rw">Wilayah RW</label>
+                    <input type="text" class="form-control" id="rw" name="rw" value="RW {{ $user->rw->number }}" disabled>
+                    <small class="form-text text-muted">Wilayah RW tidak dapat diubah.</small>
+                </div>
+                @endif
+                
                 <hr>
                 <p class="text-muted">Kosongkan password jika tidak ingin mengubahnya.</p>
                 <div class="form-group">

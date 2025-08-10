@@ -16,7 +16,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="start_date">Dari Tanggal</label>
-                            <input type="date" name="start_date" id="start_date" class="form-control" value="{{ old('start_date') }}" required>
+                            <input type="date" name="start_date" id="start_date" class="form-control" value="{{ old('start_date') }}">
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -27,7 +27,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="form-group">
                             <label for="resident_id">Pelapor</label>
                             <select name="resident_id" id="resident_id" class="form-control">
@@ -40,8 +40,8 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
+                    <div class="col-md-6">
+                         <div class="form-group">
                             <label for="report_category_id">Kategori</label>
                             <select name="report_category_id" id="report_category_id" class="form-control">
                                 <option value="">Semua Kategori</option>
@@ -53,21 +53,77 @@
                             </select>
                         </div>
                     </div>
+                </div>
+                
+                @role('super-admin')
+                <div class="row">
                     <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="rw_id">Wilayah RW</label>
+                            <select name="rw_id" id="rw_id" class="form-control">
+                                <option value="">Semua RW</option>
+                                @foreach($rws as $rw)
+                                    <option value="{{ $rw->id }}" {{ old('rw_id') == $rw->id ? 'selected' : '' }}>
+                                        RW {{ $rw->number }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                     <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="rt_id">Wilayah RT</label>
+                            <select name="rt_id" id="rt_id" class="form-control" disabled>
+                                <option value="">Pilih RW terlebih dahulu</option>
+                            </select>
+                        </div>
+                    </div>
+                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="status">Status</label>
                             <select name="status" id="status" class="form-control">
                                 <option value="">Semua Status</option>
                                 @foreach ($statuses as $status)
                                     <option value="{{ $status->value }}" {{ old('status') == $status->value ? 'selected' : '' }}>
-                                        {{ $status->value }}
+                                        {{ $status->label() }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-success" id="export-btn" disabled>
+                @else
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="rt_id">Wilayah RT</label>
+                            <select name="rt_id" id="rt_id" class="form-control">
+                                <option value="">Semua RT</option>
+                                @foreach($rts as $rt)
+                                    <option value="{{ $rt->id }}" {{ old('rt_id') == $rt->id ? 'selected' : '' }}>
+                                        RT {{ $rt->number }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                     <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select name="status" id="status" class="form-control">
+                                <option value="">Semua Status</option>
+                                @foreach ($statuses as $status)
+                                    <option value="{{ $status->value }}" {{ old('status') == $status->value ? 'selected' : '' }}>
+                                        {{ $status->label() }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                @endrole
+                
+                <button type="submit" class="btn btn-success" id="export-btn">
                     <i class="fa fa-file-excel"></i>
                     <span id="export-btn-text">Ekspor ke Excel</span>
                 </button>
@@ -78,48 +134,46 @@
 
 @section('scripts')
     @include('sweetalert::alert')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    {{-- ▼▼▼ KODE JAVASCRIPT LENGKAP YANG SUDAH DIPERBAIKI ▼▼▼ --}}
+    
+    @role('super-admin')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('export-form');
-            const exportButton = document.getElementById('export-btn');
-            const buttonText = document.getElementById('export-btn-text');
-            const startDateInput = document.getElementById('start_date');
+            const rwSelect = document.getElementById('rw_id');
+            const rtSelect = document.getElementById('rt_id');
+            const currentRtId = "{{ old('rt_id') }}";
 
-            function toggleExportButtonState() {
-                if (startDateInput.value) {
-                    exportButton.disabled = false;
-                } else {
-                    exportButton.disabled = true;
+            function fetchRts(rwId, selectedRtId = null) {
+                if (!rwId) {
+                    rtSelect.innerHTML = '<option value="">Pilih RW terlebih dahulu</option>';
+                    rtSelect.disabled = true;
+                    return;
                 }
+
+                fetch(`/api/get-rts-by-rw/${rwId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        rtSelect.innerHTML = '<option value="">Semua RT</option>';
+                        data.forEach(rt => {
+                            const option = document.createElement('option');
+                            option.value = rt.id;
+                            option.textContent = `RT ${rt.number}`;
+                            if (selectedRtId && rt.id == selectedRtId) {
+                                option.selected = true;
+                            }
+                            rtSelect.appendChild(option);
+                        });
+                        rtSelect.disabled = false;
+                    });
             }
 
-            startDateInput.addEventListener('change', toggleExportButtonState);
-            toggleExportButtonState();
-
-            form.addEventListener('submit', function(event) {
-                // Tampilkan status loading
-                buttonText.textContent = 'Mempersiapkan file...';
-                exportButton.disabled = true;
-
-                // Trik: Gunakan setTimeout untuk memberi waktu pada browser memulai unduhan
-                // sebelum menampilkan notifikasi dan mengaktifkan kembali tombolnya.
-                setTimeout(function() {
-                    Swal.fire({
-                        title: 'Berhasil!',
-                        text: 'File Excel Anda telah diunduh.',
-                        icon: 'success',
-                        timer: 2000, // Notifikasi akan hilang setelah 2 detik
-                        showConfirmButton: false
-                    });
-
-                    // Kembalikan tombol ke keadaan normal
-                    buttonText.textContent = 'Ekspor ke Excel';
-                    toggleExportButtonState();
-                }, 1500); // Jeda 1.5 detik
+            rwSelect.addEventListener('change', function() {
+                fetchRts(this.value);
             });
+
+            if (rwSelect.value) {
+                fetchRts(rwSelect.value, currentRtId);
+            }
         });
     </script>
+    @endrole
 @endsection

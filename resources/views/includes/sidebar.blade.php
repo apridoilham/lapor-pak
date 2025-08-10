@@ -35,7 +35,7 @@
     </li>
     @endrole
 
-    <li class="nav-item {{ request()->routeIs('admin.report.*') ? 'active' : '' }}">
+    <li class="nav-item {{ (request()->routeIs('admin.report.*') && !request()->routeIs('admin.report.export.*')) ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('admin.report.index') }}">
             <i class="fas fa-fw fa-file-alt"></i>
             <span>Data Laporan</span></a>

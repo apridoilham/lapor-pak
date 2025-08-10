@@ -43,23 +43,17 @@ class ReportRepository implements ReportRepositoryInterface
         });
     }
 
-    public function getAllReportsForAdmin(Request $request, int $rwId = null)
+    public function getAllReportsForAdmin(Request $request, int $rwId = null, int $rtId = null)
     {
         $query = Report::with('resident.user', 'reportCategory', 'latestStatus');
 
-        if ($rwId) {
+        if ($rtId) {
+            $query->whereHas('resident', function ($q) use ($rtId) {
+                $q->where('rt_id', $rtId);
+            });
+        } elseif ($rwId) {
             $query->whereHas('resident', function ($q) use ($rwId) {
                 $q->where('rw_id', $rwId);
-            });
-        }
-
-        if ($search = $request->input('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('code', 'like', "%{$search}%")
-                    ->orWhereHas('resident.user', function ($userQuery) use ($search) {
-                        $userQuery->where('name', 'like', "%{$search}%");
-                    });
             });
         }
 
@@ -206,22 +200,28 @@ class ReportRepository implements ReportRepositoryInterface
         if (!empty($filters['start_date'])) {
             $query->whereDate('created_at', '>=', $filters['start_date']);
         }
-
         if (!empty($filters['end_date'])) {
             $query->whereDate('created_at', '<=', $filters['end_date']);
         }
-
         if (!empty($filters['resident_id'])) {
             $query->where('resident_id', $filters['resident_id']);
         }
-
         if (!empty($filters['report_category_id'])) {
             $query->where('report_category_id', $filters['report_category_id']);
         }
-
         if (!empty($filters['status'])) {
             $query->whereHas('latestStatus', function ($q) use ($filters) {
                 $q->where('status', $filters['status']);
+            });
+        }
+        if (!empty($filters['rw_id'])) {
+            $query->whereHas('resident', function ($q) use ($filters) {
+                $q->where('rw_id', $filters['rw_id']);
+            });
+        }
+        if (!empty($filters['rt_id'])) {
+            $query->whereHas('resident', function ($q) use ($filters) {
+                $q->where('rt_id', $filters['rt_id']);
             });
         }
 
@@ -304,5 +304,17 @@ class ReportRepository implements ReportRepositoryInterface
         }
 
         return $counts;
+    }
+    
+    public function getReportCountsByRt(int $rwId)
+    {
+        return Report::query()
+            ->join('residents', 'reports.resident_id', '=', 'residents.id')
+            ->join('rts', 'residents.rt_id', '=', 'rts.id')
+            ->where('residents.rw_id', $rwId)
+            ->select('rts.number as rt_number', DB::raw('count(*) as count'))
+            ->groupBy('rts.number')
+            ->orderBy('rts.number')
+            ->get();
     }
 }

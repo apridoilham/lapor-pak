@@ -10,7 +10,6 @@
             <h6 class="m-0 font-weight-bold text-primary">Form Edit Admin</h6>
         </div>
         <div class="card-body">
-            {{-- PERUBAHAN: Menambahkan id="edit-admin-form" --}}
             <form action="{{ route('admin.admin-user.update', $admin->id) }}" method="POST" id="edit-admin-form">
                 @csrf
                 @method('PUT')
@@ -24,6 +23,16 @@
                     <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email', $admin->email) }}" required>
                     @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
+                <div class="form-group">
+                    <label for="rw_id">Wilayah RW</label>
+                    <select name="rw_id" id="rw_id" class="form-control @error('rw_id') is-invalid @enderror" required>
+                        <option value="" disabled>Pilih RW untuk admin ini</option>
+                        @foreach ($rws as $rw)
+                            <option value="{{ $rw->id }}" {{ old('rw_id', $admin->rw_id) == $rw->id ? 'selected' : '' }}>RW {{ $rw->number }}</option>
+                        @endforeach
+                    </select>
+                     @error('rw_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
                 <hr>
                 <p class="text-muted">Kosongkan password jika tidak ingin mengubahnya.</p>
                 <div class="form-group">
@@ -36,49 +45,8 @@
                     <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" autocomplete="new-password">
                 </div>
                 
-                {{-- PERUBAHAN: Menambahkan id dan atribut disabled --}}
-                <button type="submit" class="btn btn-primary" id="update-btn" disabled>Update</button>
+                <button type="submit" class="btn btn-primary">Update</button>
             </form>
         </div>
     </div>
-@endsection
-
-@section('scripts')
-    {{-- ▼▼▼ TAMBAHKAN SCRIPT BARU DI SINI ▼▼▼ --}}
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.getElementById('edit-admin-form');
-            const updateButton = document.getElementById('update-btn');
-            
-            const nameInput = document.getElementById('name');
-            const emailInput = document.getElementById('email');
-            const passwordInput = document.getElementById('password');
-            const passwordConfirmInput = document.getElementById('password_confirmation');
-
-            // Simpan nilai awal form
-            const initialValues = {
-                name: nameInput.value,
-                email: emailInput.value,
-            };
-
-            // Fungsi untuk memeriksa apakah ada perubahan
-            function checkForChanges() {
-                const nameChanged = nameInput.value !== initialValues.name;
-                const emailChanged = emailInput.value !== initialValues.email;
-                const passwordFilled = passwordInput.value.length > 0;
-
-                if (nameChanged || emailChanged || passwordFilled) {
-                    updateButton.disabled = false;
-                } else {
-                    updateButton.disabled = true;
-                }
-            }
-
-            // Tambahkan event listener ke setiap input yang relevan
-            const fieldsToMonitor = [nameInput, emailInput, passwordInput, passwordConfirmInput];
-            fieldsToMonitor.forEach(field => {
-                field.addEventListener('input', checkForChanges);
-            });
-        });
-    </script>
 @endsection

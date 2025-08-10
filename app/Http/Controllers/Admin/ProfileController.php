@@ -18,19 +18,13 @@ class ProfileController extends Controller
         $this->adminRepository = $adminRepository;
     }
 
-    /**
-     * Menampilkan form untuk mengedit profil admin yang sedang login.
-     */
     public function edit()
     {
         return view('pages.admin.profile.edit', [
-            'user' => Auth::user(),
+            'user' => Auth::user()->load('rw'),
         ]);
     }
 
-    /**
-     * Menyimpan perubahan pada profil admin yang sedang login.
-     */
     public function update(UpdateAdminProfileRequest $request)
     {
         $this->adminRepository->updateAdmin($request->validated(), Auth::id());

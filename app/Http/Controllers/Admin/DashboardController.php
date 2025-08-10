@@ -53,6 +53,11 @@ class DashboardController extends Controller
         $data = $this->getCommonDashboardData($rwId);
         $rw = Rw::find($rwId);
         $data['rwNumber'] = $rw ? $rw->number : '';
+
+        $reportsByRt = $this->reportRepository->getReportCountsByRt($rwId);
+        $data['rtLabels'] = $reportsByRt->pluck('rt_number')->map(fn($num) => "RT {$num}")->toArray();
+        $data['rtData'] = $reportsByRt->pluck('count')->toArray();
+
         return $data;
     }
 

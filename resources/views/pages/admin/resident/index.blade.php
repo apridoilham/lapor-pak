@@ -45,6 +45,40 @@
         </div>
     </div>
     @endrole
+    
+    @role('admin')
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Filter Data Pelapor</h6>
+        </div>
+        <div class="card-body">
+            <form action="{{ route('admin.resident.index') }}" method="GET">
+                <div class="row align-items-end">
+                     <div class="col-md-8">
+                        <div class="form-group mb-0">
+                            <label for="rt_id">Filter berdasarkan RT</label>
+                            <select name="rt" id="rt_id" class="form-control">
+                                <option value="">Semua RT</option>
+                                @foreach ($rts as $rt)
+                                     <option value="{{ $rt->id }}" {{ request('rt') == $rt->id ? 'selected' : '' }}>
+                                        RT {{ $rt->number }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">Filter</button>
+                    </div>
+                     <div class="col-md-2">
+                        <a href="{{ route('admin.resident.index') }}" class="btn btn-secondary w-100">Reset</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    @endrole
+
 
     <div class="card shadow mb-4">
         <div class="card-header py-3">
