@@ -42,7 +42,7 @@ class ReportController extends Controller
 
     public function index(Request $request)
     {
-        $reports = $this->reportRepository->getAllReports($request);
+        $reports = $this->reportRepository->getAllReportsForUser($request);
         $categories = $this->reportCategoryRepository->getAllReportCategories();
         $rws = Rw::orderBy('number')->get();
 
@@ -82,12 +82,17 @@ class ReportController extends Controller
 
     public function store(StoreReportRequest $request)
     {
-        $this->reportService->createReportForUser(
+        $report = $this->reportService->createReportForUser(
             $request->validated(),
             $request->user()
         );
 
-        return redirect()->route('report.success');
+        return redirect()->route('report.summary', ['report' => $report->code]);
+    }
+
+    public function summary(Report $report)
+    {
+        return view('pages.app.report.summary', compact('report'));
     }
 
     public function success()

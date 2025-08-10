@@ -28,6 +28,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/create-report', [UserReportController::class, 'create'])->name('report.create');
     Route::post('/create-report', [UserReportController::class, 'store'])->name('report.store');
     Route::get('/report-success', [UserReportController::class, 'success'])->name('report.success');
+    Route::get('/report-summary/{report:code}', [UserReportController::class, 'summary'])->name('report.summary');
     Route::get('/my-reports', [UserReportController::class, 'myReport'])->name('report.myreport');
     Route::get('/my-reports/{report}/edit', [UserReportController::class, 'edit'])->name('report.edit');
     Route::put('/my-reports/{report}', [UserReportController::class, 'update'])->name('report.update');
