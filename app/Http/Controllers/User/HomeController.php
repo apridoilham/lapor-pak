@@ -5,6 +5,8 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Interfaces\ReportCategoryRepositoryInterface;
 use App\Interfaces\ReportRepositoryInterface;
+use App\Models\Rt;
+use App\Models\Rw;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -22,11 +24,16 @@ class HomeController extends Controller
         $this->reportCategoryRepository = $reportCategoryRepository;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $categories = $this->reportCategoryRepository->getAllReportCategories();
-        $reports = $this->reportRepository->getLatesReports();
+        $rwId = $request->input('rw');
+        $rtId = $request->input('rt');
 
-        return view('pages.app.home', compact('categories', 'reports'));
+        $categories = $this->reportCategoryRepository->getAllReportCategories();
+        $reports = $this->reportRepository->getLatesReports($rwId, $rtId);
+        $rws = Rw::orderBy('number')->get();
+        $selectedRt = $rtId ? Rt::find($rtId) : null;
+
+        return view('pages.app.home', compact('categories', 'reports', 'rws', 'selectedRt'));
     }
 }

@@ -8,7 +8,7 @@ interface ReportRepositoryInterface
 {
     public function getAllReports(Request $request);
 
-    public function getLatesReports();
+    public function getLatesReports($rwId = null, $rtId = null);
 
     public function getReportByResidentId(int $residentId, ?string $status);
     
@@ -26,5 +26,5 @@ interface ReportRepositoryInterface
 
     public function countStatusesByResidentId(int $residentId): array;
 
-    public function getFilteredReports(array $filters); // <-- Method Baru
+    public function getFilteredReports(array $filters);
 }

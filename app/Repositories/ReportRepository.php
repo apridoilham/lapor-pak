@@ -17,19 +17,31 @@ class ReportRepository implements ReportRepositoryInterface
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%")
-                  ->orWhereHas('resident.user', function ($userQuery) use ($search) {
-                      $userQuery->where('name', 'like', "%{$search}%");
-                  });
+                    ->orWhere('code', 'like', "%{$search}%")
+                    ->orWhereHas('resident.user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
         return $query->latest()->get();
     }
 
-    public function getLatesReports()
+    public function getLatesReports($rwId = null, $rtId = null)
     {
-        return Report::with('resident.user', 'reportCategory', 'latestStatus')->latest()->take(5)->get();
+        $query = Report::with('resident.user', 'reportCategory', 'latestStatus');
+
+        if ($rwId || $rtId) {
+            $query->whereHas('resident', function ($q) use ($rwId, $rtId) {
+                if ($rtId) {
+                    $q->where('rt_id', $rtId);
+                } elseif ($rwId) {
+                    $q->where('rw_id', $rwId);
+                }
+            });
+        }
+
+        return $query->latest()->take(5)->get();
     }
     
     public function getReportByResidentId(int $residentId, ?string $status)
@@ -85,9 +97,6 @@ class ReportRepository implements ReportRepositoryInterface
         return Report::findOrFail($id)->delete();
     }
 
-    /**
-     * ▼▼▼ KEMBALIKAN LOGIKA DI DALAM METHOD INI ▼▼▼
-     */
     public function countStatusesByResidentId(int $residentId): array
     {
         $active = Report::where('resident_id', $residentId)
