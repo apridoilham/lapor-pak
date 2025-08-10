@@ -21,17 +21,13 @@
 
         <div class="mb-3">
             <label for="image" class="form-label fw-bold">Bukti Laporan</label>
-            {{-- Input file yang tersembunyi --}}
             <input type="file" class="form-control @error('image') is-invalid @enderror" id="image" name="image" style="display: none">
             
-            {{-- Container untuk pratinjau dan placeholder --}}
             <div id="image-preview-container">
-                {{-- Placeholder yang tampil secara default --}}
                 <div id="image-placeholder" class="image-placeholder-box">
                     <i class="fa-solid fa-image fa-2x text-secondary"></i>
                     <p class="text-secondary small mt-2">Gambar pratinjau akan tampil di sini</p>
                 </div>
-                {{-- Pratinjau gambar yang awalnya tersembunyi --}}
                 <img alt="Pratinjau Laporan" id="image-preview" class="img-fluid rounded-3 mb-3 border" style="display: none; width: 100%; height: 200px; object-fit: cover;">
             </div>
             
@@ -74,6 +70,19 @@
             @error('address')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
 
+        <div class="mb-3">
+            <label class="form-label fw-bold">Tampilkan Laporan Kepada</label>
+            @foreach(\App\Enums\ReportVisibilityEnum::cases() as $visibility)
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="visibility" id="visibility-{{ $visibility->value }}" value="{{ $visibility->value }}" {{ old('visibility', 'public') == $visibility->value ? 'checked' : '' }}>
+                    <label class="form-check-label" for="visibility-{{ $visibility->value }}">
+                        {{ $visibility->label() }}
+                    </label>
+                </div>
+            @endforeach
+             @error('visibility')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+        </div>
+
         <div class="d-grid mt-4">
             <button class="btn btn-primary py-2" type="submit" color="primary">
                 Laporkan
@@ -83,11 +92,9 @@
 @endsection
 
 @section('scripts')
-    {{-- Script lama untuk Leaflet.js tidak perlu diubah, jadi kita sisipkan di sini --}}
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="{{ asset('assets/app/js/report.js') }}"></script>
     
-    {{-- Skrip baru untuk memperbaiki pratinjau gambar --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const imageBase64 = localStorage.getItem('image');
@@ -96,7 +103,6 @@
             const imageInput = document.getElementById('image');
 
             if (imageBase64) {
-                // Fungsi untuk mengubah base64 menjadi file
                 function base64ToBlob(base64, mime) {
                     const byteString = atob(base64.split(',')[1]);
                     const ab = new ArrayBuffer(byteString.length);
@@ -107,22 +113,16 @@
                     return new Blob([ab], { type: mime });
                 }
 
-                // Buat file dari base64
                 const blob = base64ToBlob(imageBase64, 'image/jpeg');
                 const file = new File([blob], 'captured_image.jpg', { type: 'image/jpeg' });
 
-                // Masukkan file ke dalam input file
                 const dataTransfer = new DataTransfer();
                 dataTransfer.items.add(file);
                 imageInput.files = dataTransfer.files;
 
-                // Tampilkan pratinjau gambar
                 imagePreview.src = URL.createObjectURL(file);
                 imagePreview.style.display = 'block';
                 imagePlaceholder.style.display = 'none';
-
-                // Hapus gambar dari localStorage agar tidak digunakan lagi
-                // localStorage.removeItem('image');
             }
         });
     </script>

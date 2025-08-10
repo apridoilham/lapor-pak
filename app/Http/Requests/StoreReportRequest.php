@@ -2,27 +2,23 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\ReportVisibilityEnum;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreReportRequest extends FormRequest
 {
-
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         $rules = [
             'report_category_id' => 'required|exists:report_categories,id',
             'title' => 'required|string|max:255',
-            // ▼▼▼ PERUBAHAN DI SINI ▼▼▼
-            'description' => 'required|string|max:5000', // Batasan 5000 karakter
-            'image' => 'required|file|image|max:2048', // Tambahkan validasi gambar & ukuran
-            'latitude' => 'required|numeric|between:-90,90', // Harus angka antara -90 dan 90
-            'longitude' => 'required|numeric|between:-180,180', // Harus angka antara -180 dan 180
-            'address' => 'required|string|max:500' // Batasan 500 karakter
+            'description' => 'required|string|max:5000',
+            'image' => 'required|file|image|max:2048',
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+            'address' => 'required|string|max:500',
+            'visibility' => ['required', Rule::enum(ReportVisibilityEnum::class)],
         ];
 
         if (auth()->user()->hasRole('admin')) {

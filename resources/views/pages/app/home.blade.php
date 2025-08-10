@@ -47,7 +47,7 @@
                 Lihat semua
             </a>
         </div>
-
+        
         @if (request('rw'))
             @php
                 $selectedRw = $rws->firstWhere('id', request('rw'));
@@ -102,10 +102,22 @@
                 <div class="d-flex flex-column justify-content-center align-items-center text-center" style="margin-top: 50px;">
                     <div id="lottie-empty-home" style="width: 250px; height: 250px;"></div>
                     <h5 class="mt-3 fw-bold">Belum Ada Pengaduan</h5>
-                    <p class="text-secondary px-4">Tidak ada laporan yang sesuai dengan filter Anda, atau belum ada laporan sama sekali.</p>
-                    <a href="{{ route('home') }}" class="btn btn-secondary rounded-pill py-2 px-4 mt-2">
-                        Hapus Filter
-                    </a>
+                    
+                    @if (request('rw') || request('rt'))
+                        <p class="text-secondary px-4">
+                            Tidak ada laporan yang ditemukan sesuai dengan filter yang Anda pilih.
+                        </p>
+                        <a href="{{ route('home') }}" class="btn btn-secondary rounded-pill py-2 px-4 mt-2">
+                            Hapus Filter
+                        </a>
+                    @else
+                        <p class="text-secondary px-4">
+                            Jadilah yang pertama melaporkan masalah di lingkunganmu!
+                        </p>
+                        <a href="{{ route('report.take') }}" class="btn btn-primary rounded-pill py-2 px-4 mt-3">
+                            Buat Laporan Sekarang
+                        </a>
+                    @endif
                 </div>
             @endforelse
         </div>

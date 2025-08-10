@@ -8,7 +8,7 @@ interface ReportRepositoryInterface
 {
     public function getAllReports(Request $request);
 
-    public function getLatesReports($rwId = null, $rtId = null);
+    public function getLatesReports(Request $request = null);
 
     public function getReportByResidentId(int $residentId, ?string $status);
     

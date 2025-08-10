@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ReportVisibilityEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,7 +24,15 @@ class Report extends Model
         'latitude',
         'longitude',
         'address',
+        'visibility',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'visibility' => ReportVisibilityEnum::class,
+        ];
+    }
 
     public function resident(): BelongsTo
     {

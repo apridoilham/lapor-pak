@@ -26,12 +26,11 @@ class HomeController extends Controller
 
     public function index(Request $request)
     {
-        $rwId = $request->input('rw');
-        $rtId = $request->input('rt');
-
         $categories = $this->reportCategoryRepository->getAllReportCategories();
-        $reports = $this->reportRepository->getLatesReports($rwId, $rtId);
+        $reports = $this->reportRepository->getLatesReports($request);
         $rws = Rw::orderBy('number')->get();
+        
+        $rtId = $request->input('rt');
         $selectedRt = $rtId ? Rt::find($rtId) : null;
 
         return view('pages.app.home', compact('categories', 'reports', 'rws', 'selectedRt'));

@@ -3,16 +3,50 @@
 namespace App\Repositories;
 
 use App\Enums\ReportStatusEnum;
+use App\Enums\ReportVisibilityEnum;
 use App\Interfaces\ReportRepositoryInterface;
 use App\Models\Report;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ReportRepository implements ReportRepositoryInterface
 {
+    private function applyVisibilityFilter(Builder $query): Builder
+    {
+        $user = Auth::user();
+
+        return $query->where(function ($q) use ($user) {
+            $q->where('visibility', ReportVisibilityEnum::PUBLIC);
+
+            if ($user && $user->resident) {
+                $q->orWhere(function ($q2) use ($user) {
+                    $q2->where('visibility', ReportVisibilityEnum::RW)
+                        ->whereHas('resident', function ($q3) use ($user) {
+                            $q3->where('rw_id', $user->resident->rw_id);
+                        });
+                });
+                $q->orWhere(function ($q2) use ($user) {
+                    $q2->where('visibility', ReportVisibilityEnum::RT)
+                        ->whereHas('resident', function ($q3) use ($user) {
+                            $q3->where('rt_id', $user->resident->rt_id);
+                        });
+                });
+                $q->orWhere(function ($q2) use ($user) {
+                    $q2->where('visibility', ReportVisibilityEnum::PRIVATE)
+                       ->where('resident_id', $user->resident->id);
+                });
+            }
+        });
+    }
+
     public function getAllReports(Request $request)
     {
         $query = Report::with('resident.user', 'reportCategory', 'latestStatus');
+
+        if (!Auth::user() || !Auth::user()->hasAnyRole(['admin', 'super-admin'])) {
+            $this->applyVisibilityFilter($query);
+        }
 
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
@@ -27,20 +61,27 @@ class ReportRepository implements ReportRepositoryInterface
         return $query->latest()->get();
     }
 
-    public function getLatesReports($rwId = null, $rtId = null)
+    public function getLatesReports(Request $request = null)
     {
         $query = Report::with('resident.user', 'reportCategory', 'latestStatus');
+        
+        if ($request) {
+            $this->applyVisibilityFilter($query);
 
-        if ($rwId || $rtId) {
-            $query->whereHas('resident', function ($q) use ($rwId, $rtId) {
-                if ($rtId) {
-                    $q->where('rt_id', $rtId);
-                } elseif ($rwId) {
-                    $q->where('rw_id', $rwId);
-                }
-            });
+            $rwId = $request->input('rw');
+            $rtId = $request->input('rt');
+
+            if ($rwId || $rtId) {
+                $query->whereHas('resident', function ($q) use ($rwId, $rtId) {
+                    if ($rtId) {
+                        $q->where('rt_id', $rtId);
+                    } elseif ($rwId) {
+                        $q->where('rw_id', $rwId);
+                    }
+                });
+            }
         }
-
+        
         return $query->latest()->take(5)->get();
     }
     
@@ -69,10 +110,14 @@ class ReportRepository implements ReportRepositoryInterface
 
     public function getReportsByCategory(string $categoryName)
     {
-        return Report::with('resident', 'reportCategory', 'latestStatus')
+        $query = Report::with('resident.user', 'reportCategory', 'latestStatus')
             ->whereHas('reportCategory', function (Builder $query) use ($categoryName) {
                 $query->where('name', $categoryName);
-            })->latest()->get();
+            });
+            
+        $this->applyVisibilityFilter($query);
+        
+        return $query->latest()->get();
     }
 
     public function createReport(array $data)
