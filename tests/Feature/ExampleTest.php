@@ -2,26 +2,30 @@
 
 namespace Tests\Feature;
 
-use App\Models\User; // <-- DITAMBAHKAN
-use Illuminate\Foundation\Testing\RefreshDatabase; // <-- DITAMBAHKAN (jika belum ada)
+use App\Models\User;
+use Database\Seeders\RolePermissionSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
-    use RefreshDatabase; // <-- DITAMBAHKAN (jika belum ada)
+    use RefreshDatabase;
 
-    /**
-     * A basic test example.
-     */
     public function test_the_application_returns_a_successful_response(): void
     {
-        // 1. Buat user baru untuk tes
+        $this->seed(RolePermissionSeeder::class);
+        
         $user = User::factory()->create();
-
-        // 2. Lakukan request sebagai user yang sudah login dan akses halaman utama
+        $user->assignRole('resident');
+        $user->resident()->create([
+            'avatar' => 'fake-avatar.jpg',
+            'rt_id' => null,
+            'rw_id' => null,
+            'address' => 'Alamat tidak diisi',
+        ]);
+        
         $response = $this->actingAs($user)->get('/');
 
-        // 3. Sekarang tes akan mengharapkan status 200 dan berhasil
         $response->assertStatus(200);
     }
 }

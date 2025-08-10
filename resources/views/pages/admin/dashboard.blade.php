@@ -5,7 +5,6 @@
 @section('content')
     <h1 class="h3 mb-4 text-gray-800">Dashboard</h1>
 
-    {{-- ▼▼▼ KEMBALIKAN BLOK KARTU STATISTIK DI SINI ▼▼▼ --}}
     <div class="row">
         <div class="col-xl-4 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
@@ -55,7 +54,6 @@
             </div>
         </div>
     </div>
-    {{-- ▲▲▲ AKHIR DARI BLOK KARTU STATISTIK ▲▲▲ --}}
 
     <div class="row">
         <div class="col-lg-12">
@@ -142,7 +140,6 @@
 @endsection
 
 @section('scripts')
-    {{-- Skrip untuk Grafik Batang (Baru) --}}
     <script>
         var ctxBar = document.getElementById("dailyReportsChart");
         var dailyReportsChart = new Chart(ctxBar, {
@@ -193,7 +190,6 @@
         });
     </script>
     
-    {{-- Skrip untuk Grafik Lingkaran (Sudah Ada) --}}
     <script>
         var ctxPie = document.getElementById("categoryPieChart");
         var categoryPieChart = new Chart(ctxPie, {

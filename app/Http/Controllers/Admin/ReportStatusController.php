@@ -6,12 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreReportStatusRequest;
 use App\Interfaces\ReportStatusRepositoryInterface;
 use App\Interfaces\ReportRepositoryInterface;
+use App\Traits\FileUploadTrait;
 use Illuminate\Http\Request;
 use App\Http\Requests\UpdateReportStatusRequest;
 use RealRashid\SweetAlert\Facades\Alert as Swal;
 
 class ReportStatusController extends Controller
 {
+    use FileUploadTrait;
+
     private ReportRepositoryInterface $reportRepository;
     private ReportStatusRepositoryInterface $reportStatusRepository;
 
@@ -26,7 +29,7 @@ class ReportStatusController extends Controller
 
     public function index()
     {
-        //
+        
     }
 
     public function create($reportId)
@@ -39,8 +42,8 @@ class ReportStatusController extends Controller
     {
         $data = $request->validated();
 
-        if($request->hasFile('image')){
-            $data['image'] = $request->file('image')->store('assets/report-status/image', 'public');
+        if ($path = $this->handleFileUpload($request, 'image', 'assets/report-status/image')) {
+            $data['image'] = $path;
         }
 
         $this->reportStatusRepository->createReportStatus($data);
@@ -52,7 +55,7 @@ class ReportStatusController extends Controller
 
     public function show(string $id)
     {
-        //
+        
     }
 
     public function edit(string $id)
@@ -66,8 +69,8 @@ class ReportStatusController extends Controller
     {
         $data = $request->validated();
 
-        if ($request->image) {
-            $data['image'] = $request->file('image')->store('assets/report-status/image', 'public');
+        if ($path = $this->handleFileUpload($request, 'image', 'assets/report-status/image')) {
+            $data['image'] = $path;
         }
 
         $this->reportStatusRepository->updateReportStatus($data, $id);

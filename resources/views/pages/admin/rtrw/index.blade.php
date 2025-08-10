@@ -49,7 +49,7 @@
                                 <form action="{{ route('admin.rtrw.destroy', $rw->id) }}" method="POST" class="delete-form">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm" data-confirm-text="Yakin ingin menghapus RW {{ $rw->number }} beserta seluruh RT di dalamnya?">
+                                    <button type="submit" class="btn btn-danger btn-sm" data-rw-number="{{ $rw->number }}">
                                         <i class="fa fa-trash"></i> Hapus RW
                                     </button>
                                 </form>
@@ -73,4 +73,35 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteForms = document.querySelectorAll('.delete-form');
+            deleteForms.forEach(form => {
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    const button = form.querySelector('button[type="submit"]');
+                    const rwNumber = button.dataset.rwNumber;
+                    
+                    Swal.fire({
+                        title: 'Apakah Anda yakin?',
+                        text: `Anda akan menghapus RW ${rwNumber} beserta seluruh data RT di dalamnya. Tindakan ini tidak dapat dibatalkan.`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Ya, hapus!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
 @endsection

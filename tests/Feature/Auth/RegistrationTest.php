@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\Rt;
+use App\Models\Rw;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -12,10 +14,16 @@ class RegistrationTest extends TestCase
 {
     use RefreshDatabase;
 
+    private Rw $rw;
+    private Rt $rt;
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->seed(RolePermissionSeeder::class);
+        
+        $this->rw = Rw::factory()->create(['number' => '001']);
+        $this->rt = Rt::factory()->create(['rw_id' => $this->rw->id, 'number' => '001']);
     }
 
     public function test_a_new_user_can_register(): void
@@ -28,6 +36,9 @@ class RegistrationTest extends TestCase
             'password' => 'password123',
             'password_confirmation' => 'password123',
             'avatar' => UploadedFile::fake()->image('avatar.jpg'),
+            'rw_id' => $this->rw->id,
+            'rt_id' => $this->rt->id,
+            'address' => 'Jl. Uji Coba No. 123',
         ]);
 
         $response->assertRedirect(route('login'));
@@ -38,6 +49,7 @@ class RegistrationTest extends TestCase
 
         $this->assertDatabaseHas('residents', [
             'user_id' => 1,
+            'address' => 'Jl. Uji Coba No. 123',
         ]);
 
         $this->assertCount(1, Storage::disk('public')->files('assets/avatar'));
@@ -51,6 +63,9 @@ class RegistrationTest extends TestCase
             'password' => 'password123',
             'password_confirmation' => 'passwordSALAH',
             'avatar' => UploadedFile::fake()->image('avatar.jpg'),
+            'rw_id' => $this->rw->id,
+            'rt_id' => $this->rt->id,
+            'address' => 'Jl. Uji Coba No. 123',
         ]);
 
         $response->assertSessionHasErrors('password');

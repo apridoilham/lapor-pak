@@ -3,6 +3,7 @@
 namespace Tests\Feature\Report;
 
 use App\Models\ReportCategory;
+use App\Models\Resident;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -24,7 +25,7 @@ class CreateReportTest extends TestCase
 
         $this->residentUser = User::factory()->create();
         $this->residentUser->assignRole('resident');
-        $this->residentUser->resident()->create(['avatar' => 'avatar.jpg']);
+        Resident::factory()->for($this->residentUser)->create();
 
         $this->category = ReportCategory::factory()->create();
     }

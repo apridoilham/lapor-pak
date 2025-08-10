@@ -4,6 +4,7 @@ namespace Tests\Feature\Report;
 
 use App\Models\Report;
 use App\Models\ReportCategory;
+use App\Models\Resident;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -25,11 +26,11 @@ class ViewReportTest extends TestCase
 
         $this->residentUser = User::factory()->create();
         $this->residentUser->assignRole('resident');
-        $this->residentUser->resident()->create(['avatar' => 'avatar.jpg']);
+        Resident::factory()->for($this->residentUser)->create();
 
         $this->otherUser = User::factory()->create();
         $this->otherUser->assignRole('resident');
-        $this->otherUser->resident()->create(['avatar' => 'avatar2.jpg']);
+        Resident::factory()->for($this->otherUser)->create();
 
         $this->category = ReportCategory::factory()->create();
 
@@ -38,11 +39,6 @@ class ViewReportTest extends TestCase
             'report_category_id' => $this->category->id,
         ]);
 
-        /**
-         * PERUBAHAN DI SINI:
-         * Tambahkan status awal 'delivered' ke laporan yang dibuat oleh factory,
-         * agar sesuai dengan logika baru di controller.
-         */
         $this->userReport->reportStatuses()->create([
             'status' => 'delivered',
             'description' => 'Laporan dibuat untuk testing.'

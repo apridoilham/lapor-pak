@@ -19,11 +19,9 @@ class DashboardTest extends TestCase
         parent::setUp();
         $this->seed(RolePermissionSeeder::class);
 
-        // Membuat Admin
         $this->adminUser = User::factory()->create();
         $this->adminUser->assignRole('admin');
 
-        // Membuat User Biasa (Resident)
         $this->residentUser = User::factory()->create();
         $this->residentUser->assignRole('resident');
     }
@@ -34,10 +32,7 @@ class DashboardTest extends TestCase
 
         $response->assertStatus(200);
 
-        // PERUBAHAN DI SINI:
-        // Kita menggunakan assertSee() untuk mencari teks mentah termasuk tag HTML-nya.
-        // Parameter 'false' berarti pencarian bersifat case-sensitive dan tidak meng-escape HTML.
-        $response->assertSee('<h1>Dashboard</h1>', false);
+        $response->assertSee('<h1 class="h3 mb-4 text-gray-800">Dashboard</h1>', false);
         $response->assertSee('Total Laporan');
     }
 
@@ -45,7 +40,6 @@ class DashboardTest extends TestCase
     {
         $response = $this->actingAs($this->residentUser)->get(route('admin.dashboard'));
 
-        // Harusnya mendapatkan status 403 (Forbidden) karena middleware 'role:admin'
         $response->assertStatus(403);
     }
 }

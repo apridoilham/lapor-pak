@@ -4,6 +4,7 @@ namespace Tests\Feature\Report;
 
 use App\Models\Report;
 use App\Models\ReportCategory;
+use App\Models\Resident;
 use App\Models\User;
 use Database\Seeders\AdminSeeder;
 use Database\Seeders\RolePermissionSeeder;
@@ -27,7 +28,7 @@ class UpdateReportTest extends TestCase
 
         $residentUser = User::factory()->create();
         $residentUser->assignRole('resident');
-        $residentUser->resident()->create(['avatar' => 'avatar.jpg']);
+        Resident::factory()->for($residentUser)->create();
 
         $category = ReportCategory::factory()->create();
 
