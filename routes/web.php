@@ -18,7 +18,7 @@ use App\Http\Controllers\User\ProfileController;
 use App\Http\Controllers\User\ReportController as UserReportController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [HomeController::class, 'index'])->name('home')->middleware('auth');
+Route::get('/', [HomeController::class, 'index'])->name('home')->middleware(['auth', 'role:resident']);
 Route::get('/reports', [UserReportController::class, 'index'])->name('report.index');
 Route::get('/report/{code}', [UserReportController::class, 'show'])->name('report.show');
 
