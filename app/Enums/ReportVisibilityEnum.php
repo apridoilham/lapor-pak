@@ -2,6 +2,9 @@
 
 namespace App\Enums;
 
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+
 enum ReportVisibilityEnum: string
 {
     case PUBLIC = 'public';
@@ -11,10 +14,14 @@ enum ReportVisibilityEnum: string
 
     public function label(): string
     {
+        $user = Auth::user();
+        $rwNumber = $user?->resident?->rw?->number;
+        $rtNumber = $user?->resident?->rt?->number;
+
         return match ($this) {
-            self::PUBLIC => 'Semua Orang (Publik)',
-            self::RW => 'Hanya sesama Warga RW',
-            self::RT => 'Hanya sesama Warga RT',
+            self::PUBLIC => 'Publik (Semua Orang)',
+            self::RW => $rwNumber ? "Hanya sesama Warga RW {$rwNumber}" : 'Hanya sesama Warga RW',
+            self::RT => $rtNumber ? "Hanya sesama Warga RT {$rtNumber}" : 'Hanya sesama Warga RT',
             self::PRIVATE => 'Hanya Saya (Private)',
         };
     }

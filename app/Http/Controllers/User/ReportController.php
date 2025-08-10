@@ -4,26 +4,38 @@ namespace App\Http\Controllers\User;
 
 use App\Enums\ReportStatusEnum;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CompleteReportRequest;
 use App\Http\Requests\StoreReportRequest;
+use App\Http\Requests\UpdateUserReportRequest;
 use App\Interfaces\ReportCategoryRepositoryInterface;
 use App\Interfaces\ReportRepositoryInterface;
+use App\Interfaces\ReportStatusRepositoryInterface;
+use App\Models\Report;
 use App\Services\ReportService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use RealRashid\SweetAlert\Facades\Alert as Swal;
+
 
 class ReportController extends Controller
 {
+    use AuthorizesRequests;
+
     private ReportRepositoryInterface $reportRepository;
     private ReportCategoryRepositoryInterface $reportCategoryRepository;
+    private ReportStatusRepositoryInterface $reportStatusRepository;
     private ReportService $reportService;
 
     public function __construct(
         ReportRepositoryInterface $reportRepository,
         ReportCategoryRepositoryInterface $reportCategoryRepository,
+        ReportStatusRepositoryInterface $reportStatusRepository,
         ReportService $reportService
     ) {
         $this->reportRepository = $reportRepository;
         $this->reportCategoryRepository = $reportCategoryRepository;
+        $this->reportStatusRepository = $reportStatusRepository;
         $this->reportService = $reportService;
     }
 
@@ -35,7 +47,6 @@ class ReportController extends Controller
             $reports = $this->reportRepository->getAllReports($request);
         }
 
-        // Ambil semua kategori untuk modal filter
         $categories = $this->reportCategoryRepository->getAllReportCategories();
 
         return view('pages.app.report.index', compact('reports', 'categories'));
@@ -85,5 +96,49 @@ class ReportController extends Controller
     public function success()
     {
         return view('pages.app.report.success');
+    }
+
+    public function edit(Report $report)
+    {
+        $this->authorize('update', $report);
+        $categories = $this->reportCategoryRepository->getAllReportCategories();
+        return view('pages.app.report.edit', compact('report', 'categories'));
+    }
+
+    public function update(UpdateUserReportRequest $request, Report $report)
+    {
+        $this->authorize('update', $report);
+        $this->reportRepository->updateReport($request->validated(), $report->id);
+        Swal::success('Berhasil', 'Laporan Anda telah berhasil diperbarui.');
+        return redirect()->route('report.myreport');
+    }
+
+    public function destroy(Report $report)
+    {
+        $this->authorize('delete', $report);
+        $this->reportRepository->deleteReport($report->id);
+        Swal::success('Berhasil', 'Laporan Anda telah berhasil dihapus.');
+        return redirect()->route('report.myreport');
+    }
+
+    public function showCompleteForm(Report $report)
+    {
+        $this->authorize('complete', $report);
+        return view('pages.app.report.complete', compact('report'));
+    }
+
+    public function complete(CompleteReportRequest $request, Report $report)
+    {
+    $this->authorize('complete', $report);
+
+    $this->reportStatusRepository->createReportStatus([
+        'report_id' => $report->id,
+        'status' => ReportStatusEnum::COMPLETED,
+        'description' => $request->description,
+        'created_by_role' => 'resident', // Tambahkan baris ini
+    ]);
+
+    Swal::success('Berhasil', 'Laporan Anda telah ditandai sebagai selesai.');
+    return redirect()->route('report.myreport', ['status' => 'completed']);
     }
 }

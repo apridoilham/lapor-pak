@@ -105,7 +105,7 @@ class ReportRepository implements ReportRepositoryInterface
 
     public function getReportByCode(string $code)
     {
-        return Report::with('resident', 'reportCategory', 'reportStatuses')->where('code', $code)->firstOrFail();
+        return Report::with('resident.user', 'resident.rt', 'resident.rw', 'reportCategory', 'reportStatuses')->where('code', $code)->firstOrFail();
     }
 
     public function getReportsByCategory(string $categoryName)

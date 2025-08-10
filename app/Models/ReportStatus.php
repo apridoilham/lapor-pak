@@ -16,18 +16,15 @@ class ReportStatus extends Model
         'image',
         'status',
         'description',
+        'created_by_role',
     ];
 
-    /**
-     * Pastikan kolom 'status' selalu di-handle sebagai Enum.
-     */
     protected function casts(): array
     {
         return [
             'status' => ReportStatusEnum::class,
         ];
     }
-
 
     public function report(): BelongsTo
     {

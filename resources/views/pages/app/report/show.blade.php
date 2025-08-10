@@ -31,6 +31,12 @@
                 </div>
             </div>
             <div class="row mb-3">
+                <div class="col-4 text-secondary">Pelapor</div>
+                <div class="col-8">
+                    <p class="mb-0">: {{ $report->resident?->user?->name }} (RT {{ $report->resident?->rt?->number }} / RW {{ $report->resident?->rw?->number }})</p>
+                </div>
+            </div>
+            <div class="row mb-3">
                 <div class="col-4 text-secondary">Kategori</div>
                 <div class="col-8">
                     <p class="mb-0">: {{ $report->reportCategory->name }}</p>
@@ -43,7 +49,7 @@
                 </div>
             </div>
             <div class="row mb-3">
-                <div class="col-4 text-secondary">Lokasi</div>
+                <div class="col-4 text-secondary">Lokasi Laporan</div>
                 <div class="col-8">
                     <p class="mb-0">: {{ $report->address }}</p>
                 </div>
@@ -54,25 +60,25 @@
                     <span class="me-2">:</span>
                     @if($report->latestStatus)
                         @php
-                            $statusValue = $report->latestStatus->status->value;
+                            $statusValue = $report->latestStatus->status;
                         @endphp
 
-                        @if ($statusValue === 'delivered')
+                        @if ($statusValue === \App\Enums\ReportStatusEnum::DELIVERED)
                             <div class="badge-status status-delivered">
                                 <i class="fa-solid fa-paper-plane"></i>
                                 <span>Terkirim</span>
                             </div>
-                        @elseif ($statusValue === 'in_process')
+                        @elseif ($statusValue === \App\Enums\ReportStatusEnum::IN_PROCESS)
                             <div class="badge-status status-processing">
                                 <i class="fa-solid fa-spinner"></i>
                                 <span>Diproses</span>
                             </div>
-                        @elseif ($statusValue === 'completed')
+                        @elseif ($statusValue === \App\Enums\ReportStatusEnum::COMPLETED)
                             <div class="badge-status status-completed">
                                 <i class="fa-solid fa-check-double"></i>
                                 <span>Selesai</span>
                             </div>
-                        @elseif ($statusValue === 'rejected')
+                        @elseif ($statusValue === \App\Enums\ReportStatusEnum::REJECTED)
                             <div class="badge-status status-rejected">
                                 <i class="fa-solid fa-xmark"></i>
                                 <span>Ditolak</span>
@@ -97,7 +103,19 @@
                                 <img src="{{ asset('storage/' . $status->image) }}" alt="status" class="img-fluid">
                             @endif
                             <span class="timeline-date">{{ \Carbon\Carbon::parse($status->created_at)->tz('Asia/Jakarta')->isoFormat('dddd, D MMMM YYYY, HH:mm') }}</span>
-                            <h6 class="timeline-status text-capitalize">{{ $status->status->value }}</h6>
+                            
+                            @php
+                                $statusLabel = $status->status->label();
+                                if ($status->status === \App\Enums\ReportStatusEnum::COMPLETED) {
+                                    if ($status->created_by_role === 'resident') {
+                                        $statusLabel .= ' (oleh Pelapor)';
+                                    } elseif ($status->created_by_role === 'admin') {
+                                        $statusLabel .= ' (oleh Admin)';
+                                    }
+                                }
+                            @endphp
+                            <h6 class="timeline-status">{{ $statusLabel }}</h6>
+                            
                             <span class="timeline-event">{{ $status->description }}</span>
                         </div>
                     </li>

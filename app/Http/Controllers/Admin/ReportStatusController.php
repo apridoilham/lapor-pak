@@ -46,6 +46,8 @@ class ReportStatusController extends Controller
             $data['image'] = $path;
         }
 
+        $data['created_by_role'] = 'admin';
+
         $this->reportStatusRepository->createReportStatus($data);
 
         Swal::success('Success', 'Data Progress laporan berhasil ditambahkan!')->timerProgressBar();
