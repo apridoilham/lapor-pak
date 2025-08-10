@@ -11,6 +11,7 @@ use App\Interfaces\ReportCategoryRepositoryInterface;
 use App\Interfaces\ReportRepositoryInterface;
 use App\Interfaces\ReportStatusRepositoryInterface;
 use App\Models\Report;
+use App\Models\Rw;
 use App\Services\ReportService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -41,15 +42,11 @@ class ReportController extends Controller
 
     public function index(Request $request)
     {
-        if ($request->category) {
-            $reports = $this->reportRepository->getReportsByCategory($request->category);
-        } else {
-            $reports = $this->reportRepository->getAllReports($request);
-        }
-
+        $reports = $this->reportRepository->getAllReports($request);
         $categories = $this->reportCategoryRepository->getAllReportCategories();
+        $rws = Rw::orderBy('number')->get();
 
-        return view('pages.app.report.index', compact('reports', 'categories'));
+        return view('pages.app.report.index', compact('reports', 'categories', 'rws'));
     }
 
     public function myReport(Request $request)
@@ -129,16 +126,16 @@ class ReportController extends Controller
 
     public function complete(CompleteReportRequest $request, Report $report)
     {
-    $this->authorize('complete', $report);
+        $this->authorize('complete', $report);
 
-    $this->reportStatusRepository->createReportStatus([
-        'report_id' => $report->id,
-        'status' => ReportStatusEnum::COMPLETED,
-        'description' => $request->description,
-        'created_by_role' => 'resident', // Tambahkan baris ini
-    ]);
+        $this->reportStatusRepository->createReportStatus([
+            'report_id' => $report->id,
+            'status' => ReportStatusEnum::COMPLETED,
+            'description' => $request->description,
+            'created_by_role' => 'resident',
+        ]);
 
-    Swal::success('Berhasil', 'Laporan Anda telah ditandai sebagai selesai.');
-    return redirect()->route('report.myreport', ['status' => 'completed']);
+        Swal::success('Berhasil', 'Laporan Anda telah ditandai sebagai selesai.');
+        return redirect()->route('report.myreport', ['status' => 'completed']);
     }
 }

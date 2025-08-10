@@ -43,9 +43,27 @@ class ReportRepository implements ReportRepositoryInterface
     public function getAllReports(Request $request)
     {
         $query = Report::with('resident.user', 'reportCategory', 'latestStatus');
-
+        
         if (!Auth::user() || !Auth::user()->hasAnyRole(['admin', 'super-admin'])) {
             $this->applyVisibilityFilter($query);
+        }
+
+        if ($category = $request->input('category')) {
+            $query->whereHas('reportCategory', function (Builder $q) use ($category) {
+                $q->where('name', $category);
+            });
+        }
+
+        $rwId = $request->input('rw');
+        $rtId = $request->input('rt');
+        if ($rwId || $rtId) {
+            $query->whereHas('resident', function ($q) use ($rwId, $rtId) {
+                if ($rtId) {
+                    $q->where('rt_id', $rtId);
+                } elseif ($rwId) {
+                    $q->where('rw_id', $rwId);
+                }
+            });
         }
 
         if ($search = $request->input('search')) {
