@@ -12,12 +12,20 @@
         <div class="card-body">
             <table class="table table-bordered">
                 <tr>
-                    <td>Kode Laporan</td>
+                    <td style="width: 200px;">Kode Laporan</td>
                     <td>{{ $report->code }}</td>
                 </tr>
                 <tr>
                     <td>Pelapor</td>
-                    <td>{{ $report->resident->user->email }} - {{ $report->resident->user->name }}</td>
+                    <td>{{ $report->resident?->user?->email }} - {{ $report->resident?->user?->name }}</td>
+                </tr>
+                <tr>
+                    <td>RT / RW Pelapor</td>
+                    <td>RT {{ $report->resident?->rt?->number }} / RW {{ $report->resident?->rw?->number }}</td>
+                </tr>
+                <tr>
+                    <td>Alamat Tinggal Pelapor</td>
+                    <td>{{ $report->resident?->address }}</td>
                 </tr>
                 <tr>
                     <td>Kategori Laporan</td>
@@ -64,7 +72,13 @@
             <h6 class="m-0 font-weight-bold text-primary">Progress Laporan</h6>
         </div>
         <div class="card-body">
-            <a href="{{ route('admin.report-status.create', $report->id) }}" class="btn btn-primary mb-3">Tambah Progress</a>
+            @can('manageStatus', $report)
+                <a href="{{ route('admin.report-status.create', $report->id) }}" class="btn btn-primary mb-3">Tambah Progress</a>
+            @else
+                <button class="btn btn-primary mb-3" disabled>Tambah Progress</button>
+                <small class="ms-2 text-danger">Hanya admin dari RW {{ $report->resident?->rw?->number }} yang bisa memperbarui progress.</small>
+            @endcan
+
             <div class="table-responsive">
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                     <thead>
@@ -88,19 +102,23 @@
                                     @endif
                                 </td>
                                 <td>
-                                    {{ $status->status }}
+                                    {{ $status->status->label() }}
                                 </td>
                                 <td>
                                     {{ $status->description }}
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.report-status.edit', $status->id) }}" class="btn btn-warning">Edit</a>
+                                    @can('manageStatus', $report)
+                                        <a href="{{ route('admin.report-status.edit', $status->id) }}" class="btn btn-warning">Edit</a>
 
-                                    <form action="{{ route('admin.report-status.destroy', $status->id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">Delete</button>
-                                    </form>
+                                        <form action="{{ route('admin.report-status.destroy', $status->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </form>
+                                    @else
+                                        -
+                                    @endcan
                                 </td>
                             </tr>
                         @endforeach

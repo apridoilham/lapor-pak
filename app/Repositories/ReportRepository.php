@@ -43,7 +43,7 @@ class ReportRepository implements ReportRepositoryInterface
     public function getAllReports(Request $request)
     {
         $query = Report::with('resident.user', 'reportCategory', 'latestStatus');
-        
+
         if (!Auth::user() || !Auth::user()->hasAnyRole(['admin', 'super-admin'])) {
             $this->applyVisibilityFilter($query);
         }
@@ -118,7 +118,7 @@ class ReportRepository implements ReportRepositoryInterface
 
     public function getReportById(int $id)
     {
-        return Report::with('resident', 'reportCategory', 'reportStatuses')->findOrFail($id);
+        return Report::with('resident.user', 'resident.rt', 'resident.rw', 'reportCategory', 'reportStatuses')->findOrFail($id);
     }
 
     public function getReportByCode(string $code)

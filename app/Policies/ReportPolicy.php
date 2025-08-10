@@ -15,6 +15,19 @@ class ReportPolicy
     {
         return $user->id === $report->resident->user_id;
     }
+    
+    public function manageStatus(User $user, Report $report): bool
+    {
+        if ($user->hasRole('super-admin')) {
+            return true;
+        }
+
+        if ($user->hasRole('admin')) {
+            return $user->rw_id === $report->resident->rw_id;
+        }
+
+        return false;
+    }
 
     public function update(User $user, Report $report): bool
     {

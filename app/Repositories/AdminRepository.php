@@ -28,6 +28,7 @@ class AdminRepository implements AdminRepositoryInterface
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'password' => $data['password'],
+                'rw_id' => $data['rw_id'],
             ]);
 
             $user->assignRole('admin');
@@ -46,6 +47,10 @@ class AdminRepository implements AdminRepositoryInterface
 
         if (isset($data['email'])) {
             $userData['email'] = $data['email'];
+        }
+        
+        if (isset($data['rw_id'])) {
+            $userData['rw_id'] = $data['rw_id'];
         }
 
         if (!empty($data['password'])) {
