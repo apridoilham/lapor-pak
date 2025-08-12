@@ -2,6 +2,8 @@
 
 namespace App\Enums;
 
+use Illuminate\Support\Facades\Auth;
+
 enum ReportStatusEnum: string
 {
     case DELIVERED = 'delivered';
@@ -9,15 +11,15 @@ enum ReportStatusEnum: string
     case COMPLETED = 'completed';
     case REJECTED = 'rejected';
 
-    /**
-     * ▼▼▼ TAMBAHKAN METHOD BARU DI SINI ▼▼▼
-     * Method ini akan mengembalikan label Bahasa Indonesia untuk setiap status.
-     */
     public function label(): string
     {
+        $user = Auth::user();
+        $rwNumber = $user?->resident?->rw?->number;
+        $rtNumber = $user?->resident?->rt?->number;
+
         return match ($this) {
             self::DELIVERED => 'Terkirim',
-            self::IN_PROCESS => 'Sedang Diproses',
+            self::IN_PROCESS => 'Diproses',
             self::COMPLETED => 'Selesai',
             self::REJECTED => 'Ditolak',
         };

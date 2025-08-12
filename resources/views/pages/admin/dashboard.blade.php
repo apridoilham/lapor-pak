@@ -184,16 +184,26 @@
                                         <td>{{ $report->resident->user->name }}</td>
                                         <td>
                                             @if ($report->latestStatus)
-                                                <span class="badge badge-info">{{ $report->latestStatus->status->value }}</span>
+                                                @php
+                                                    $status = $report->latestStatus->status;
+                                                    $badgeClass = match($status) {
+                                                        \App\Enums\ReportStatusEnum::DELIVERED => 'badge-secondary',
+                                                        \App\Enums\ReportStatusEnum::IN_PROCESS => 'badge-info',
+                                                        \App\Enums\ReportStatusEnum::COMPLETED => 'badge-success',
+                                                        \App\Enums\ReportStatusEnum::REJECTED => 'badge-danger',
+                                                        default => 'badge-light',
+                                                    };
+                                                @endphp
+                                                <span class="badge {{ $badgeClass }}">{{ $status->label() }}</span>
                                             @else
                                                 <span class="badge badge-secondary">Baru</span>
                                             @endif
                                         </td>
                                         <td>
                                             @if ($report->latestStatus)
-                                                {{ $report->latestStatus->created_at->tz('Asia/Jakarta')->isoFormat('D MMM Y, HH:mm') }}
+                                                {{ $report->latestStatus->updated_at->isoFormat('D MMM Y, HH:mm') }}
                                             @else
-                                                {{ $report->created_at->tz('Asia/Jakarta')->isoFormat('D MMM Y, HH:mm') }}
+                                                {{ $report->created_at->isoFormat('D MMM Y, HH:mm') }}
                                             @endif
                                         </td>
                                     </tr>

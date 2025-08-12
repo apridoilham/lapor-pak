@@ -14,7 +14,7 @@
         Silakan mengisi form di bawah ini untuk mendaftar sebagai warga.
     </p>
 
-    <form action="{{ route('register.store') }}" method="POST" class="mt-4" enctype="multipart/form-data">
+    <form action="{{ route('register.store') }}" method="POST" class="mt-4" enctype="multipart/form-data" id="register-form">
         @csrf
         <div class="mb-3">
             <label for="name" class="form-label">Nama Lengkap</label>
@@ -83,7 +83,7 @@
         </div>
         
         <div class="d-grid mt-4">
-            <button class="btn btn-primary py-2" type="submit">Daftar</button>
+            <button class="btn btn-primary py-2" type="submit" id="register-btn" disabled>Daftar</button>
         </div>
         
         <div class="text-center mt-3">
@@ -101,7 +101,7 @@
 
             function fetchRts(rwId, selectedRtId = null) {
                 rtSelect.disabled = true;
-                rtSelect.innerHTML = '<option value="" disabled selected>Memuat RT...</option>';
+                rtSelect.innerHTML = '<option value="">Memuat RT...</option>';
 
                 if (!rwId) return;
 
@@ -140,6 +140,29 @@
             if (rwSelect.value) {
                 fetchRts(rwSelect.value, oldRtId);
             }
+
+            const form = document.getElementById('register-form');
+            const registerButton = document.getElementById('register-btn');
+            const requiredInputs = form.querySelectorAll('[required]');
+
+            function checkFormValidity() {
+                let allFieldsFilled = true;
+                requiredInputs.forEach(input => {
+                    if (input.type === 'file') {
+                        if (input.files.length === 0) {
+                            allFieldsFilled = false;
+                        }
+                    } else if (input.value.trim() === '') {
+                        allFieldsFilled = false;
+                    }
+                });
+                registerButton.disabled = !allFieldsFilled;
+            }
+
+            requiredInputs.forEach(input => {
+                input.addEventListener('input', checkFormValidity);
+                input.addEventListener('change', checkFormValidity);
+            });
         });
     </script>
 @endsection

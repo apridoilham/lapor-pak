@@ -3,7 +3,7 @@
 @section('title', 'Data Laporan')
 
 @section('content')
-    <a href="{{ route('admin.report.create') }}" class="btn btn-primary mb-3">Tambah Data</a>
+    <a href="{{ route('admin.report.create') }}" class="btn btn-primary mb-3">Tambah Data Laporan</a>
 
     @role('super-admin')
     <div class="card shadow mb-4">
@@ -109,12 +109,12 @@
                                     <img src="{{ asset('storage/' . $report->image) }}" alt="image" width="100">
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.report.edit', $report->id) }}" class="btn btn-warning btn-sm mb-1">Edit</a>
-                                    <a href="{{ route('admin.report.show', $report->id) }}" class="btn btn-info btn-sm mb-1">Show</a>
-                                    <form action="{{ route('admin.report.destroy', $report->id) }}" method="POST" class="d-inline">
+                                    <a href="{{ route('admin.report.edit', $report->id) }}" class="btn btn-warning btn-sm mb-1">Ubah</a>
+                                    <a href="{{ route('admin.report.show', $report->id) }}" class="btn btn-info btn-sm mb-1">Lihat</a>
+                                    <form action="{{ route('admin.report.destroy', $report->id) }}" method="POST" class="d-inline delete-form">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-sm mb-1">Delete</button>
+                                        <button type="submit" class="btn btn-danger btn-sm mb-1" data-title="Hapus Laporan?" data-text="Anda yakin ingin menghapus laporan dengan kode {{ $report->code }}?">Hapus</button>
                                     </form>
                                 </td>
                             </tr>

@@ -84,6 +84,7 @@
                     <thead>
                         <tr>
                             <th>No</th>
+                            <th>Tanggal Update</th>
                             <th>Bukti</th>
                             <th>Status</th>
                             <th>Deskripsi</th>
@@ -94,6 +95,7 @@
                         @foreach ($report->reportStatuses as $status)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
+                                <td>{{ $status->updated_at->isoFormat('D MMM Y, HH:mm') }}</td>
                                 <td>
                                     @if ($status->image)
                                         <img src="{{ asset('storage/' . $status->image) }}" alt="image" width="100">
@@ -109,12 +111,12 @@
                                 </td>
                                 <td>
                                     @can('manageStatus', $report)
-                                        <a href="{{ route('admin.report-status.edit', $status->id) }}" class="btn btn-warning">Edit</a>
+                                        <a href="{{ route('admin.report-status.edit', $status->id) }}" class="btn btn-warning">Ubah</a>
 
-                                        <form action="{{ route('admin.report-status.destroy', $status->id) }}" method="POST" class="d-inline">
+                                        <form action="{{ route('admin.report-status.destroy', $status->id) }}" method="POST" class="d-inline delete-form">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                            <button type="submit" class="btn btn-danger" data-title="Hapus Progress?" data-text="Anda yakin ingin menghapus progress ini?">Hapus</button>
                                         </form>
                                     @else
                                         -

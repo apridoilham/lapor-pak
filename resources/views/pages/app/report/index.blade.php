@@ -37,7 +37,7 @@
         <div class="d-flex flex-column gap-3 mt-3">
             @forelse($reports as $report)
                 <div class="card card-report border-0 shadow-none">
-                    <a href="{{ route('report.show', $report->code) }}" class="text-decoration-none text-dark">
+                    <a href="{{ route('report.show', ['code' => $report->code, '_ref' => request()->fullUrl()]) }}" class="text-decoration-none text-dark">
                         <div class="card-body p-0">
                             <div class="card-report-image position-relative mb-2">
                                 <img src="{{ asset('storage/' . $report->image) }}" alt="{{ $report->title }}">

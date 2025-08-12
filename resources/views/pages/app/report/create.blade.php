@@ -14,14 +14,14 @@
         Isi form di bawah ini dengan detail yang benar agar laporan Anda dapat segera kami proses.
     </p>
 
-    <form action="{{ route('report.store') }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('report.store') }}" method="POST" enctype="multipart/form-data" id="create-report-form">
         @csrf
-        <input type="hidden" id="latitude" name="latitude">
-        <input type="hidden" id="longitude" name="longitude">
+        <input type="hidden" id="latitude" name="latitude" required>
+        <input type="hidden" id="longitude" name="longitude" required>
 
         <div class="mb-3">
             <label for="image" class="form-label fw-bold">Bukti Laporan</label>
-            <input type="file" class="form-control @error('image') is-invalid @enderror" id="image" name="image" style="display: none">
+            <input type="file" class="form-control @error('image') is-invalid @enderror" id="image" name="image" style="display: none" required>
             
             <div id="image-preview-container">
                 <div id="image-placeholder" class="image-placeholder-box">
@@ -38,14 +38,14 @@
 
         <div class="mb-3">
             <label for="title" class="form-label fw-bold">Judul Laporan</label>
-            <input type="text" class="form-control @error('title') is-invalid @enderror" id="title" name="title" value="{{ old('title') }}">
+            <input type="text" class="form-control @error('title') is-invalid @enderror" id="title" name="title" value="{{ old('title') }}" required>
             @error('title')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
 
         <div class="mb-3">
             <label for="report_category_id" class="form-label fw-bold">Kategori Laporan</label>
-            <select name="report_category_id" class="form-select @error('report_category_id') is-invalid @enderror">
-                <option selected disabled>Pilih Kategori</option>
+            <select name="report_category_id" class="form-select @error('report_category_id') is-invalid @enderror" required>
+                <option value="" selected disabled>Pilih Kategori</option>
                 @foreach ($categories as $category)
                     <option value="{{ $category->id }}" @if (old('report_category_id') == $category->id) selected @endif> {{ $category->name }}</option>
                 @endforeach
@@ -55,7 +55,7 @@
 
         <div class="mb-3">
             <label for="description" class="form-label fw-bold">Ceritakan Laporan Kamu</label>
-            <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description" rows="5">{{ old('description') }}</textarea>
+            <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description" rows="5" required>{{ old('description') }}</textarea>
             @error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
 
@@ -66,7 +66,7 @@
 
         <div class="mb-3">
             <label for="address" class="form-label fw-bold">Alamat Lengkap</label>
-            <textarea class="form-control @error('address') is-invalid @enderror" id="address" name="address" rows="5">{{ old('address') }}</textarea>
+            <textarea class="form-control @error('address') is-invalid @enderror" id="address" name="address" rows="5" required>{{ old('address') }}</textarea>
             @error('address')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
 
@@ -84,7 +84,7 @@
         </div>
 
         <div class="d-grid mt-4">
-            <button class="btn btn-primary py-2" type="submit" color="primary">
+            <button class="btn btn-primary py-2" type="submit" color="primary" id="report-btn" disabled>
                 Laporkan
             </button>
         </div>
@@ -97,6 +97,29 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('create-report-form');
+            const reportButton = document.getElementById('report-btn');
+            const requiredInputs = form.querySelectorAll('[required]');
+
+            function checkFormValidity() {
+                let allFieldsFilled = true;
+                requiredInputs.forEach(input => {
+                    if (input.type === 'file') {
+                        if (input.files.length === 0) {
+                            allFieldsFilled = false;
+                        }
+                    } else if (input.value.trim() === '') {
+                        allFieldsFilled = false;
+                    }
+                });
+                reportButton.disabled = !allFieldsFilled;
+            }
+
+            requiredInputs.forEach(input => {
+                input.addEventListener('input', checkFormValidity);
+                input.addEventListener('change', checkFormValidity);
+            });
+            
             const imageBase64 = localStorage.getItem('image');
             const imagePreview = document.getElementById('image-preview');
             const imagePlaceholder = document.getElementById('image-placeholder');
@@ -123,6 +146,8 @@
                 imagePreview.src = URL.createObjectURL(file);
                 imagePreview.style.display = 'block';
                 imagePlaceholder.style.display = 'none';
+
+                checkFormValidity();
             }
         });
     </script>

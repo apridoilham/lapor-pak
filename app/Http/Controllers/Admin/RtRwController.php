@@ -19,8 +19,14 @@ class RtRwController extends Controller
 
     public function store(Request $request)
     {
+        if ($request->has('number')) {
+            $request->merge([
+                'number' => str_pad($request->number, 3, '0', STR_PAD_LEFT),
+            ]);
+        }
+        
         $request->validate([
-            'number' => 'required|string|max:3|unique:rws,number',
+            'number' => 'required|string|digits:3|unique:rws,number',
             'rt_count' => 'required|integer|min:1|max:50',
         ]);
 
@@ -30,7 +36,7 @@ class RtRwController extends Controller
             for ($i = 1; $i <= $request->rt_count; $i++) {
                 Rt::create([
                     'rw_id' => $rw->id,
-                    'number' => str_pad($i, 3, '0', STR_PAD_LEFT), // Membuat format 001, 002, dst.
+                    'number' => str_pad($i, 3, '0', STR_PAD_LEFT),
                 ]);
             }
         });
@@ -41,7 +47,7 @@ class RtRwController extends Controller
 
     public function destroy(Rw $rw)
     {
-        $rw->delete(); // Karena onDelete('cascade'), semua RT terkait akan ikut terhapus
+        $rw->delete();
         Swal::success('Berhasil', 'Data RW ' . $rw->number . ' dan semua RT di dalamnya berhasil dihapus.');
         return redirect()->route('admin.rtrw.index');
     }

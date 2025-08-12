@@ -49,8 +49,39 @@
                     <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" autocomplete="new-password">
                 </div>
                 
-                <button type="submit" class="btn btn-primary">Update Profil</button>
+                <button type="submit" class="btn btn-primary" id="update-btn" disabled>Update Profil</button>
             </form>
         </div>
     </div>
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const updateButton = document.getElementById('update-btn');
+        const nameInput = document.getElementById('name');
+        const currentPasswordInput = document.getElementById('current_password');
+        const passwordInput = document.getElementById('password');
+        const passwordConfirmInput = document.getElementById('password_confirmation');
+        
+        const initialName = nameInput.value;
+
+        const fieldsToMonitor = [nameInput, currentPasswordInput, passwordInput, passwordConfirmInput];
+
+        function checkForChanges() {
+            const nameChanged = nameInput.value !== initialName;
+            const passwordFieldsFilled = currentPasswordInput.value.length > 0 || passwordInput.value.length > 0 || passwordConfirmInput.value.length > 0;
+
+            if (nameChanged || passwordFieldsFilled) {
+                updateButton.disabled = false;
+            } else {
+                updateButton.disabled = true;
+            }
+        }
+
+        fieldsToMonitor.forEach(field => {
+            field.addEventListener('input', checkForChanges);
+        });
+    });
+</script>
 @endsection

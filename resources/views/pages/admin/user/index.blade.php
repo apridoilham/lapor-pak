@@ -17,6 +17,7 @@
                             <th>No</th>
                             <th>Nama</th>
                             <th>Email</th>
+                            <th>Wilayah RW</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -27,11 +28,19 @@
                                 <td>{{ $admin->name }}</td>
                                 <td>{{ $admin->email }}</td>
                                 <td>
-                                    <a href="{{ route('admin.admin-user.edit', $admin->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                                    <form action="{{ route('admin.admin-user.destroy', $admin->id) }}" method="POST" class="d-inline">
+                                    @if($admin->rw)
+                                        RW {{ $admin->rw->number }}
+                                    @else
+                                        <span class="badge badge-warning">Super Admin</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <a href="{{ route('admin.admin-user.edit', $admin->id) }}" class="btn btn-warning btn-sm">Ubah</a>
+                                    <a href="{{ route('admin.admin-user.show', $admin->id) }}" class="btn btn-info btn-sm">Lihat</a>
+                                    <form action="{{ route('admin.admin-user.destroy', $admin->id) }}" method="POST" class="d-inline delete-form">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Apakah Anda yakin ingin menghapus admin ini?')">Delete</button>
+                                        <button type="submit" class="btn btn-danger btn-sm" data-title="Hapus Admin?" data-text="Anda yakin ingin menghapus admin RW {{ $admin->rw->number }}?">Hapus</button>
                                     </form>
                                 </td>
                             </tr>

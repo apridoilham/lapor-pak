@@ -72,7 +72,7 @@
     <li class="nav-item {{ request()->routeIs('admin.rtrw.*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('admin.rtrw.index') }}">
             <i class="fas fa-fw fa-map-marker-alt"></i>
-            <span>Data RT/RW</span></a>
+            <span>Data RW/RT</span></a>
     </li>
 
     <li class="nav-item {{ request()->routeIs('admin.report-category.*') ? 'active' : '' }}">

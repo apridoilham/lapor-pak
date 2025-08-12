@@ -67,7 +67,7 @@
             <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $user->name) }}" required>
             @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
-        
+
         @php
             $emailUsername = old('email_username', explode('@', $user->email)[0]);
         @endphp
@@ -132,7 +132,7 @@
         </div>
         
         <div class="d-grid gap-3 mt-4">
-             <button class="btn btn-primary py-2" type="submit">Simpan Perubahan</button>
+             <button class="btn btn-primary py-2" type="submit" id="save-changes-btn" disabled>Simpan Perubahan</button>
              <a href="{{ route('profile') }}" class="btn btn-link text-secondary text-decoration-none">Kembali</a>
         </div>
     </form>
@@ -142,6 +142,35 @@
     @include('sweetalert::alert')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('profile-form');
+            const saveButton = document.getElementById('save-changes-btn');
+            const inputs = form.querySelectorAll('input, select, textarea');
+            let initialFormState = {};
+
+            inputs.forEach(input => {
+                if (input.type === 'file' || input.type === 'password' || input.name === '_token' || input.name === '_method') return;
+                initialFormState[input.name] = input.value;
+            });
+
+            function checkForChanges() {
+                let hasChanged = false;
+                inputs.forEach(input => {
+                    if (input.type === 'password' && input.value.length > 0) {
+                        hasChanged = true;
+                    } else if (input.type === 'file' && input.files.length > 0) {
+                        hasChanged = true;
+                    } else if (initialFormState.hasOwnProperty(input.name) && initialFormState[input.name] !== input.value) {
+                        hasChanged = true;
+                    }
+                });
+                saveButton.disabled = !hasChanged;
+            }
+
+            inputs.forEach(input => {
+                input.addEventListener('input', checkForChanges);
+                input.addEventListener('change', checkForChanges);
+            });
+
             document.getElementById('avatar').addEventListener('change', function(event) {
                 const file = event.target.files[0];
                 if (file) {

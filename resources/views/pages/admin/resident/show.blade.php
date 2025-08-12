@@ -1,13 +1,12 @@
 @extends('layouts.admin')
 
-@section('title', 'Detail Data Masyarakat')
+@section('title', 'Detail Data Pelapor')
 
 @section('content')
     <a href="{{ route('admin.resident.index') }}" class="btn btn-danger mb-3">Kembali</a>
 
     <div class="row">
         <div class="col-lg-4">
-            {{-- Kartu Informasi Pribadi --}}
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">Informasi Pribadi</h6>
@@ -18,12 +17,11 @@
                     <p class="text-muted">{{ $resident->user->email }}</p>
                 </div>
                 <div class="card-footer">
-                    <a href="{{ route('admin.resident.edit', $resident->id) }}" class="btn btn-warning btn-block">Edit Data Ini</a>
+                    <a href="{{ route('admin.resident.edit', $resident->id) }}" class="btn btn-warning btn-block">Ubah Data Pelapor</a>
                 </div>
             </div>
         </div>
         <div class="col-lg-8">
-            {{-- Kartu Detail Alamat & Riwayat Laporan --}}
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">Detail & Riwayat Laporan</h6>
@@ -51,8 +49,8 @@
                                     <th>Kode</th>
                                     <th>Judul</th>
                                     <th>Kategori</th>
-                                    <th>Status</th>
-                                    <th>Tanggal</th>
+                                    <th>Status Terakhir</th>
+                                    <th>Tanggal Update</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -64,13 +62,29 @@
                                         <td>{{ Str::limit($report->title, 25) }}</td>
                                         <td>{{ $report->reportCategory->name }}</td>
                                         <td>
-                                            @if($report->latestStatus)
-                                                <span class="badge badge-info">{{ $report->latestStatus->status->value }}</span>
+                                            @if ($report->latestStatus)
+                                                @php
+                                                    $status = $report->latestStatus->status;
+                                                    $badgeClass = match($status) {
+                                                        \App\Enums\ReportStatusEnum::DELIVERED => 'badge-secondary',
+                                                        \App\Enums\ReportStatusEnum::IN_PROCESS => 'badge-info',
+                                                        \App\Enums\ReportStatusEnum::COMPLETED => 'badge-success',
+                                                        \App\Enums\ReportStatusEnum::REJECTED => 'badge-danger',
+                                                        default => 'badge-light',
+                                                    };
+                                                @endphp
+                                                <span class="badge {{ $badgeClass }}">{{ $status->label() }}</span>
                                             @else
                                                 <span class="badge badge-secondary">Baru</span>
                                             @endif
                                         </td>
-                                        <td>{{ $report->created_at->isoFormat('D MMM Y') }}</td>
+                                        <td>
+                                            @if ($report->latestStatus)
+                                                {{ $report->latestStatus->updated_at->isoFormat('D MMM Y, HH:mm') }}
+                                            @else
+                                                {{ $report->created_at->isoFormat('D MMM Y, HH:mm') }}
+                                            @endif
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>

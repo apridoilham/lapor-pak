@@ -3,7 +3,7 @@
 @section('title', 'Ekspor Laporan')
 
 @section('content')
-    <h1 class="h3 mb-4 text-gray-800">Ekspor Laporan Kustom</h1>
+    <h1 class="h3 mb-4 text-gray-800">Ekspor Laporan</h1>
 
     <div class="card shadow mb-4">
         <div class="card-header py-3">
@@ -16,7 +16,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="start_date">Dari Tanggal</label>
-                            <input type="date" name="start_date" id="start_date" class="form-control" value="{{ old('start_date') }}">
+                            <input type="date" name="start_date" id="start_date" class="form-control" value="{{ old('start_date') }}" required>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -123,7 +123,7 @@
                 </div>
                 @endrole
                 
-                <button type="submit" class="btn btn-success" id="export-btn">
+                <button type="submit" class="btn btn-success" id="export-btn" disabled>
                     <i class="fa fa-file-excel"></i>
                     <span id="export-btn-text">Ekspor ke Excel</span>
                 </button>
@@ -135,6 +135,19 @@
 @section('scripts')
     @include('sweetalert::alert')
     
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const exportButton = document.getElementById('export-btn');
+            const startDateInput = document.getElementById('start_date');
+
+            function toggleExportButtonState() {
+                exportButton.disabled = !startDateInput.value;
+            }
+
+            startDateInput.addEventListener('input', toggleExportButtonState);
+        });
+    </script>
+
     @role('super-admin')
     <script>
         document.addEventListener('DOMContentLoaded', function() {

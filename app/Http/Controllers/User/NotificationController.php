@@ -26,7 +26,7 @@ class NotificationController extends Controller
 
         $notification->markAsRead();
 
-        $baseUrl = route('report.show', $notification->data['report_code']);
+        $baseUrl = route('report.show', ['code' => $notification->data['report_code'], '_ref' => route('notifications.index')]);
         $fragment = '#komentar';
 
         if (isset($notification->data['type']) && $notification->data['type'] === 'status_update') {

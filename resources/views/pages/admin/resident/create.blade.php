@@ -1,13 +1,13 @@
 @extends('layouts.admin')
-@section('title', 'Tambah Data Masyarakat')
+@section('title', 'Tambah Data Pelapor')
 @section('content')
     <a href="{{ route('admin.resident.index') }}" class="btn btn-danger mb-3">Kembali</a>
     <div class="card shadow">
         <div class="card-header">
-            <h6 class="m-0 font-weight-bold text-primary">Form Tambah Data Masyarakat</h6>
+            <h6 class="m-0 font-weight-bold text-primary">Form Tambah Data Pelapor</h6>
         </div>
         <div class="card-body">
-            <form action="{{ route('admin.resident.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('admin.resident.store') }}" method="POST" enctype="multipart/form-data" id="create-resident-form">
                 @csrf
                 <div class="form-group"><label for="name">Nama</label><input type="text" class="form-control" name="name" value="{{ old('name') }}" required></div>
                 <div class="form-group"><label for="email">Email</label><input type="email" class="form-control" name="email" value="{{ old('email') }}" required></div>
@@ -20,7 +20,7 @@
                 <hr>
                 <div class="form-group"><label for="password">Password</label><input type="password" class="form-control" name="password" required autocomplete="new-password"></div>
                 <div class="form-group"><label for="password_confirmation">Konfirmasi Password</label><input type="password" class="form-control" name="password_confirmation" required autocomplete="new-password"></div>
-                <button type="submit" class="btn btn-primary">Simpan</button>
+                <button type="submit" class="btn btn-primary" id="simpan-btn" disabled>Tambah Pelapor</button>
             </form>
         </div>
     </div>
@@ -30,8 +30,8 @@
         document.addEventListener('DOMContentLoaded', function() {
             const rwSelect = document.getElementById('rw_id');
             const rtSelect = document.getElementById('rt_id');
-            rwSelect.addEventListener('change', function() {
-                const rwId = this.value;
+            
+            function fetchRts(rwId) {
                 rtSelect.disabled = true;
                 rtSelect.innerHTML = '<option value="">Memuat...</option>';
                 if (rwId) {
@@ -48,6 +48,33 @@
                             rtSelect.disabled = false;
                         });
                 }
+            }
+            
+            rwSelect.addEventListener('change', function() {
+                fetchRts(this.value);
+            });
+
+            const form = document.getElementById('create-resident-form');
+            const saveButton = document.getElementById('simpan-btn');
+            const requiredInputs = form.querySelectorAll('[required]');
+
+            function checkFormValidity() {
+                let allFieldsFilled = true;
+                requiredInputs.forEach(input => {
+                    if (input.type === 'file') {
+                        if (input.files.length === 0) {
+                            allFieldsFilled = false;
+                        }
+                    } else if (input.value.trim() === '') {
+                        allFieldsFilled = false;
+                    }
+                });
+                saveButton.disabled = !allFieldsFilled;
+            }
+
+            requiredInputs.forEach(input => {
+                input.addEventListener('input', checkFormValidity);
+                input.addEventListener('change', checkFormValidity);
             });
         });
     </script>

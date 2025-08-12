@@ -1,10 +1,10 @@
 @extends('layouts.admin')
-@section('title', 'Edit Data Masyarakat')
+@section('title', 'Ubah Data Pelapor')
 @section('content')
     <a href="{{ route('admin.resident.index') }}" class="btn btn-danger mb-3">Kembali</a>
     <div class="card shadow">
         <div class="card-header">
-            <h6 class="m-0 font-weight-bold text-primary">Form Edit Data Masyarakat</h6>
+            <h6 class="m-0 font-weight-bold text-primary">Form Ubah Data Pelapor</h6>
         </div>
         <div class="card-body">
             <form action="{{ route('admin.resident.update', $resident->id) }}" method="POST" enctype="multipart/form-data" id="edit-resident-form">
@@ -26,7 +26,7 @@
                 <p class="text-muted">Kosongkan password jika tidak ingin meresetnya.</p>
                 <div class="form-group"><label for="password">Password Baru</label><input type="password" class="form-control" id="password" name="password" autocomplete="new-password"></div>
                 <div class="form-group"><label for="password_confirmation">Konfirmasi Password Baru</label><input type="password" class="form-control" id="password_confirmation" name="password_confirmation" autocomplete="new-password"></div>
-                <button type="submit" class="btn btn-primary" id="update-btn" disabled>Update</button>
+                <button type="submit" class="btn btn-primary" id="update-btn" disabled>Simpan Perubahan</button>
             </form>
         </div>
     </div>

@@ -37,7 +37,7 @@
         @forelse ($reports as $report)
             <div class="card card-report border-0 shadow-none">
                 <div class="card-body p-0">
-                    <a href="{{ route('report.show', $report->code) }}" class="text-decoration-none text-dark">
+                    <a href="{{ route('report.show', ['code' => $report->code, '_ref' => request()->fullUrl()]) }}" class="text-decoration-none text-dark">
                         <div class="card-report-image position-relative mb-2">
                             <img src="{{ asset('storage/' . $report->image) }}" alt="{{ $report->title }}">
 
@@ -105,12 +105,36 @@
             </div>
         @empty
             <div class="d-flex flex-column justify-content-center align-items-center text-center" style="margin-top: 80px;">
+                @php
+                    $status = request('status', 'delivered');
+                    $title = 'Belum ada laporan';
+                    $message = 'Ayo buat laporan pertamamu!';
+                    $showButton = true;
+
+                    if ($status === 'in_process') {
+                        $title = 'Tidak Ada Laporan yang Diproses';
+                        $message = 'Laporan Anda yang sedang ditangani akan muncul di sini.';
+                        $showButton = false;
+                    } elseif ($status === 'completed') {
+                        $title = 'Tidak Ada Laporan Selesai';
+                        $message = 'Laporan yang telah berhasil diselesaikan akan tercatat di sini.';
+                        $showButton = false;
+                    } elseif ($status === 'rejected') {
+                        $title = 'Tidak Ada Laporan Ditolak';
+                        $message = 'Jika ada laporan yang ditolak, informasinya akan muncul di sini.';
+                        $showButton = false;
+                    }
+                @endphp
+                
                 <div id="lottie" style="width: 250px; height: 250px;"></div>
-                <h5 class="mt-3">Belum ada laporan</h5>
-                <p class="text-secondary">Ayo buat laporanmu!</p>
+                <h5 class="mt-3">{{ $title }}</h5>
+                <p class="text-secondary">{{ $message }}</p>
+                
+                @if($showButton)
                 <a href="{{ route('report.take') }}" class="btn btn-primary py-2 px-4 mt-3">
                     Buat Laporan
                 </a>
+                @endif
             </div>
         @endforelse
     </div>

@@ -52,7 +52,7 @@
 
 @section('content')
     <div class="header-nav">
-        <a href="{{ url()->previous() }}">
+        <a href="{{ request()->query('_ref', route('home')) }}">
             <img src="{{ asset('assets/app/images/icons/ArrowLeft.svg') }}" alt="arrow-left">
         </a>
         <h1>Detail Laporan {{ $report->code }}</h1>
@@ -182,10 +182,10 @@
                 <form action="{{ route('report.comments.store', $report) }}" method="POST" class="mb-4">
                     @csrf
                     <div class="mb-2">
-                        <textarea name="body" class="form-control" rows="3" placeholder="Tulis komentar Anda..." required></textarea>
+                        <textarea name="body" class="form-control" rows="3" placeholder="Tulis komentar Anda..." required id="comment-body"></textarea>
                     </div>
                     <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn btn-primary btn-sm">Kirim Komentar</button>
+                        <button type="submit" class="btn btn-primary btn-sm" id="submit-comment-btn" disabled>Kirim Komentar</button>
                     </div>
                 </form>
                 @else
@@ -214,4 +214,21 @@
             </div>
         </div>
     @endif
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const commentBody = document.getElementById('comment-body');
+        const submitButton = document.getElementById('submit-comment-btn');
+
+        if (commentBody) {
+            function checkCommentValidity() {
+                submitButton.disabled = commentBody.value.trim() === '';
+            }
+
+            commentBody.addEventListener('input', checkCommentValidity);
+        }
+    });
+</script>
 @endsection

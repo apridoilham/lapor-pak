@@ -1,16 +1,16 @@
 @extends('layouts.admin')
 
-@section('title', 'Tambah Admin Baru')
+@section('title', 'Tambah Admin')
 
 @section('content')
     <a href="{{ route('admin.admin-user.index') }}" class="btn btn-danger mb-3">Kembali</a>
 
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Form Tambah Admin</h6>
+            <h6 class="m-0 font-weight-bold text-primary">Form Tambah Data Admin</h6>
         </div>
         <div class="card-body">
-            <form action="{{ route('admin.admin-user.store')}}" method="POST">
+            <form action="{{ route('admin.admin-user.store')}}" method="POST" id="create-admin-form">
                 @csrf
                 <div class="form-group">
                     <label for="name">Nama</label>
@@ -47,8 +47,33 @@
                     <label for="password_confirmation">Konfirmasi Password</label>
                     <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required autocomplete="new-password">
                 </div>
-                <button type="submit" class="btn btn-primary">Simpan</button>
+                <button type="submit" class="btn btn-primary" id="simpan-btn" disabled>Tambah Admin</button>
             </form>
         </div>
     </div>
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('create-admin-form');
+        const saveButton = document.getElementById('simpan-btn');
+        const requiredInputs = form.querySelectorAll('[required]');
+
+        function checkFormValidity() {
+            let allFieldsFilled = true;
+            requiredInputs.forEach(input => {
+                if (input.value.trim() === '') {
+                    allFieldsFilled = false;
+                }
+            });
+            saveButton.disabled = !allFieldsFilled;
+        }
+
+        requiredInputs.forEach(input => {
+            input.addEventListener('input', checkFormValidity);
+            input.addEventListener('change', checkFormValidity);
+        });
+    });
+</script>
 @endsection

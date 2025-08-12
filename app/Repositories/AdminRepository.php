@@ -12,6 +12,7 @@ class AdminRepository implements AdminRepositoryInterface
     public function getAllAdmins()
     {
         return User::role(['admin', 'super-admin'])
+            ->with('rw')
             ->where('id', '!=', Auth::id())
             ->get();
     }

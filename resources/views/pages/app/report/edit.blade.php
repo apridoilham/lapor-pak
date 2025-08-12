@@ -14,7 +14,7 @@
         Anda hanya dapat mengubah detail teks laporan. Gambar dan lokasi tidak dapat diubah.
     </p>
 
-    <form action="{{ route('report.update', $report->id) }}" method="POST">
+    <form action="{{ route('report.update', $report->id) }}" method="POST" id="edit-report-form">
         @csrf
         @method('PUT')
 
@@ -59,9 +59,61 @@
         </div>
 
         <div class="d-grid mt-4">
-            <button class="btn btn-primary py-2" type="submit">
+            <button class="btn btn-primary py-2" type="submit" id="save-btn" disabled>
                 Simpan Perubahan
             </button>
         </div>
     </form>
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('edit-report-form');
+        const saveButton = document.getElementById('save-btn');
+        const inputs = form.querySelectorAll('input, select, textarea');
+        let initialFormState = {};
+
+        const getRadioValue = (name) => {
+            const selectedRadio = form.querySelector(`input[name="${name}"]:checked`);
+            return selectedRadio ? selectedRadio.value : null;
+        };
+
+        inputs.forEach(input => {
+            if (input.name === '_token' || input.name === '_method') return;
+            if (input.type === 'radio') {
+                if (!initialFormState.hasOwnProperty(input.name)) {
+                    initialFormState[input.name] = getRadioValue(input.name);
+                }
+            } else {
+                initialFormState[input.name] = input.value;
+            }
+        });
+
+        function checkForChanges() {
+            let hasChanged = false;
+            for (const input of inputs) {
+                if (input.name === '_token' || input.name === '_method') continue;
+                
+                let currentValue;
+                if (input.type === 'radio') {
+                    currentValue = getRadioValue(input.name);
+                } else {
+                    currentValue = input.value;
+                }
+
+                if (initialFormState[input.name] !== currentValue) {
+                    hasChanged = true;
+                    break;
+                }
+            }
+            saveButton.disabled = !hasChanged;
+        }
+
+        inputs.forEach(input => {
+            input.addEventListener('input', checkForChanges);
+            input.addEventListener('change', checkForChanges);
+        });
+    });
+</script>
 @endsection

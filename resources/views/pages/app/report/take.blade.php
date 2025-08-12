@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="header-nav mb-4">
-        <a href="{{ route('home') }}" class="text-decoration-none">
+        <a href="{{ url()->previous() }}" class="text-decoration-none">
             <i class="fa-solid fa-arrow-left"></i>
         </a>
         <h1>Ambil Foto Bukti</h1>
@@ -58,7 +58,6 @@
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
                 const imageDataURL = canvas.toDataURL('image/jpeg');
                 
-                // Simpan ke localStorage dan pindah ke halaman preview
                 localStorage.setItem('image', imageDataURL);
                 window.location.href = '{{ route('report.preview') }}';
             }

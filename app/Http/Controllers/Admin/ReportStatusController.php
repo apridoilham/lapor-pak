@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\ReportStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreReportStatusRequest;
 use App\Interfaces\ReportStatusRepositoryInterface;
@@ -31,7 +32,8 @@ class ReportStatusController extends Controller
     {
         $report = $this->reportRepository->getReportById($reportId);
         $this->authorize('manageStatus', $report);
-        return view('pages.admin.report-status.create', compact('report'));
+        $statuses = ReportStatusEnum::cases();
+        return view('pages.admin.report-status.create', compact('report', 'statuses'));
     }
 
     public function store(StoreReportStatusRequest $request)
@@ -55,7 +57,8 @@ class ReportStatusController extends Controller
     {
         $status = $this->reportStatusRepository->getReportStatusById($id);
         $this->authorize('manageStatus', $status->report);
-        return view('pages.admin.report-status.edit', compact('status'));
+        $statuses = ReportStatusEnum::cases();
+        return view('pages.admin.report-status.edit', compact('status', 'statuses'));
     }
 
     public function update(UpdateReportStatusRequest $request, string $id)

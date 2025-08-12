@@ -48,6 +48,37 @@
     <script src="{{ asset('assets/admin/vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
     <script src="{{ asset('assets/admin/js/demo/datatables-demo.js') }}"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.body.addEventListener('submit', function (event) {
+                const form = event.target;
+                if (form.classList.contains('delete-form')) {
+                    event.preventDefault();
+                    
+                    const submitButton = form.querySelector('button[type="submit"]');
+                    const title = submitButton.dataset.title || 'Anda yakin?';
+                    const text = submitButton.dataset.text || "Tindakan ini tidak dapat dibatalkan.";
+
+                    Swal.fire({
+                        title: title,
+                        text: text,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Ya, hapus!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 
     @yield('scripts')
 </body>

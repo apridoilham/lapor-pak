@@ -39,6 +39,12 @@ class AdminUserController extends Controller
         return redirect()->route('admin.admin-user.index');
     }
 
+    public function show(User $admin_user)
+    {
+        $admin_user->load('rw');
+        return view('pages.admin.user.show', ['admin' => $admin_user]);
+    }
+
     public function edit(User $admin_user)
     {
         $rws = Rw::orderBy('number')->get();

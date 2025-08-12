@@ -1,9 +1,9 @@
 @extends('layouts.admin')
 
-@section('title', 'Data Kategori Laporan')
+@section('title', 'Data Kategori')
 
 @section('content')
-    <a href="{{ route('admin.report-category.create') }}" class="btn btn-primary mb-3">Tambah Data</a>
+    <a href="{{ route('admin.report-category.create') }}" class="btn btn-primary mb-3">Tambah Kategori Laporan</a>
 
 
     <div class="card shadow mb-4">
@@ -30,14 +30,14 @@
                                     <img src="{{ asset('storage/' . $category->image) }}" alt="image" width="100">
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.report-category.edit', $category->id) }}" class="btn btn-warning">Edit</a>
+                                    <a href="{{ route('admin.report-category.edit', $category->id) }}" class="btn btn-warning">Ubah</a>
 
-                                    <a href="{{ route('admin.report-category.show', $category->id) }}" class="btn btn-info">Show</a>
+                                    <a href="{{ route('admin.report-category.show', $category->id) }}" class="btn btn-info">Lihat</a>
 
-                                    <form action="{{ route('admin.report-category.destroy', $category->id) }}" method="POST" class="d-inline">
+                                    <form action="{{ route('admin.report-category.destroy', $category->id) }}" method="POST" class="d-inline delete-form">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                        <button type="submit" class="btn btn-danger" data-title="Hapus Kategori?" data-text="Anda yakin ingin menghapus kategori {{ $category->name }}?">Hapus</button>
                                     </form>
                                 </td>
                             </tr>
