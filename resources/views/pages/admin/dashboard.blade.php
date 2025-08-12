@@ -181,7 +181,7 @@
                                             <a href="{{ route('admin.report.show', $report->id) }}">{{ $report->code }}</a>
                                         </td>
                                         <td>{{ Str::limit($report->title, 20) }}</td>
-                                        <td>{{ $report->resident->user->name }}</td>
+                                        <td>{{ $report->resident?->user?->name ?? 'N/A' }}</td>
                                         <td>
                                             @if ($report->latestStatus)
                                                 @php

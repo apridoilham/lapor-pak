@@ -67,7 +67,7 @@
             <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $user->name) }}" required>
             @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
-
+        
         @php
             $emailUsername = old('email_username', explode('@', $user->email)[0]);
         @endphp
@@ -76,6 +76,7 @@
             <div class="input-group">
                 <input type="text" class="form-control @error('email_username') is-invalid @enderror @error('email') is-invalid @enderror" id="email_username" name="email_username" value="{{ $emailUsername }}" required>
                 <span class="input-group-text">@bsblapor.com</span>
+                <div class="invalid-feedback" id="email-error">Email sudah ada sebelumnya.</div>
             </div>
             @error('email_username')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
             @error('email')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
@@ -163,7 +164,9 @@
                         hasChanged = true;
                     }
                 });
-                saveButton.disabled = !hasChanged;
+                
+                const isEmailInvalid = document.getElementById('email_username').classList.contains('is-invalid');
+                saveButton.disabled = !hasChanged || isEmailInvalid;
             }
 
             inputs.forEach(input => {
@@ -175,9 +178,7 @@
                 const file = event.target.files[0];
                 if (file) {
                     const reader = new FileReader();
-                    reader.onload = function(e) {
-                        document.getElementById('avatar-preview').src = e.target.result;
-                    }
+                    reader.onload = function(e) { document.getElementById('avatar-preview').src = e.target.result; }
                     reader.readAsDataURL(file);
                 }
             });
@@ -209,20 +210,48 @@
                         } else {
                             rtSelect.innerHTML = '<option value="" disabled selected>Tidak ada RT</option>';
                         }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        rtSelect.innerHTML = '<option value="" disabled selected>Gagal memuat RT</option>';
                     });
             }
 
-            rwSelect.addEventListener('change', function() {
-                fetchRts(this.value);
-            });
+            rwSelect.addEventListener('change', function() { fetchRts(this.value); });
+            if (rwSelect.value) { fetchRts(rwSelect.value, activeRtId); }
+            
+            const emailInput = document.getElementById('email_username');
+            const emailError = document.getElementById('email-error');
+            let debounceTimer;
 
-            if (rwSelect.value) {
-                fetchRts(rwSelect.value, activeRtId);
-            }
+            emailInput.addEventListener('input', function () {
+                checkForChanges();
+                clearTimeout(debounceTimer);
+                
+                emailInput.classList.remove('is-invalid');
+                emailError.classList.remove('d-block');
+
+                debounceTimer = setTimeout(function () {
+                    const emailUsername = emailInput.value;
+                    if (emailUsername.length > 2) {
+                        fetch('/api/check-email', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                email_username: emailUsername,
+                                ignore_user_id: {{ auth()->id() }}
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.is_taken) {
+                                emailInput.classList.add('is-invalid');
+                                emailError.classList.add('d-block');
+                            }
+                            checkForChanges();
+                        });
+                    }
+                }, 500);
+            });
         });
     </script>
 @endsection

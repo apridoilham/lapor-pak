@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\ReportVisibilityEnum;
 use App\Http\Controllers\Controller;
 use App\Interfaces\ReportRepositoryInterface;
 use App\Interfaces\ReportCategoryRepositoryInterface;
@@ -68,6 +69,7 @@ class ReportController extends Controller
         $data = $request->validated();
         
         $data['code'] = config('report.code_prefix.admin') . mt_rand(100000, 999999);
+        $data['visibility'] = ReportVisibilityEnum::PUBLIC->value;
 
         if ($path = $this->handleFileUpload($request, 'image', 'assets/report/image')) {
             $data['image'] = $path;

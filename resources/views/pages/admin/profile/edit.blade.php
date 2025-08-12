@@ -1,13 +1,13 @@
 @extends('layouts.admin')
 
-@section('title', 'Edit Profil Saya')
+@section('title', 'Ubah Profil')
 
 @section('content')
     <a href="{{ route('profile') }}" class="btn btn-danger mb-3">Kembali ke Profil</a>
 
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Form Edit Profil</h6>
+            <h6 class="m-0 font-weight-bold text-primary">Form Ubah Data Profil</h6>
         </div>
         <div class="card-body">
             <form action="{{ route('admin.profile.update') }}" method="POST">
@@ -49,7 +49,7 @@
                     <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" autocomplete="new-password">
                 </div>
                 
-                <button type="submit" class="btn btn-primary" id="update-btn" disabled>Update Profil</button>
+                <button type="submit" class="btn btn-primary" id="update-btn" disabled>Simpan Perubahan</button>
             </form>
         </div>
     </div>

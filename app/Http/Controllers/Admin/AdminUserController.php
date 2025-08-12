@@ -35,7 +35,7 @@ class AdminUserController extends Controller
     public function store(StoreAdminRequest $request)
     {
         $this->adminRepository->createAdmin($request->validated());
-        Swal::success('Berhasil', 'Admin baru berhasil ditambahkan.');
+        Swal::success('Berhasil', 'Data Admin baru berhasil ditambahkan.');
         return redirect()->route('admin.admin-user.index');
     }
 
@@ -66,7 +66,7 @@ class AdminUserController extends Controller
         }
 
         $this->adminRepository->deleteAdmin($admin_user->id);
-        Swal::success('Berhasil', 'Admin berhasil dihapus.');
+        Swal::success('Berhasil', 'Data Admin berhasil dihapus.');
         return redirect()->route('admin.admin-user.index');
     }
 }

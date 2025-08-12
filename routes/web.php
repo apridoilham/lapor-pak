@@ -56,6 +56,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin|super-ad
     Route::get('/profile/edit', [AdminProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/update', [AdminProfileController::class, 'update'])->name('profile.update');
     Route::resource('/resident', ResidentController::class);
+    Route::get('/residents/{resident}/reports-for-alert', [ResidentController::class, 'getReportsForDeletionAlert'])->name('residents.reports_for_alert');
     Route::resource('/report', ReportController::class);
     Route::get('/export-reports', [ReportExportController::class, 'create'])->name('report.export.create');
     Route::post('/export-reports', [ReportExportController::class, 'store'])->name('report.export.store');

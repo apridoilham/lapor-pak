@@ -27,7 +27,10 @@ class RtRwController extends Controller
         
         $request->validate([
             'number' => 'required|string|digits:3|unique:rws,number',
-            'rt_count' => 'required|integer|min:1|max:50',
+            'rt_count' => 'required|integer|min:1|max:99',
+        ], [
+            'rt_count.max' => 'Jumlah RT tidak boleh lebih dari 99.',
+            'rt_count.min' => 'Jumlah RT minimal harus 1.',
         ]);
 
         DB::transaction(function () use ($request) {

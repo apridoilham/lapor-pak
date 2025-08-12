@@ -2,31 +2,38 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Resident; // <-- DITAMBAHKAN
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateResidentRequest extends FormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('email_username')) {
+            $this->merge([
+                'email_username' => strtolower($this->email_username),
+                'email' => strtolower($this->email_username) . '@bsblapor.com',
+            ]);
+        }
+    }
+    
+    public function authorize(): bool
+    {
+        return $this->user()->hasAnyRole(['admin', 'super-admin']);
+    }
+
     public function rules(): array
     {
-        // PERUBAHAN DI SINI:
-        // Ambil objek Resident dari database menggunakan ID dari route, lalu ambil user_id-nya.
-        $resident = Resident::find($this->route('resident'));
-        $userId = $resident ? $resident->user_id : null;
+        $residentId = $this->route('resident');
+        $user = \App\Models\Resident::find($residentId)->user;
 
         return [
             'name' => 'required|string|max:255',
+            'email_username' => 'required|string|alpha_num',
             'email' => [
                 'required',
                 'email',
-                // Pastikan $userId tidak null sebelum digunakan
-                Rule::unique('users')->ignore($userId),
+                Rule::unique('users')->ignore($user->id),
             ],
             'avatar' => 'nullable|file|image|max:2048',
             'rt_id' => 'required|exists:rts,id',

@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Edit Data Admin')
+@section('title', 'Edit Admin')
 
 @section('content')
     <a href="{{ route('admin.admin-user.index') }}" class="btn btn-danger mb-3">Kembali</a>
@@ -29,6 +29,7 @@
                         <div class="input-group-append">
                             <span class="input-group-text">@bsblapor.com</span>
                         </div>
+                        <div class="invalid-feedback" id="email-error">Email sudah ada sebelumnya.</div>
                     </div>
                     @error('email_username')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                     @error('email')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
@@ -68,6 +69,8 @@
         const form = document.getElementById('edit-admin-form');
         const updateButton = document.getElementById('update-btn');
         const inputs = form.querySelectorAll('input, select');
+        const emailInput = document.getElementById('email_username');
+        const emailError = document.getElementById('email-error');
         let initialFormState = {};
 
         inputs.forEach(input => {
@@ -90,12 +93,54 @@
                 }
             }
             
-            updateButton.disabled = !hasChanged;
+            const isEmailInvalid = emailInput.classList.contains('is-invalid');
+            updateButton.disabled = !hasChanged || isEmailInvalid;
         }
 
         inputs.forEach(input => {
             input.addEventListener('input', checkForChanges);
             input.addEventListener('change', checkForChanges);
+        });
+
+        let debounceTimer;
+        emailInput.addEventListener('input', function () {
+            checkForChanges();
+            clearTimeout(debounceTimer);
+            
+            if (emailInput.value === initialFormState['email_username']) {
+                emailInput.classList.remove('is-invalid');
+                emailError.classList.remove('d-block');
+                checkForChanges();
+                return;
+            }
+
+            debounceTimer = setTimeout(function () {
+                const emailUsername = emailInput.value;
+                if (emailUsername.length > 2) {
+                    fetch('/api/check-email', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            email_username: emailUsername,
+                            ignore_user_id: {{ $admin->id }}
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.is_taken) {
+                            emailInput.classList.add('is-invalid');
+                            emailError.classList.add('d-block');
+                        } else {
+                            emailInput.classList.remove('is-invalid');
+                            emailError.classList.remove('d-block');
+                        }
+                        checkForChanges();
+                    });
+                }
+            }, 500);
         });
     });
 </script>

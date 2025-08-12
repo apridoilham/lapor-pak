@@ -8,6 +8,15 @@ use Illuminate\Validation\Rule;
 
 class StoreReportRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('email_username')) {
+            $this->merge([
+                'email' => $this->email_username . '@bsblapor.com',
+            ]);
+        }
+    }
+    
     public function rules(): array
     {
         $rules = [
@@ -18,13 +27,13 @@ class StoreReportRequest extends FormRequest
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
             'address' => 'required|string|max:500',
-            'visibility' => ['required', Rule::enum(ReportVisibilityEnum::class)],
         ];
 
-        if (auth()->user()->hasRole('admin')) {
-            $rules['resident_id'] = 'required|exists:residents,id';
-        } else {
+        if ($this->user()->hasRole('resident')) {
+            $rules['visibility'] = ['required', Rule::enum(ReportVisibilityEnum::class)];
             $rules['resident_id'] = 'nullable|exists:residents,id';
+        } else {
+            $rules['resident_id'] = 'required|exists:residents,id';
         }
 
         return $rules;

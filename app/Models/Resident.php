@@ -1,23 +1,40 @@
 <?php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 class Resident extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
         'avatar',
-        'rt_id',    // <-- Diubah
-        'rw_id',    // <-- Diubah
         'address',
+        'rt_id',
+        'rw_id',
     ];
 
-    public function user() { return $this->belongsTo(User::class); }
-    public function reports() { return $this->hasMany(Report::class); }
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
-    // ▼▼▼ TAMBAHKAN RELASI BARU INI ▼▼▼
-    public function rt() { return $this->belongsTo(Rt::class); }
-    public function rw() { return $this->belongsTo(Rw::class); }
+    public function reports()
+    {
+        return $this->hasMany(Report::class);
+    }
+
+    public function rt(): BelongsTo
+    {
+        return $this->belongsTo(Rt::class);
+    }
+
+    public function rw(): BelongsTo
+    {
+        return $this->belongsTo(Rw::class);
+    }
 }

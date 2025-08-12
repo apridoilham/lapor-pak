@@ -60,7 +60,12 @@
         </div>
 
         <div class="mb-3">
-            <label for="map" class="form-label fw-bold">Lokasi Laporan</label>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <label for="map" class="form-label fw-bold">Lokasi Laporan</label>
+                <button type="button" class="btn btn-outline-primary btn-sm" id="detect-location-btn">
+                    <i class="fa-solid fa-map-marker-alt"></i> Cek Lokasi Saya
+                </button>
+            </div>
             <div id="map" class="rounded-3"></div>
         </div>
 
@@ -149,6 +154,68 @@
 
                 checkFormValidity();
             }
+
+            // Map Script Integration
+            const latitudeInput = document.getElementById('latitude');
+            const longitudeInput = document.getElementById('longitude');
+            const addressInput = document.getElementById('address');
+            const detectButton = document.getElementById('detect-location-btn');
+            const defaultLocation = [-6.3816, 106.7420]; 
+
+            const map = L.map('map').setView(defaultLocation, 13);
+            let marker = L.marker(defaultLocation, { draggable: true }).addTo(map);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            function updateAddress(lat, lng) {
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.display_name) {
+                            addressInput.value = data.display_name;
+                            checkFormValidity();
+                        }
+                    }).catch(error => {
+                        console.error('Error fetching address:', error);
+                        addressInput.value = 'Gagal mendapatkan alamat.';
+                    });
+            }
+
+            function updateInputs(latlng) {
+                latitudeInput.value = latlng.lat.toFixed(8);
+                longitudeInput.value = latlng.lng.toFixed(8);
+                updateAddress(latlng.lat, latlng.lng);
+            }
+
+            marker.on('dragend', function(e) {
+                updateInputs(e.target.getLatLng());
+            });
+            
+            function detectLocation() {
+                if ('geolocation' in navigator) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        const newLatLng = new L.LatLng(lat, lng);
+                        map.setView(newLatLng, 17);
+                        marker.setLatLng(newLatLng);
+                        updateInputs(newLatLng);
+                    }, function(error) {
+                        alert('Gagal mendeteksi lokasi. Pastikan izin lokasi telah diberikan.');
+                        console.error(error);
+                    });
+                } else {
+                    alert('Geolocation tidak didukung oleh browser Anda.');
+                }
+            }
+
+            detectButton.addEventListener('click', detectLocation);
+            
+            // Auto-detect location on page load
+            detectLocation();
+
         });
     </script>
 @endsection

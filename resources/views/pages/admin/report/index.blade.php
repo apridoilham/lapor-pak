@@ -3,7 +3,7 @@
 @section('title', 'Data Laporan')
 
 @section('content')
-    <a href="{{ route('admin.report.create') }}" class="btn btn-primary mb-3">Tambah Data Laporan</a>
+    <a href="{{ route('admin.report.create') }}" class="btn btn-primary mb-3">Tambah Laporan Pelapor</a>
 
     @role('super-admin')
     <div class="card shadow mb-4">

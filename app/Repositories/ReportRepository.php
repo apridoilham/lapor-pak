@@ -45,7 +45,7 @@ class ReportRepository implements ReportRepositoryInterface
 
     public function getAllReportsForAdmin(Request $request, int $rwId = null, int $rtId = null)
     {
-        $query = Report::with('resident.user', 'reportCategory', 'latestStatus');
+        $query = Report::with('resident.user', 'reportCategory', 'latestStatus')->whereHas('resident');
 
         if ($rtId) {
             $query->whereHas('resident', function ($q) use ($rtId) {
@@ -89,7 +89,7 @@ class ReportRepository implements ReportRepositoryInterface
 
     public function getLatestReportsForAdmin(int $rwId = null)
     {
-        $query = Report::with('resident.user', 'reportCategory', 'latestStatus');
+        $query = Report::with('resident.user', 'reportCategory', 'latestStatus')->whereHas('resident');
 
         if ($rwId) {
             $query->whereHas('resident', function ($q) use ($rwId) {
@@ -230,7 +230,7 @@ class ReportRepository implements ReportRepositoryInterface
 
     public function countReports(int $rwId = null): int
     {
-        return Report::when($rwId, function ($query) use ($rwId) {
+        return Report::whereHas('resident')->when($rwId, function ($query) use ($rwId) {
             $query->whereHas('resident', function ($q) use ($rwId) {
                 $q->where('rw_id', $rwId);
             });
@@ -240,6 +240,7 @@ class ReportRepository implements ReportRepositoryInterface
     public function getCategoryReportCounts(int $rwId = null)
     {
         return ReportCategory::withCount(['reports' => function ($query) use ($rwId) {
+            $query->whereHas('resident');
             if ($rwId) {
                 $query->whereHas('resident', function ($q) use ($rwId) {
                     $q->where('rw_id', $rwId);
@@ -251,6 +252,7 @@ class ReportRepository implements ReportRepositoryInterface
     public function getDailyReportCounts(int $rwId = null)
     {
         return Report::query()
+            ->whereHas('resident')
             ->when($rwId, function ($query) use ($rwId) {
                 $query->whereHas('resident', function ($q) use ($rwId) {
                     $q->where('rw_id', $rwId);
@@ -267,6 +269,7 @@ class ReportRepository implements ReportRepositoryInterface
     public function getReportCountsByRw()
     {
         return Report::query()
+            ->whereHas('resident')
             ->join('residents', 'reports.resident_id', '=', 'residents.id')
             ->join('rws', 'residents.rw_id', '=', 'rws.id')
             ->select('rws.number as rw_number', DB::raw('count(*) as count'))
@@ -277,7 +280,7 @@ class ReportRepository implements ReportRepositoryInterface
 
     public function getStatusCounts(int $rwId = null): array
     {
-        $query = Report::query();
+        $query = Report::query()->whereHas('resident');
 
         if ($rwId) {
             $query->whereHas('resident', function ($q) use ($rwId) {
@@ -309,6 +312,7 @@ class ReportRepository implements ReportRepositoryInterface
     public function getReportCountsByRt(int $rwId)
     {
         return Report::query()
+            ->whereHas('resident')
             ->join('residents', 'reports.resident_id', '=', 'residents.id')
             ->join('rts', 'residents.rt_id', '=', 'rts.id')
             ->where('residents.rw_id', $rwId)

@@ -27,6 +27,7 @@
             <div class="input-group">
                 <input type="text" class="form-control @error('email_username') is-invalid @enderror @error('email') is-invalid @enderror" id="email_username" name="email_username" value="{{ old('email_username') }}" required autocomplete="email">
                 <span class="input-group-text">@bsblapor.com</span>
+                <div class="invalid-feedback" id="email-error">Email sudah ada sebelumnya.</div>
             </div>
             @error('email_username')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
             @error('email')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
@@ -102,14 +103,10 @@
             function fetchRts(rwId, selectedRtId = null) {
                 rtSelect.disabled = true;
                 rtSelect.innerHTML = '<option value="">Memuat RT...</option>';
-
                 if (!rwId) return;
 
                 fetch(`/api/get-rts-by-rw/${rwId}`)
-                    .then(response => {
-                        if (!response.ok) throw new Error('Network response was not ok');
-                        return response.json();
-                    })
+                    .then(response => response.json())
                     .then(data => {
                         rtSelect.innerHTML = '<option value="" disabled selected>Pilih RT</option>';
                         if (data.length > 0) {
@@ -124,44 +121,68 @@
                             });
                             rtSelect.disabled = false;
                         } else {
-                            rtSelect.innerHTML = '<option value="" disabled selected>Tidak ada RT di RW ini</option>';
+                            rtSelect.innerHTML = '<option value="" disabled selected>Tidak ada RT</option>';
                         }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching RTs:', error);
-                        rtSelect.innerHTML = '<option value="" disabled selected>Gagal memuat RT</option>';
                     });
             }
 
-            rwSelect.addEventListener('change', function() {
-                fetchRts(this.value);
-            });
-            
-            if (rwSelect.value) {
-                fetchRts(rwSelect.value, oldRtId);
-            }
+            rwSelect.addEventListener('change', function() { fetchRts(this.value); });
+            if (rwSelect.value) { fetchRts(rwSelect.value, oldRtId); }
 
             const form = document.getElementById('register-form');
             const registerButton = document.getElementById('register-btn');
             const requiredInputs = form.querySelectorAll('[required]');
+            const emailInput = document.getElementById('email_username');
+            const emailError = document.getElementById('email-error');
 
             function checkFormValidity() {
                 let allFieldsFilled = true;
                 requiredInputs.forEach(input => {
                     if (input.type === 'file') {
-                        if (input.files.length === 0) {
-                            allFieldsFilled = false;
-                        }
+                        if (input.files.length === 0) allFieldsFilled = false;
                     } else if (input.value.trim() === '') {
                         allFieldsFilled = false;
                     }
                 });
-                registerButton.disabled = !allFieldsFilled;
+                
+                const isEmailInvalid = emailInput.classList.contains('is-invalid');
+                registerButton.disabled = !allFieldsFilled || isEmailInvalid;
             }
 
             requiredInputs.forEach(input => {
                 input.addEventListener('input', checkFormValidity);
                 input.addEventListener('change', checkFormValidity);
+            });
+
+            let debounceTimer;
+            emailInput.addEventListener('input', function () {
+                checkFormValidity();
+                clearTimeout(debounceTimer);
+                
+                emailInput.classList.remove('is-invalid');
+                emailError.classList.remove('d-block');
+
+                debounceTimer = setTimeout(function () {
+                    const emailUsername = emailInput.value;
+                    if (emailUsername.length > 2) {
+                        fetch('/api/check-email', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({ email_username: emailUsername })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.is_taken) {
+                                emailInput.classList.add('is-invalid');
+                                emailError.classList.add('d-block');
+                            }
+                            checkFormValidity();
+                        });
+                    }
+                }, 500);
             });
         });
     </script>

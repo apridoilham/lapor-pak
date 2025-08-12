@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreResidentRequest;
 use App\Http\Requests\UpdateResidentRequest;
 use App\Interfaces\ResidentRepositoryInterface;
+use App\Models\Resident;
 use App\Models\Rt;
 use App\Models\Rw;
 use App\Traits\FileUploadTrait;
@@ -59,7 +60,7 @@ class ResidentController extends Controller
             $data['avatar'] = $path;
         }
         $this->residentRepository->createResident($data);
-        Swal::success('Berhasil', 'Data masyarakat berhasil ditambahkan!');
+        Swal::success('Berhasil', 'Data pelapor berhasil ditambahkan!');
         return redirect()->route('admin.resident.index');
     }
 
@@ -87,14 +88,27 @@ class ResidentController extends Controller
             $data['avatar'] = $path;
         }
         $this->residentRepository->updateResident($data, $id);
-        Swal::success('Berhasil', 'Data masyarakat berhasil diubah!');
+        Swal::success('Berhasil', 'Data pelapor berhasil diubah!');
         return redirect()->route('admin.resident.index');
     }
 
     public function destroy(string $id)
     {
         $this->residentRepository->deleteResident($id);
-        Swal::success('Berhasil', 'Data masyarakat berhasil dihapus!');
+        Swal::success('Berhasil', 'Data pelapor berhasil dihapus!');
         return redirect()->route('admin.resident.index');
+    }
+
+    public function getReportsForDeletionAlert(Resident $resident)
+    {
+        $reports = $resident->reports()->with('latestStatus')->get()->map(function ($report) {
+            return [
+                'title' => \Str::limit($report->title, 30),
+                'status' => $report->latestStatus ? $report->latestStatus->status->label() : 'Baru',
+                'updated_at' => $report->latestStatus ? $report->latestStatus->updated_at->isoFormat('D MMM Y, HH:mm') : $report->created_at->isoFormat('D MMM Y, HH:mm'),
+            ];
+        });
+
+        return response()->json($reports);
     }
 }

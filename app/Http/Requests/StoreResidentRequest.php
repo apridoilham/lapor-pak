@@ -10,7 +10,8 @@ class StoreResidentRequest extends FormRequest
     {
         if ($this->has('email_username')) {
             $this->merge([
-                'email' => $this->email_username . '@bsblapor.com',
+                'email_username' => strtolower($this->email_username),
+                'email' => strtolower($this->email_username) . '@bsblapor.com',
             ]);
         }
     }
