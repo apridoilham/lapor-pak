@@ -67,11 +67,18 @@
             <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $user->name) }}" required>
             @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
-
+        
+        @php
+            $emailUsername = old('email_username', explode('@', $user->email)[0]);
+        @endphp
         <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email', $user->email) }}" required>
-            @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            <label for="email_username" class="form-label">Email</label>
+            <div class="input-group">
+                <input type="text" class="form-control @error('email_username') is-invalid @enderror @error('email') is-invalid @enderror" id="email_username" name="email_username" value="{{ $emailUsername }}" required>
+                <span class="input-group-text">@bsblapor.com</span>
+            </div>
+            @error('email_username')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+            @error('email')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
         </div>
 
         <hr class="my-4">
@@ -125,49 +132,16 @@
         </div>
         
         <div class="d-grid gap-3 mt-4">
-             <button class="btn btn-primary py-2" type="submit" id="save-changes-btn" disabled>Simpan Perubahan</button>
+             <button class="btn btn-primary py-2" type="submit">Simpan Perubahan</button>
              <a href="{{ route('profile') }}" class="btn btn-link text-secondary text-decoration-none">Kembali</a>
         </div>
     </form>
 @endsection
 
 @section('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @include('sweetalert::alert')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Logika Tombol Simpan Aktif/Nonaktif
-            const form = document.getElementById('profile-form');
-            const saveButton = document.getElementById('save-changes-btn');
-            const inputs = form.querySelectorAll('input, select, textarea');
-            let initialFormState = {};
-            inputs.forEach(input => {
-                if (input.type === 'file') {
-                    initialFormState[input.name] = null;
-                } else {
-                    initialFormState[input.name] = input.value;
-                }
-            });
-
-            function checkForChanges() {
-                let hasChanged = false;
-                inputs.forEach(input => {
-                    if (input.type === 'file') {
-                        if (input.files.length > 0) hasChanged = true;
-                    } else if (initialFormState[input.name] !== input.value) {
-                        hasChanged = true;
-                    }
-                });
-                saveButton.disabled = !hasChanged;
-            }
-            inputs.forEach(input => {
-                input.addEventListener('input', checkForChanges);
-                if (input.type === 'file' || input.tagName.toLowerCase() === 'select') {
-                    input.addEventListener('change', checkForChanges);
-                }
-            });
-
-            // Logika Pratinjau Avatar
             document.getElementById('avatar').addEventListener('change', function(event) {
                 const file = event.target.files[0];
                 if (file) {
@@ -179,7 +153,6 @@
                 }
             });
 
-            // Logika Dropdown RT/RW Bertingkat
             const rwSelect = document.getElementById('rw_id');
             const rtSelect = document.getElementById('rt_id');
             const activeRtId = "{{ old('rt_id', $user->resident->rt_id) }}";
@@ -221,29 +194,6 @@
             if (rwSelect.value) {
                 fetchRts(rwSelect.value, activeRtId);
             }
-
-            // Logika Konfirmasi Submit dengan SweetAlert
-            form.addEventListener('submit', function(event) {
-                if (saveButton.disabled) {
-                    event.preventDefault();
-                    return;
-                }
-                event.preventDefault();
-                Swal.fire({
-                    title: 'Simpan Perubahan?',
-                    text: "Apakah Anda yakin ingin menyimpan perubahan pada profil Anda?",
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#16752B',
-                    cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Ya, Simpan!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        form.submit();
-                    }
-                });
-            });
         });
     </script>
 @endsection

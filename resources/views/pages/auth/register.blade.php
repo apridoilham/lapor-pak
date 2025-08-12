@@ -23,9 +23,13 @@
         </div>
         
         <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" required autocomplete="email">
-            @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            <label for="email_username" class="form-label">Email</label>
+            <div class="input-group">
+                <input type="text" class="form-control @error('email_username') is-invalid @enderror @error('email') is-invalid @enderror" id="email_username" name="email_username" value="{{ old('email_username') }}" required autocomplete="email">
+                <span class="input-group-text">@bsblapor.com</span>
+            </div>
+            @error('email_username')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+            @error('email')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
         </div>
 
         <div class="mb-3">
@@ -93,7 +97,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             const rwSelect = document.getElementById('rw_id');
             const rtSelect = document.getElementById('rt_id');
-            // Menyimpan nilai RT lama jika ada error validasi
             const oldRtId = "{{ old('rt_id') }}";
 
             function fetchRts(rwId, selectedRtId = null) {
@@ -102,7 +105,6 @@
 
                 if (!rwId) return;
 
-                // Panggil API yang sudah kita buat
                 fetch(`/api/get-rts-by-rw/${rwId}`)
                     .then(response => {
                         if (!response.ok) throw new Error('Network response was not ok');
@@ -115,13 +117,12 @@
                                 const option = document.createElement('option');
                                 option.value = rt.id;
                                 option.textContent = rt.number;
-                                // Jika ada nilai RT lama (dari error validasi), pilih kembali
                                 if (selectedRtId && rt.id == selectedRtId) {
                                     option.selected = true;
                                 }
                                 rtSelect.appendChild(option);
                             });
-                            rtSelect.disabled = false; // Aktifkan kembali dropdown RT
+                            rtSelect.disabled = false;
                         } else {
                             rtSelect.innerHTML = '<option value="" disabled selected>Tidak ada RT di RW ini</option>';
                         }
@@ -136,8 +137,6 @@
                 fetchRts(this.value);
             });
             
-            // Jika ada nilai RW lama (karena error validasi),
-            // picu event change untuk otomatis memuat RT yang berelasi
             if (rwSelect.value) {
                 fetchRts(rwSelect.value, oldRtId);
             }

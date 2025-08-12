@@ -18,11 +18,22 @@
                     <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $admin->name) }}" required>
                     @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
+                
+                @php
+                    $emailUsername = old('email_username', explode('@', $admin->email)[0]);
+                @endphp
                 <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email', $admin->email) }}" required>
-                    @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    <label for="email_username">Email</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control @error('email_username') is-invalid @enderror @error('email') is-invalid @enderror" id="email_username" name="email_username" value="{{ $emailUsername }}" required>
+                        <div class="input-group-append">
+                            <span class="input-group-text">@bsblapor.com</span>
+                        </div>
+                    </div>
+                    @error('email_username')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                    @error('email')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                 </div>
+
                 <div class="form-group">
                     <label for="rw_id">Wilayah RW</label>
                     <select name="rw_id" id="rw_id" class="form-control @error('rw_id') is-invalid @enderror" required>

@@ -13,12 +13,22 @@ class UpdateProfileRequest extends FormRequest
         return auth()->check();
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('email_username')) {
+            $this->merge([
+                'email' => $this->email_username . '@bsblapor.com',
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         $userId = auth()->id();
 
         return [
             'name' => 'required|string|max:255',
+            'email_username' => 'required|string|alpha_num',
             'email' => [
                 'required',
                 'email',

@@ -18,9 +18,15 @@
                     @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" required>
-                    @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    <label for="email_username">Email</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control @error('email_username') is-invalid @enderror @error('email') is-invalid @enderror" id="email_username" name="email_username" value="{{ old('email_username') }}" required>
+                        <div class="input-group-append">
+                            <span class="input-group-text">@bsblapor.com</span>
+                        </div>
+                    </div>
+                    @error('email_username')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                    @error('email')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                 </div>
                 <div class="form-group">
                     <label for="rw_id">Wilayah RW</label>
