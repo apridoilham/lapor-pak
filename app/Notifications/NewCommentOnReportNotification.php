@@ -24,10 +24,11 @@ class NewCommentOnReportNotification extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
+            'type' => 'new_comment',
             'report_id' => $this->comment->report->id,
             'report_code' => $this->comment->report->code,
-            'title' => "{$this->comment->user->name} mengomentari laporan Anda ({$this->comment->report->code}).",
-            'message' => "Komentar: " . \Str::limit($this->comment->body, 50),
+            'comment_body' => \Str::limit($this->comment->body, 50),
+            'action_by_user_id' => $this->comment->user_id,
         ];
     }
 }

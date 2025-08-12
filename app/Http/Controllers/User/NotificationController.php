@@ -14,6 +14,8 @@ class NotificationController extends Controller
     {
         $user = Auth::user();
         $notifications = $user->notifications()->latest()->paginate(10);
+        
+        $notifications->load('notifiable');
 
         return view('pages.app.notifications.index', compact('notifications'));
     }

@@ -7,6 +7,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Auth;
 
 class ReportStatusUpdatedNotification extends Notification implements ShouldQueue
 {
@@ -44,8 +45,8 @@ class ReportStatusUpdatedNotification extends Notification implements ShouldQueu
             'type' => 'status_update',
             'report_id' => $this->report->id,
             'report_code' => $this->report->code,
-            'title' => 'Status laporan ' . $this->report->code . ' telah diperbarui.',
-            'message' => $this->report->latestStatus->status->value,
+            'status_message' => $this->report->latestStatus->status->value,
+            'action_by_user_id' => Auth::id(),
         ];
     }
 }

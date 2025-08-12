@@ -34,27 +34,29 @@
 
     <div class="notification-list">
         @forelse ($notifications as $notification)
+            @php
+                $actionUser = \App\Models\User::find($notification->data['action_by_user_id']);
+                $title = '';
+                $message = '';
+
+                if ($notification->data['type'] === 'new_comment') {
+                    $title = ($actionUser ? $actionUser->name : 'Seseorang') . ' mengomentari laporan Anda (' . $notification->data['report_code'] . ').';
+                    $message = 'Komentar: ' . $notification->data['comment_body'];
+                } else { // status_update
+                    $title = 'Status laporan ' . $notification->data['report_code'] . ' telah diperbarui.';
+                    $statusEnum = \App\Enums\ReportStatusEnum::tryFrom($notification->data['status_message']);
+                    $message = 'Status terbaru: ' . ($statusEnum ? $statusEnum->label() : $notification->data['status_message']);
+                }
+            @endphp
+
             <div class="notification-item-container notification-item {{ !$notification->read_at ? 'unread' : '' }}">
                 <a href="{{ route('notifications.read', $notification->id) }}" class="notification-link-main">
                     <div class="notification-icon">
                         <i class="fa-solid fa-file-alt"></i>
                     </div>
                     <div class="notification-content">
-                        <p class="mb-1 fw-bold">{{ $notification->data['title'] }}</p>
-                        
-                        <p class="text-secondary mb-1">
-                            @php
-                                $message = $notification->data['message'];
-                                $statusEnum = \App\Enums\ReportStatusEnum::tryFrom($message);
-                            @endphp
-
-                            @if ($statusEnum)
-                                Status terbaru: {{ $statusEnum->label() }}
-                            @else
-                                {{ $message }}
-                            @endif
-                        </p>
-                        
+                        <p class="mb-1 fw-bold">{{ $title }}</p>
+                        <p class="text-secondary mb-1">{{ $message }}</p>
                         <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
                     </div>
                 </a>
