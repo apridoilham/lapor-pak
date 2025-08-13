@@ -12,28 +12,26 @@
                 @method('PUT')
                 <div class="form-group">
                     <label for="name">Nama</label>
-                    <input type="text" class="form-control" name="name" value="{{ old('name', $resident->user->name) }}" required>
+                    <input type="text" class="form-control bg-light" name="name" value="{{ $resident->user->name }}" readonly disabled>
+                    <small class="form-text text-muted">Nama dan Email diambil dari akun Google dan tidak bisa diubah.</small>
                 </div>
 
-                @php
-                    $emailUsername = old('email_username', explode('@', $resident->user->email)[0]);
-                @endphp
                 <div class="form-group">
-                    <label for="email_username">Email</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control @error('email_username') is-invalid @enderror @error('email') is-invalid @enderror" id="email_username" name="email_username" value="{{ $emailUsername }}" required>
-                        <div class="input-group-append">
-                            <span class="input-group-text">@bsblapor.com</span>
-                        </div>
-                        <div class="invalid-feedback" id="email-error">Email sudah ada sebelumnya.</div>
-                    </div>
-                    @error('email_username')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
-                    @error('email')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control bg-light" name="email" value="{{ $resident->user->email }}" readonly disabled>
                 </div>
 
                 <div class="form-group">
                     <label>Foto Profil (Kosongkan jika tidak diubah)</label>
-                    <img src="{{ asset('storage/' . $resident->avatar) }}" alt="avatar" width="100" class="d-block mb-2">
+                    @php
+                        $avatarUrl = $resident->avatar;
+                        if ($avatarUrl && !Str::startsWith($avatarUrl, 'http')) {
+                            $avatarUrl = asset('storage/' . $avatarUrl);
+                        } elseif (!$avatarUrl) {
+                            $avatarUrl = asset('assets/app/images/default-avatar.png');
+                        }
+                    @endphp
+                    <img src="{{ $avatarUrl }}" alt="avatar" width="100" class="d-block mb-2">
                     <input type="file" class="form-control" name="avatar">
                 </div>
 
@@ -64,16 +62,16 @@
                     <textarea name="address" class="form-control" rows="3" required>{{ old('address', $resident->address) }}</textarea>
                 </div>
                 <hr>
-                <p class="text-muted">Kosongkan jika tidak ingin meresetnya.</p>
+                <p class="text-muted">Kosongkan jika tidak ingin mereset password pengguna.</p>
                 <div class="form-group">
-                    <label for="password">Password</label>
+                    <label for="password">Password Baru</label>
                     <input type="password" class="form-control" name="password" autocomplete="new-password">
                 </div>
                 <div class="form-group">
                     <label for="password_confirmation">Konfirmasi Password</label>
                     <input type="password" class="form-control" name="password_confirmation" autocomplete="new-password">
                 </div>
-                <button type="submit" class="btn btn-primary" id="update-btn" disabled>Simpan Perubahan</button>
+                <button type="submit" class="btn btn-primary" id="update-btn">Simpan Perubahan</button>
             </form>
         </div>
     </div>
@@ -114,73 +112,6 @@
             if (rwSelect.value) {
                 fetchRts(rwSelect.value, activeRtId);
             }
-
-            const form = document.getElementById('edit-resident-form');
-            const updateButton = document.getElementById('update-btn');
-            const inputs = form.querySelectorAll('input, select, textarea');
-            const emailInput = document.getElementById('email_username');
-            const emailError = document.getElementById('email-error');
-            let initialFormState = {};
-
-            inputs.forEach(input => {
-                if (input.type === 'file' || input.type === 'password' || input.name === '_token' || input.name === '_method') return;
-                initialFormState[input.name] = input.value;
-            });
-
-            function checkForChanges() {
-                let hasChanged = false;
-                inputs.forEach(input => {
-                    if (input.type === 'file' && input.files.length > 0) {
-                        hasChanged = true;
-                    } else if (input.type === 'password' && input.value.length > 0) {
-                        hasChanged = true;
-                    } else if (initialFormState.hasOwnProperty(input.name) && initialFormState[input.name] !== input.value) {
-                        hasChanged = true;
-                    }
-                });
-
-                const isEmailInvalid = emailInput.classList.contains('is-invalid');
-                updateButton.disabled = !hasChanged || isEmailInvalid;
-            }
-
-            inputs.forEach(input => {
-                input.addEventListener('input', checkForChanges);
-                input.addEventListener('change', checkForChanges);
-            });
-
-            let debounceTimer;
-            emailInput.addEventListener('input', function () {
-                checkForChanges();
-                clearTimeout(debounceTimer);
-                
-                emailInput.classList.remove('is-invalid');
-                emailError.classList.remove('d-block');
-
-                debounceTimer = setTimeout(function () {
-                    const emailUsername = emailInput.value;
-                    if (emailUsername.length > 2) {
-                        fetch('/api/check-email', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: JSON.stringify({
-                                email_username: emailUsername,
-                                ignore_user_id: {{ $resident->user->id }}
-                            })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.is_taken) {
-                                emailInput.classList.add('is-invalid');
-                                emailError.classList.add('d-block');
-                            }
-                            checkForChanges();
-                        });
-                    }
-                }, 500);
-            });
         });
     </script>
 @endsection

@@ -30,17 +30,19 @@ class ProfileController extends Controller
 
     public function index()
     {
-        $user = Auth::user();
-
-        if ($user->hasAnyRole(['admin', 'super-admin'])) {
-            $user->load('rw');
-            return view('pages.admin.profile', ['user' => $user]);
+        $user = Auth::user()->load('resident.rt', 'resident.rw');
+        
+        // Pastikan user memiliki data resident sebelum menghitung statistik
+        if (!$user->resident) {
+            // Ini adalah kasus darurat jika data resident tidak ada, arahkan ke edit
+            Swal::error('Data Tidak Lengkap', 'Data kependudukan Anda tidak ditemukan, harap lengkapi profil.');
+            return redirect()->route('profile.edit');
         }
 
-        $user->load('resident.rt', 'resident.rw');
         $stats = $this->reportRepository->countStatusesByResidentId($user->resident->id);
 
         return view('pages.app.profile', [
+            'user' => $user, // Kirim variabel $user ke view
             'activeReportsCount' => $stats['active'],
             'completedReportsCount' => $stats['completed'],
             'rejectedReportsCount' => $stats['rejected'],
@@ -64,7 +66,7 @@ class ProfileController extends Controller
         $validatedData = $request->validated();
         $resident = $request->user()->resident;
 
-        if ($path = $this->handleFileUpload($request, 'avatar', 'assets/avatar')) {
+        if ($path = $this->handleFileUpload($request, 'avatar', 'assets/avatar', $resident->avatar)) {
             $validatedData['avatar'] = $path;
         }
 

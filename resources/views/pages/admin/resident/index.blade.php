@@ -3,8 +3,6 @@
 @section('title', 'Data Pelapor')
 
 @section('content')
-    <a href="{{ route('admin.resident.create') }}" class="btn btn-primary mb-3">Tambah Pelapor</a>
-
     @role('super-admin')
     <div class="card shadow mb-4">
         <div class="card-header py-3">
@@ -26,7 +24,7 @@
                             </select>
                         </div>
                     </div>
-                     <div class="col-md-4">
+                    <div class="col-md-4">
                         <div class="form-group mb-0">
                             <label for="rt_id">Filter berdasarkan RT</label>
                             <select name="rt" id="rt_id" class="form-control" disabled>
@@ -37,7 +35,7 @@
                     <div class="col-md-2">
                         <button type="submit" class="btn btn-primary w-100">Filter</button>
                     </div>
-                     <div class="col-md-2">
+                    <div class="col-md-2">
                         <a href="{{ route('admin.resident.index') }}" class="btn btn-secondary w-100">Reset</a>
                     </div>
                 </div>
@@ -54,13 +52,13 @@
         <div class="card-body">
             <form action="{{ route('admin.resident.index') }}" method="GET">
                 <div class="row align-items-end">
-                     <div class="col-md-8">
+                    <div class="col-md-8">
                         <div class="form-group mb-0">
                             <label for="rt_id">Filter berdasarkan RT</label>
                             <select name="rt" id="rt_id" class="form-control">
                                 <option value="">Semua RT di RW {{ Auth::user()->rw?->number }}</option>
                                 @foreach ($rts as $rt)
-                                     <option value="{{ $rt->id }}" {{ request('rt') == $rt->id ? 'selected' : '' }}>
+                                    <option value="{{ $rt->id }}" {{ request('rt') == $rt->id ? 'selected' : '' }}>
                                         RT {{ $rt->number }}
                                     </option>
                                 @endforeach
@@ -70,7 +68,7 @@
                     <div class="col-md-2">
                         <button type="submit" class="btn btn-primary w-100">Filter</button>
                     </div>
-                     <div class="col-md-2">
+                    <div class="col-md-2">
                         <a href="{{ route('admin.resident.index') }}" class="btn btn-secondary w-100">Reset</a>
                     </div>
                 </div>
@@ -102,7 +100,15 @@
                                 <td>{{ $resident->user->email }}</td>
                                 <td>{{ $resident->user->name }}</td>
                                 <td>
-                                    <img src="{{ asset('storage/' . $resident->avatar) }}" alt="avatar" width="100">
+                                    @php
+                                        $avatarUrl = $resident->avatar;
+                                        if ($avatarUrl && !Str::startsWith($avatarUrl, 'http')) {
+                                            $avatarUrl = asset('storage/' . $avatarUrl);
+                                        } elseif (!$avatarUrl) {
+                                            $avatarUrl = asset('assets/app/images/default-avatar.png');
+                                        }
+                                    @endphp
+                                    <img src="{{ $avatarUrl }}" alt="avatar" width="100">
                                 </td>
                                 <td>
                                     <a href="{{ route('admin.resident.edit', $resident->id) }}" class="btn btn-warning">Ubah</a>

@@ -2,19 +2,21 @@
 
 namespace App\Interfaces;
 
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Collection;
 use Illuminate\Http\Request;
 
 interface ReportRepositoryInterface
 {
-    public function getAllReportsForAdmin(Request $request, int $rwId = null, int $rtId = null);
+    public function getAllReportsForAdmin(Request $request, int $rwId = null, int $rtId = null): EloquentCollection;
 
-    public function getAllReportsForUser(Request $request);
+    public function getAllReportsForUser(Request $request): EloquentCollection;
 
-    public function getLatestReportsForAdmin(int $rwId = null);
+    public function getLatestReportsForAdmin(?int $rwId = null, int $limit = 5): EloquentCollection;
 
-    public function getLatestReportsForUser(Request $request);
+    public function getLatestReportsForUser(Request $request): EloquentCollection;
 
-    public function getReportByResidentId(int $residentId, ?string $status);
+    public function getReportByResidentId(int $residentId, ?string $status): EloquentCollection;
     
     public function getReportById(int $id);
 
@@ -28,17 +30,18 @@ interface ReportRepositoryInterface
 
     public function countStatusesByResidentId(int $residentId): array;
 
-    public function getFilteredReports(array $filters);
+    public function getFilteredReports(array $filters): EloquentCollection;
 
     public function countReports(int $rwId = null): int;
     
-    public function getCategoryReportCounts(int $rwId = null);
+    public function getCategoryReportCounts(int $rwId = null): EloquentCollection;
 
-    public function getDailyReportCounts(int $rwId = null);
+    // Perbaikan: Return type sekarang adalah Illuminate\Support\Collection
+    public function getDailyReportCounts(int $rwId = null): Collection;
 
-    public function getReportCountsByRw();
+    public function getReportCountsByRw(): EloquentCollection;
 
     public function getStatusCounts(int $rwId = null): array;
 
-    public function getReportCountsByRt(int $rwId);
+    public function getReportCountsByRt(int $rwId): EloquentCollection;
 }

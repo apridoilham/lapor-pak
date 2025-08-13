@@ -3,7 +3,7 @@
 @section('title', 'Ubah Profil')
 
 @section('content')
-    <a href="{{ route('profile') }}" class="btn btn-danger mb-3">Kembali ke Profil</a>
+    <a href="{{ route('admin.profile.index') }}" class="btn btn-danger mb-3">Kembali ke Profil</a>
 
     <div class="card shadow mb-4">
         <div class="card-header py-3">
@@ -37,7 +37,7 @@
                 <div class="form-group">
                     <label for="current_password">Password Lama</label>
                     <input type="password" class="form-control @error('current_password') is-invalid @enderror" id="current_password" name="current_password" autocomplete="new-password">
-                     @error('current_password')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    @error('current_password')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div class="form-group">
                     <label for="password">Password Baru</label>

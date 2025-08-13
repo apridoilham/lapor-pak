@@ -51,7 +51,8 @@
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="visibility" id="visibility-{{ $visibility->value }}" value="{{ $visibility->value }}" {{ old('visibility', $report->visibility->value) == $visibility->value ? 'checked' : '' }}>
                     <label class="form-check-label" for="visibility-{{ $visibility->value }}">
-                        {{ $visibility->label() }}
+                        {{-- PERUBAHAN DI SINI --}}
+                        {{ $visibility->label(Auth::user()) }}
                     </label>
                 </div>
             @endforeach
@@ -94,7 +95,7 @@
             let hasChanged = false;
             for (const input of inputs) {
                 if (input.name === '_token' || input.name === '_method') continue;
-                
+
                 let currentValue;
                 if (input.type === 'radio') {
                     currentValue = getRadioValue(input.name);

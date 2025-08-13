@@ -7,26 +7,20 @@
 
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Form Tambah Admin</h6>
+            <h6 class="m-0 font-weight-bold text-primary">Form Tambah Admin RW</h6>
         </div>
         <div class="card-body">
             <form action="{{ route('admin.admin-user.store')}}" method="POST" id="create-admin-form">
                 @csrf
                 <div class="form-group">
-                    <label for="name">Nama</label>
-                    <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" required>
+                    <label for="name">Nama Calon Admin</label>
+                    <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" required placeholder="Masukkan nama lengkap calon admin">
                     @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div class="form-group">
-                    <label for="email_username">Email</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control @error('email_username') is-invalid @enderror @error('email') is-invalid @enderror" id="email_username" name="email_username" value="{{ old('email_username') }}" required>
-                        <div class="input-group-append">
-                            <span class="input-group-text">@bsblapor.com</span>
-                        </div>
-                        <div class="invalid-feedback" id="email-error">Email sudah ada sebelumnya.</div>
-                    </div>
-                    @error('email_username')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                    <label for="email">Email Google Calon Admin</label>
+                    <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" required placeholder="contoh: admin.rw01@gmail.com">
+                    <div class="invalid-feedback" id="email-error-message"></div>
                     @error('email')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                 </div>
                 <div class="form-group">
@@ -48,16 +42,7 @@
                         @error('rw_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     @endif
                 </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" required autocomplete="new-password">
-                    @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                </div>
-                <div class="form-group">
-                    <label for="password_confirmation">Konfirmasi Password</label>
-                    <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required autocomplete="new-password">
-                </div>
-                <button type="submit" class="btn btn-primary" id="simpan-btn" disabled>Simpan</button>
+                <button type="submit" class="btn btn-primary" id="submit-btn">Simpan</button>
             </form>
         </div>
     </div>
@@ -66,57 +51,42 @@
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('create-admin-form');
-        const saveButton = document.getElementById('simpan-btn');
-        const requiredInputs = form.querySelectorAll('[required]');
-        const emailInput = document.getElementById('email_username');
-        const emailError = document.getElementById('email-error');
-
-        function checkFormValidity() {
-            let allFieldsFilled = true;
-            requiredInputs.forEach(input => {
-                if (input.value.trim() === '') {
-                    allFieldsFilled = false;
-                }
-            });
-
-            const isEmailInvalid = emailInput.classList.contains('is-invalid');
-            saveButton.disabled = !allFieldsFilled || isEmailInvalid;
-        }
-
-        requiredInputs.forEach(input => {
-            input.addEventListener('input', checkFormValidity);
-            input.addEventListener('change', checkFormValidity);
-        });
-
+        const emailInput = document.getElementById('email');
+        const emailErrorMessage = document.getElementById('email-error-message');
+        const submitButton = document.getElementById('submit-btn');
         let debounceTimer;
-        emailInput.addEventListener('input', function () {
-            checkFormValidity();
+
+        emailInput.addEventListener('input', function() {
             clearTimeout(debounceTimer);
             
-            emailInput.classList.remove('is-invalid');
-            emailError.classList.remove('d-block');
+            const email = this.value;
+            if (email.length < 5 || !email.includes('@')) {
+                return;
+            }
 
-            debounceTimer = setTimeout(function () {
-                const emailUsername = emailInput.value;
-                if (emailUsername.length > 2) {
-                    fetch('/api/check-email', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({ email_username: emailUsername })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.is_taken) {
-                            emailInput.classList.add('is-invalid');
-                            emailError.classList.add('d-block');
-                        }
-                        checkFormValidity();
-                    });
-                }
+            debounceTimer = setTimeout(() => {
+                fetch('/api/check-admin-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ email: email })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.is_taken) {
+                        emailInput.classList.add('is-invalid');
+                        emailErrorMessage.textContent = data.message;
+                        emailErrorMessage.style.display = 'block';
+                        submitButton.disabled = true;
+                    } else {
+                        emailInput.classList.remove('is-invalid');
+                        emailErrorMessage.style.display = 'none';
+                        submitButton.disabled = false;
+                    }
+                });
             }, 500);
         });
     });

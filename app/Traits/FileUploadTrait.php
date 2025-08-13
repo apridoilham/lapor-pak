@@ -3,23 +3,31 @@
 namespace App\Traits;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 trait FileUploadTrait
 {
     /**
-     * Menangani proses unggah file.
+     * Menangani upload file dari request, menyimpannya, dan menghapus file lama jika ada.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param string $inputName Nama field input file (misal: 'image', 'avatar')
-     * @param string $path Direktori penyimpanan di dalam 'storage/app/public'
-     * @return string|null Path file yang disimpan atau null jika tidak ada file.
+     * @param Request $request Instance dari request yang masuk.
+     * @param string $inputName Nama input file dari form.
+     * @param string $path Direktori penyimpanan di dalam 'storage/app/public'.
+     * @param string|null $oldFilePath Path file lama yang akan dihapus jika ada.
+     * @return string|null Path file yang baru disimpan, atau null jika tidak ada file yang diunggah.
      */
-    protected function handleFileUpload(Request $request, string $inputName, string $path): ?string
+    public function handleFileUpload(Request $request, string $inputName, string $path, string $oldFilePath = null): ?string
     {
         if (!$request->hasFile($inputName)) {
             return null;
         }
 
-        return $request->file($inputName)->store($path, 'public');
+        // Hapus file lama jika ada
+        if ($oldFilePath && Storage::disk('public')->exists($oldFilePath)) {
+            Storage::disk('public')->delete($oldFilePath);
+        }
+
+        $file = $request->file($inputName);
+        return $file->store($path, 'public');
     }
 }

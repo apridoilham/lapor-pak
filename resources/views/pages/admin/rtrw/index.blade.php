@@ -32,7 +32,7 @@
                         <div class="form-group">
                             <label for="rt_count">Jumlah RT di Dalamnya</label>
                             <input type="text" name="rt_count" class="form-control @error('rt_count') is-invalid @enderror" placeholder="Contoh: 10" required maxlength="2" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-                             @error('rt_count')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                            @error('rt_count')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <button type="submit" class="btn btn-primary btn-block" id="tambah-btn" disabled>
                             <i class="fa fa-plus-circle"></i> Tambah RW & RT
@@ -63,6 +63,11 @@
                                             <button class="btn btn-info btn-sm mr-2" type="button" data-toggle="collapse" data-target="#collapse{{ $rw->id }}">
                                                 <i class="fa fa-eye"></i> Detail RT
                                             </button>
+
+                                            <a href="{{ route('admin.rtrw.edit', $rw->id) }}" class="btn btn-warning btn-sm mr-2">
+                                                <i class="fa fa-edit"></i> Ubah
+                                            </a>
+
                                             <form action="{{ route('admin.rtrw.destroy', $rw->id) }}" method="POST" class="d-inline delete-form">
                                                 @csrf
                                                 @method('DELETE')
@@ -76,7 +81,7 @@
                                         <div class="p-3 rt-list">
                                             <h6 class="font-weight-bold">Daftar RT di RW {{ $rw->number }}:</h6>
                                             <ul class="list-unstyled mb-0">
-                                                 @forelse ($rw->rts->sortBy('number') as $rt)
+                                                @forelse ($rw->rts->sortBy('number') as $rt)
                                                     <li>- RT {{ $rt->number }}</li>
                                                 @empty
                                                     <li class="text-muted">Belum ada data RT.</li>
@@ -132,30 +137,37 @@
                     if(errorDiv) errorDiv.classList.remove('d-block');
                 }
 
-
                 debounceTimer = setTimeout(function() {
                     const rwNumber = rwNumberInput.value;
                     if (rwNumber.length > 0) {
                         fetch('/api/check-rw', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                },
-                                body: JSON.stringify({
-                                    number: rwNumber
-                                })
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                number: rwNumber
                             })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.is_taken) {
-                                    rwNumberInput.classList.add('is-invalid');
-                                    rwError.classList.add('d-block');
-                                }
-                                checkFormValidity();
-                            });
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.is_taken) {
+                                rwNumberInput.classList.add('is-invalid');
+                                rwError.classList.add('d-block');
+                            }
+                            checkFormValidity();
+                        });
                     }
                 }, 500);
+            });
+
+            // Logika untuk auto-padding input nomor RW
+            rwNumberInput.addEventListener('blur', function() {
+                let value = this.value;
+                if (value && !isNaN(value)) {
+                    this.value = value.padStart(3, '0');
+                }
             });
         });
     </script>

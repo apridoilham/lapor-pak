@@ -8,7 +8,6 @@ use App\Http\Requests\UpdateAdminRequest;
 use App\Interfaces\AdminRepositoryInterface;
 use App\Models\Rw;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 use RealRashid\SweetAlert\Facades\Alert as Swal;
 
 class AdminUserController extends Controller
@@ -20,53 +19,82 @@ class AdminUserController extends Controller
         $this->adminRepository = $adminRepository;
     }
 
+    /**
+     * Menampilkan daftar semua admin.
+     */
     public function index()
     {
         $admins = $this->adminRepository->getAllAdmins();
         return view('pages.admin.user.index', compact('admins'));
     }
 
+    /**
+     * Menampilkan form untuk membuat admin baru.
+     */
     public function create()
     {
         $rws = Rw::orderBy('number')->get();
         return view('pages.admin.user.create', compact('rws'));
     }
 
+    /**
+     * Menyimpan admin baru ke database.
+     */
     public function store(StoreAdminRequest $request)
     {
         $this->adminRepository->createAdmin($request->validated());
-        Swal::success('Berhasil', 'Data Admin baru berhasil ditambahkan.');
+
+        Swal::success('Berhasil', 'Admin baru berhasil ditambahkan.');
         return redirect()->route('admin.admin-user.index');
     }
 
+    /**
+     * Menampilkan detail seorang admin.
+     */
     public function show(User $admin_user)
     {
+        // Pastikan kita hanya menampilkan user dengan role admin
+        if (!$admin_user->hasRole('admin')) {
+            abort(404);
+        }
         $admin_user->load('rw');
         return view('pages.admin.user.show', ['admin' => $admin_user]);
     }
 
+    /**
+     * Menampilkan form untuk mengedit admin.
+     */
     public function edit(User $admin_user)
     {
+        if (!$admin_user->hasRole('admin')) {
+            abort(404);
+        }
         $rws = Rw::orderBy('number')->get();
-        return view('pages.admin.user.edit', ['admin' => $admin_user, 'rws' => $rws]);
+        return view('pages.admin.user.edit', [
+            'admin' => $admin_user,
+            'rws' => $rws,
+        ]);
     }
 
+    /**
+     * Memperbarui data admin di database.
+     */
     public function update(UpdateAdminRequest $request, User $admin_user)
     {
         $this->adminRepository->updateAdmin($request->validated(), $admin_user->id);
+
         Swal::success('Berhasil', 'Data admin berhasil diperbarui.');
         return redirect()->route('admin.admin-user.index');
     }
 
+    /**
+     * Menghapus admin dari database.
+     */
     public function destroy(User $admin_user)
     {
-        if ($admin_user->id === Auth::id()) {
-            Swal::error('Gagal', 'Anda tidak dapat menghapus akun Anda sendiri.');
-            return back();
-        }
-
         $this->adminRepository->deleteAdmin($admin_user->id);
-        Swal::success('Berhasil', 'Data Admin berhasil dihapus.');
+
+        Swal::success('Berhasil', 'Admin berhasil dihapus.');
         return redirect()->route('admin.admin-user.index');
     }
 }

@@ -35,10 +35,12 @@
                             <td>RW {{ $user->rw->number }}</td>
                         </tr>
                         @endif
+                        <tr>
+                            <th>Tanggal Bergabung</th>
+                            <td>{{ $user->created_at->isoFormat('dddd, D MMMM YYYY') }}</td>
+                        </tr>
                     </table>
-                    @role('admin|super-admin')
-                        <a href="{{ route('admin.profile.edit') }}" class="btn btn-primary">Edit Profil</a>
-                    @endrole
+                    <a href="{{ route('admin.profile.edit') }}" class="btn btn-primary">Edit Profil & Password</a>
                 </div>
             </div>
         </div>

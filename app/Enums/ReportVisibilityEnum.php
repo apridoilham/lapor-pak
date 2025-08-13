@@ -2,8 +2,7 @@
 
 namespace App\Enums;
 
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
+use App\Models\User; // Import model User
 
 enum ReportVisibilityEnum: string
 {
@@ -12,16 +11,13 @@ enum ReportVisibilityEnum: string
     case RT = 'rt';
     case PRIVATE = 'private';
 
-    public function label(): string
+    // Metode label sekarang menerima user sebagai parameter
+    public function label(User $user = null): string
     {
-        $user = Auth::user();
-        $rwNumber = $user?->resident?->rw?->number;
-        $rtNumber = $user?->resident?->rt?->number;
-
         return match ($this) {
             self::PUBLIC => 'Publik (Semua Orang)',
-            self::RW => $rwNumber ? "Hanya sesama Warga RW {$rwNumber}" : 'Hanya sesama Warga RW',
-            self::RT => $rtNumber ? "Hanya sesama Warga RT {$rtNumber}" : 'Hanya sesama Warga RT',
+            self::RW => ($user?->resident?->rw?->number) ? "Hanya sesama Warga RW {$user->resident->rw->number}" : 'Hanya sesama Warga RW',
+            self::RT => ($user?->resident?->rt?->number) ? "Hanya sesama Warga RT {$user->resident->rt->number}" : 'Hanya sesama Warga RT',
             self::PRIVATE => 'Hanya Saya (Private)',
         };
     }

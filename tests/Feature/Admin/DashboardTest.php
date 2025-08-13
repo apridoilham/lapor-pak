@@ -17,7 +17,6 @@ class DashboardTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(RolePermissionSeeder::class);
 
         $this->adminUser = User::factory()->create();
         $this->adminUser->assignRole('admin');

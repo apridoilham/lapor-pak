@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('rts', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('rw_id'); // <-- Diubah: Hanya kolom biasa
+            $table->unsignedBigInteger('rw_id');
             $table->string('number', 3);
             $table->timestamps();
         });

@@ -83,6 +83,7 @@
 
                 <div class="form-group">
                     <label>Lokasi Laporan</label>
+                    {{-- Tombol deteksi otomatis dikembalikan --}}
                     <button type="button" class="btn btn-info btn-sm d-block mb-2" id="detect-location-btn">
                         <i class="fa fa-map-marker-alt"></i> Deteksi Lokasi Saya
                     </button>
@@ -124,6 +125,47 @@
         const form = document.getElementById('create-report-form');
         const submitButton = document.getElementById('submit-btn');
         const requiredInputs = form.querySelectorAll('[required]');
+        
+        const messageContainer = document.createElement('div');
+        messageContainer.id = 'custom-message-container';
+        messageContainer.style.position = 'fixed';
+        messageContainer.style.bottom = '1rem';
+        messageContainer.style.left = '50%';
+        messageContainer.style.transform = 'translateX(-50%)';
+        messageContainer.style.padding = '0.75rem 1.25rem';
+        messageContainer.style.borderRadius = '0.5rem';
+        messageContainer.style.color = '#fff';
+        messageContainer.style.zIndex = '1000';
+        messageContainer.style.display = 'none';
+        messageContainer.style.opacity = '0';
+        messageContainer.style.transition = 'opacity 0.3s ease-in-out';
+        document.body.appendChild(messageContainer);
+
+        function showMessage(message, type) {
+            let bgColor = '#007bff';
+            if (type === 'error') {
+                bgColor = '#dc3545';
+            } else if (type === 'success') {
+                bgColor = '#28a745';
+            } else if (type === 'warning') {
+                bgColor = '#ffc107';
+            }
+            
+            messageContainer.style.backgroundColor = bgColor;
+            messageContainer.textContent = message;
+            messageContainer.style.display = 'block';
+            
+            setTimeout(() => {
+                messageContainer.style.opacity = '1';
+            }, 10);
+            
+            setTimeout(() => {
+                messageContainer.style.opacity = '0';
+                setTimeout(() => {
+                    messageContainer.style.display = 'none';
+                }, 300);
+            }, 5000);
+        }
 
         function checkFormValidity() {
             let allFieldsFilled = true;
@@ -143,7 +185,7 @@
             input.addEventListener('input', checkFormValidity);
             input.addEventListener('change', checkFormValidity);
         });
-
+        
         const latitudeInput = document.getElementById('latitude');
         const longitudeInput = document.getElementById('longitude');
         const addressInput = document.getElementById('address');
@@ -163,11 +205,14 @@
                 .then(data => {
                     if (data && data.display_name) {
                         addressInput.value = data.display_name;
-                        checkFormValidity();
+                    } else {
+                        addressInput.value = 'Alamat tidak ditemukan.';
                     }
+                    checkFormValidity();
                 }).catch(error => {
                     console.error('Error fetching address:', error);
                     addressInput.value = 'Gagal mendapatkan alamat.';
+                    checkFormValidity();
                 });
         }
 
@@ -175,31 +220,75 @@
             latitudeInput.value = latlng.lat.toFixed(8);
             longitudeInput.value = latlng.lng.toFixed(8);
             updateAddress(latlng.lat, latlng.lng);
+            checkFormValidity();
         }
 
         marker.on('dragend', function(e) {
             updateInputs(e.target.getLatLng());
         });
         
+        // Memanggil updateInputs() dengan lokasi default saat halaman dimuat
+        updateInputs(L.latLng(defaultLocation[0], defaultLocation[1]));
+
         function detectLocation() {
+            detectButton.disabled = true;
+            detectButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Mendeteksi...';
+            
             if ('geolocation' in navigator) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    const newLatLng = new L.LatLng(lat, lng);
-                    map.setView(newLatLng, 17);
-                    marker.setLatLng(newLatLng);
-                    updateInputs(newLatLng);
-                }, function(error) {
-                    alert('Gagal mendeteksi lokasi. Pastikan izin lokasi telah diberikan.');
-                    console.error(error);
-                });
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        const newLatLng = new L.LatLng(lat, lng);
+                        map.setView(newLatLng, 17);
+                        marker.setLatLng(newLatLng);
+                        updateInputs(newLatLng);
+                        
+                        detectButton.disabled = false;
+                        detectButton.innerHTML = '<i class="fa fa-map-marker-alt"></i> Deteksi Lokasi Saya';
+                        showMessage('Lokasi berhasil dideteksi!', 'success');
+                    },
+                    function(error) {
+                        detectButton.disabled = false;
+                        detectButton.innerHTML = '<i class="fa fa-map-marker-alt"></i> Deteksi Lokasi Saya';
+                        
+                        let errorMessage;
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage = 'Izin lokasi ditolak. Mohon berikan izin lokasi di pengaturan browser.';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage = 'Lokasi tidak dapat ditemukan. Coba lagi atau pindahkan marker secara manual.';
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage = 'Waktu deteksi lokasi habis. Periksa koneksi internet Anda.';
+                                break;
+                            default:
+                                errorMessage = 'Terjadi kesalahan tidak terduga saat mendeteksi lokasi.';
+                                break;
+                        }
+                        
+                        showMessage(errorMessage, 'error');
+                        console.error(error);
+                        
+                        updateInputs(L.latLng(defaultLocation[0], defaultLocation[1]));
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
+                    }
+                );
             } else {
-                alert('Geolocation tidak didukung oleh browser Anda.');
+                detectButton.disabled = false;
+                detectButton.innerHTML = '<i class="fa fa-map-marker-alt"></i> Deteksi Lokasi Saya';
+                showMessage('Geolocation tidak didukung oleh browser ini.', 'error');
             }
         }
 
         detectButton.addEventListener('click', detectLocation);
+        
+        checkFormValidity();
     });
 </script>
 @endsection

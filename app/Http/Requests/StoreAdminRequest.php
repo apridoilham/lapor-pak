@@ -2,20 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\UniqueUserRole;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreAdminRequest extends FormRequest
 {
-    protected function prepareForValidation(): void
-    {
-        if ($this->has('email_username')) {
-            $this->merge([
-                'email_username' => strtolower($this->email_username),
-                'email' => strtolower($this->email_username) . '@bsblapor.com',
-            ]);
-        }
-    }
-
     public function authorize(): bool
     {
         return $this->user()->hasRole('super-admin');
@@ -25,9 +16,7 @@ class StoreAdminRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'email_username' => 'required|string|alpha_num',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8|confirmed',
+            'email' => ['required', 'email', 'max:255', new UniqueUserRole()],
             'rw_id' => 'required|exists:rws,id',
         ];
     }

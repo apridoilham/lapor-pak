@@ -6,11 +6,9 @@ use App\Enums\ReportStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Interfaces\ReportRepositoryInterface;
 use App\Interfaces\ResidentRepositoryInterface;
-use App\Models\ReportCategory;
-use App\Models\Rw;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
+// Hapus 'use Carbon\Carbon;' karena tidak lagi digunakan di sini
 use Illuminate\Support\Facades\Auth;
+// Hapus 'use Illuminate\Support\Str;' karena tidak lagi digunakan di sini
 
 class DashboardController extends Controller
 {
@@ -26,82 +24,38 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $viewData = [];
+        $rwId = $user->hasRole('super-admin') ? null : $user->rw_id;
 
-        if ($user->hasRole('super-admin')) {
-            $viewData = $this->getSuperAdminDashboardData();
-        } else {
-            $viewData = $this->getAdminDashboardData($user->rw_id);
-        }
+        // --- Data untuk KPI Cards ---
+        $reportCounts = $this->reportRepository->getStatusCounts($rwId);
+        $totalReports = array_sum($reportCounts);
+        $totalResidents = $this->residentRepository->countResidents($rwId);
 
-        return view('pages.admin.dashboard', $viewData);
-    }
-
-    private function getSuperAdminDashboardData(): array
-    {
-        $data = $this->getCommonDashboardData();
+        // --- Data untuk Bar Chart (Laporan per RW) ---
         $reportsByRw = $this->reportRepository->getReportCountsByRw();
-        $data['rwLabels'] = $reportsByRw->pluck('rw_number')->map(fn($num) => "RW {$num}")->toArray();
-        $data['rwData'] = $reportsByRw->pluck('count')->toArray();
-        $data['rwNumber'] = null;
-        
-        return $data;
-    }
+        $rwLabels = $reportsByRw->pluck('rw_number');
+        $rwData = $reportsByRw->pluck('count');
 
-    private function getAdminDashboardData(int $rwId): array
-    {
-        $data = $this->getCommonDashboardData($rwId);
-        $rw = Rw::find($rwId);
-        $data['rwNumber'] = $rw ? $rw->number : '';
+        // --- Data untuk Line Chart (Laporan 7 hari terakhir) ---
+        // Logika ini sekarang lebih sederhana!
+        $dailyReports = $this->reportRepository->getDailyReportCounts($rwId);
+        $dailyLabels = $dailyReports['labels'];
+        $dailyData = $dailyReports['counts'];
 
-        $reportsByRt = $this->reportRepository->getReportCountsByRt($rwId);
-        $data['rtLabels'] = $reportsByRt->pluck('rt_number')->map(fn($num) => "RT {$num}")->toArray();
-        $data['rtData'] = $reportsByRt->pluck('count')->toArray();
+        return view('pages.admin.dashboard', [
+            // KPI Data
+            'totalReports' => $totalReports,
+            'totalResidents' => $totalResidents,
+            'deliveredCount' => $reportCounts[ReportStatusEnum::DELIVERED->value] ?? 0,
+            'inProcessCount' => $reportCounts[ReportStatusEnum::IN_PROCESS->value] ?? 0,
+            'completedCount' => $reportCounts[ReportStatusEnum::COMPLETED->value] ?? 0,
+            'rejectedCount' => $reportCounts[ReportStatusEnum::REJECTED->value] ?? 0,
 
-        return $data;
-    }
-
-    private function getCommonDashboardData(int $rwId = null): array
-    {
-        $reportCategoryCount = ReportCategory::count();
-        $reportCount = $this->reportRepository->countReports($rwId);
-        $residentCount = $this->residentRepository->countResidents($rwId);
-        $latestReports = $this->reportRepository->getLatestReportsForAdmin($rwId);
-        
-        $statusCounts = $this->reportRepository->getStatusCounts($rwId);
-
-        $categoriesWithCount = $this->reportRepository->getCategoryReportCounts($rwId);
-        $categoryLabels = $categoriesWithCount->pluck('name')->toArray();
-        $categoryData = $categoriesWithCount->pluck('reports_count')->toArray();
-
-        $reportDaily = $this->reportRepository->getDailyReportCounts($rwId);
-        $dailyLabels = [];
-        $dailyData = [];
-
-        for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i);
-            $dateString = $date->format('Y-m-d');
-            
-            $dailyLabels[] = $date->isoFormat('D MMM');
-            $dailyData[] = $reportDaily[$dateString] ?? 0;
-        }
-
-        $data = compact(
-            'reportCategoryCount',
-            'reportCount',
-            'residentCount',
-            'latestReports',
-            'categoryLabels',
-            'categoryData',
-            'dailyLabels',
-            'dailyData'
-        );
-        
-        $data['deliveredCount'] = $statusCounts[ReportStatusEnum::DELIVERED->value];
-        $data['inProcessCount'] = $statusCounts[ReportStatusEnum::IN_PROCESS->value];
-        $data['completedCount'] = $statusCounts[ReportStatusEnum::COMPLETED->value];
-        $data['rejectedCount'] = $statusCounts[ReportStatusEnum::REJECTED->value];
-
-        return $data;
+            // Chart Data
+            'rwLabels' => $rwLabels,
+            'rwData' => $rwData,
+            'dailyLabels' => $dailyLabels,
+            'dailyData' => $dailyData,
+        ]);
     }
 }

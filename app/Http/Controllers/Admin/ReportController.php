@@ -4,54 +4,45 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\ReportVisibilityEnum;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreReportRequest; // Pastikan namespace ini benar
+use App\Http\Requests\UpdateReportRequest; // Pastikan namespace ini benar
 use App\Interfaces\ReportRepositoryInterface;
-use App\Interfaces\ReportCategoryRepositoryInterface;
 use App\Interfaces\ResidentRepositoryInterface;
-use App\Http\Requests\StoreReportRequest;
-use App\Http\Requests\UpdateReportRequest;
-use App\Models\Rt;
-use App\Models\Rw;
-use App\Traits\FileUploadTrait;
+use App\Interfaces\ReportCategoryRepositoryInterface;
+use App\Models\RW;
+use App\Models\RT;
+use App\Traits\FileUploadTrait; // Tambahkan ini
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Maatwebsite\Excel\Facades\Excel;
 use RealRashid\SweetAlert\Facades\Alert as Swal;
 
 class ReportController extends Controller
 {
-    use FileUploadTrait;
+    use FileUploadTrait; // Gunakan Trait di sini
 
     private ReportRepositoryInterface $reportRepository;
-    private ReportCategoryRepositoryInterface $reportCategoryRepository;
     private ResidentRepositoryInterface $residentRepository;
+    private ReportCategoryRepositoryInterface $reportCategoryRepository;
 
     public function __construct(
         ReportRepositoryInterface $reportRepository,
-        ReportCategoryRepositoryInterface $reportCategoryRepository,
-        ResidentRepositoryInterface $residentRepository
+        ResidentRepositoryInterface $residentRepository,
+        ReportCategoryRepositoryInterface $reportCategoryRepository
     ) {
         $this->reportRepository = $reportRepository;
-        $this->reportCategoryRepository = $reportCategoryRepository;
         $this->residentRepository = $residentRepository;
+        $this->reportCategoryRepository = $reportCategoryRepository;
     }
-    
+
     public function index(Request $request)
     {
-        $user = Auth::user();
-        $rws = [];
-        $rts = [];
-        $reports = [];
+        // Logic yang ada sudah benar, asumsikan getAllReportsForAdmin menangani filter
+        $user = auth()->user();
+        $rwId = $user->hasRole('super-admin') ? $request->query('rw') : $user->rw_id;
+        $rtId = $request->query('rt');
 
-        $filterRwId = $request->input('rw');
-        $filterRtId = $request->input('rt');
-
-        if ($user->hasRole('super-admin')) {
-            $reports = $this->reportRepository->getAllReportsForAdmin($request, $filterRwId, $filterRtId);
-            $rws = Rw::orderBy('number')->get();
-        } else {
-            $reports = $this->reportRepository->getAllReportsForAdmin($request, $user->rw_id, $filterRtId);
-            $rts = Rt::where('rw_id', $user->rw_id)->orderBy('number')->get();
-        }
+        $reports = $this->reportRepository->getAllReportsForAdmin($request, $rwId, $rtId);
+        $rws = RW::all();
+        $rts = RT::all();
 
         return view('pages.admin.report.index', compact('reports', 'rws', 'rts'));
     }
@@ -60,14 +51,13 @@ class ReportController extends Controller
     {
         $residents = $this->residentRepository->getAllResidents();
         $categories = $this->reportCategoryRepository->getAllReportCategories();
-
         return view('pages.admin.report.create', compact('residents', 'categories'));
     }
 
     public function store(StoreReportRequest $request)
     {
         $data = $request->validated();
-        
+
         $data['code'] = config('report.code_prefix.admin') . mt_rand(100000, 999999);
         $data['visibility'] = ReportVisibilityEnum::PUBLIC->value;
 
@@ -78,48 +68,51 @@ class ReportController extends Controller
         $this->reportRepository->createReport($data);
 
         Swal::success('Success', 'Data laporan berhasil ditambahkan!')->timerProgressBar();
-
         return redirect()->route('admin.report.index');
     }
 
     public function show(string $id)
     {
         $report = $this->reportRepository->getReportById($id);
-
         return view('pages.admin.report.show', compact('report'));
     }
 
     public function edit(string $id)
     {
         $report = $this->reportRepository->getReportById($id);
-
         $residents = $this->residentRepository->getAllResidents();
         $categories = $this->reportCategoryRepository->getAllReportCategories();
-
         return view('pages.admin.report.edit', compact('report', 'residents', 'categories'));
     }
 
     public function update(UpdateReportRequest $request, string $id)
     {
         $data = $request->validated();
-        
-        if ($path = $this->handleFileUpload($request, 'image', 'assets/report/image')) {
+        $oldImage = $this->reportRepository->getReportById($id)->image;
+
+        if ($path = $this->handleFileUpload($request, 'image', 'assets/report/image', $oldImage)) {
             $data['image'] = $path;
         }
 
         $this->reportRepository->updateReport($data, $id);
 
-        Swal::success('Success', 'Data laporan berhasil diupdate!')->timerProgressBar();
-
+        Swal::success('Success', 'Data laporan berhasil diperbarui!')->timerProgressBar();
         return redirect()->route('admin.report.index');
     }
 
     public function destroy(string $id)
     {
+        $report = $this->reportRepository->getReportById($id);
+
+        if ($report->image) {
+            Storage::disk('public')->delete($report->image); // Gunakan Storage::disk('public')
+        }
+
         $this->reportRepository->deleteReport($id);
 
         Swal::success('Success', 'Data laporan berhasil dihapus!')->timerProgressBar();
-
         return redirect()->route('admin.report.index');
     }
+
+    // HAPUS metode private handleFileUpload dari sini karena sudah ada di Trait.
 }

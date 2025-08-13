@@ -22,7 +22,7 @@
         <div class="mb-3">
             <label for="image" class="form-label fw-bold">Bukti Laporan</label>
             <input type="file" class="form-control @error('image') is-invalid @enderror" id="image" name="image" style="display: none" required>
-            
+
             <div id="image-preview-container">
                 <div id="image-placeholder" class="image-placeholder-box">
                     <i class="fa-solid fa-image fa-2x text-secondary"></i>
@@ -30,7 +30,7 @@
                 </div>
                 <img alt="Pratinjau Laporan" id="image-preview" class="img-fluid rounded-3 mb-3 border" style="display: none; width: 100%; height: 200px; object-fit: cover;">
             </div>
-            
+
             @error('image')
                 <div class="invalid-feedback d-block">{{ $message }}</div>
             @enderror
@@ -81,11 +81,12 @@
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="visibility" id="visibility-{{ $visibility->value }}" value="{{ $visibility->value }}" {{ old('visibility', 'public') == $visibility->value ? 'checked' : '' }}>
                     <label class="form-check-label" for="visibility-{{ $visibility->value }}">
-                        {{ $visibility->label() }}
+                        {{-- PERUBAHAN DI SINI --}}
+                        {{ $visibility->label(Auth::user()) }}
                     </label>
                 </div>
             @endforeach
-             @error('visibility')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+            @error('visibility')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
         </div>
 
         <div class="d-grid mt-4">
@@ -99,7 +100,7 @@
 @section('scripts')
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="{{ asset('assets/app/js/report.js') }}"></script>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('create-report-form');
@@ -124,7 +125,7 @@
                 input.addEventListener('input', checkFormValidity);
                 input.addEventListener('change', checkFormValidity);
             });
-            
+
             const imageBase64 = localStorage.getItem('image');
             const imagePreview = document.getElementById('image-preview');
             const imagePlaceholder = document.getElementById('image-placeholder');
@@ -192,7 +193,7 @@
             marker.on('dragend', function(e) {
                 updateInputs(e.target.getLatLng());
             });
-            
+
             function detectLocation() {
                 if ('geolocation' in navigator) {
                     navigator.geolocation.getCurrentPosition(function(position) {
@@ -212,10 +213,9 @@
             }
 
             detectButton.addEventListener('click', detectLocation);
-            
+
             // Auto-detect location on page load
             detectLocation();
-
         });
     </script>
 @endsection

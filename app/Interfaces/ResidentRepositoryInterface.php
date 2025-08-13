@@ -15,4 +15,6 @@ interface ResidentRepositoryInterface
     public function deleteResident(int $id);
 
     public function countResidents(int $rwId = null): int;
+    
+    public function getTopReporters(int $rwId = null);
 }

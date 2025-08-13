@@ -4,13 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\ReportStatusEnum;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreReportStatusRequest;
+use App\Http\Requests\UpsertReportStatusRequest; // Ganti ini
 use App\Interfaces\ReportStatusRepositoryInterface;
 use App\Interfaces\ReportRepositoryInterface;
 use App\Traits\FileUploadTrait;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Http\Request;
-use App\Http\Requests\UpdateReportStatusRequest;
 use RealRashid\SweetAlert\Facades\Alert as Swal;
 
 class ReportStatusController extends Controller
@@ -36,7 +34,7 @@ class ReportStatusController extends Controller
         return view('pages.admin.report-status.create', compact('report', 'statuses'));
     }
 
-    public function store(StoreReportStatusRequest $request)
+    public function store(UpsertReportStatusRequest $request) // Ganti ini
     {
         $report = $this->reportRepository->getReportById($request->report_id);
         $this->authorize('manageStatus', $report);
@@ -61,13 +59,13 @@ class ReportStatusController extends Controller
         return view('pages.admin.report-status.edit', compact('status', 'statuses'));
     }
 
-    public function update(UpdateReportStatusRequest $request, string $id)
+    public function update(UpsertReportStatusRequest $request, string $id) // Ganti ini
     {
         $status = $this->reportStatusRepository->getReportStatusById($id);
         $this->authorize('manageStatus', $status->report);
 
         $data = $request->validated();
-        if ($path = $this->handleFileUpload($request, 'image', 'assets/report-status/image')) {
+        if ($path = $this->handleFileUpload($request, 'image', 'assets/report-status/image', $status->image)) {
             $data['image'] = $path;
         }
 

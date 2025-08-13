@@ -6,12 +6,13 @@ use App\Interfaces\AdminRepositoryInterface;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class AdminRepository implements AdminRepositoryInterface
 {
     public function getAllAdmins()
     {
-        return User::role(['admin', 'super-admin'])
+        return User::role('admin')
             ->with('rw')
             ->where('id', '!=', Auth::id())
             ->get();
@@ -19,7 +20,7 @@ class AdminRepository implements AdminRepositoryInterface
 
     public function getAdminById(int $id)
     {
-        return User::role(['admin', 'super-admin'])->findOrFail($id);
+        return User::role('admin')->findOrFail($id);
     }
 
     public function createAdmin(array $data): User
@@ -28,7 +29,7 @@ class AdminRepository implements AdminRepositoryInterface
             $user = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
-                'password' => $data['password'],
+                'google_id' => 'admin-' . Str::uuid(),
                 'rw_id' => $data['rw_id'],
             ]);
 
@@ -44,19 +45,9 @@ class AdminRepository implements AdminRepositoryInterface
 
         $userData = [
             'name' => $data['name'],
+            'email' => $data['email'],
+            'rw_id' => $data['rw_id'],
         ];
-
-        if (isset($data['email'])) {
-            $userData['email'] = $data['email'];
-        }
-        
-        if (isset($data['rw_id'])) {
-            $userData['rw_id'] = $data['rw_id'];
-        }
-
-        if (!empty($data['password'])) {
-            $userData['password'] = $data['password'];
-        }
 
         return $user->update($userData);
     }

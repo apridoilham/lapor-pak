@@ -26,6 +26,10 @@ class Report extends Model
         'visibility',
     ];
 
+    protected $attributes = [
+        'visibility' => 'public',
+    ];
+
     protected function casts(): array
     {
         return [

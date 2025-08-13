@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-use Illuminate\Support\Facades\Auth;
+// Hapus 'use Illuminate\Support\Facades\Auth;' karena tidak lagi digunakan
 
 enum ReportStatusEnum: string
 {
@@ -13,10 +13,7 @@ enum ReportStatusEnum: string
 
     public function label(): string
     {
-        $user = Auth::user();
-        $rwNumber = $user?->resident?->rw?->number;
-        $rtNumber = $user?->resident?->rt?->number;
-
+        // Logika yang bergantung pada user dihapus karena tidak digunakan
         return match ($this) {
             self::DELIVERED => 'Terkirim',
             self::IN_PROCESS => 'Diproses',

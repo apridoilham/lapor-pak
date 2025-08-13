@@ -19,19 +19,10 @@
                     @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 
-                @php
-                    $emailUsername = old('email_username', explode('@', $admin->email)[0]);
-                @endphp
                 <div class="form-group">
-                    <label for="email_username">Email</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control @error('email_username') is-invalid @enderror @error('email') is-invalid @enderror" id="email_username" name="email_username" value="{{ $emailUsername }}" required>
-                        <div class="input-group-append">
-                            <span class="input-group-text">@bsblapor.com</span>
-                        </div>
-                        <div class="invalid-feedback" id="email-error">Email sudah ada sebelumnya.</div>
-                    </div>
-                    @error('email_username')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email', $admin->email) }}" required>
+                    <div class="invalid-feedback" id="email-error-message"></div>
                     @error('email')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                 </div>
 
@@ -43,21 +34,10 @@
                             <option value="{{ $rw->id }}" {{ old('rw_id', $admin->rw_id) == $rw->id ? 'selected' : '' }}>RW {{ $rw->number }}</option>
                         @endforeach
                     </select>
-                     @error('rw_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                </div>
-                <hr>
-                <p class="text-muted">Kosongkan password jika tidak ingin mengubahnya.</p>
-                <div class="form-group">
-                    <label for="password">Password Baru</label>
-                    <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" autocomplete="new-password">
-                    @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                </div>
-                <div class="form-group">
-                    <label for="password_confirmation">Konfirmasi Password Baru</label>
-                    <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" autocomplete="new-password">
+                    @error('rw_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 
-                <button type="submit" class="btn btn-primary" id="update-btn" disabled>Simpan Perubahan</button>
+                <button type="submit" class="btn btn-primary" id="submit-btn">Simpan Perubahan</button>
             </form>
         </div>
     </div>
@@ -65,81 +45,47 @@
 
 @section('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const form = document.getElementById('edit-admin-form');
-        const updateButton = document.getElementById('update-btn');
-        const inputs = form.querySelectorAll('input, select');
-        const emailInput = document.getElementById('email_username');
-        const emailError = document.getElementById('email-error');
-        let initialFormState = {};
-
-        inputs.forEach(input => {
-            if (input.type === 'password' || input.name === '_token' || input.name === '_method') return;
-            initialFormState[input.name] = input.value;
-        });
-
-        function checkForChanges() {
-            let hasChanged = false;
-            
-            for (const input of inputs) {
-                if (input.type === 'password') {
-                    if (input.value.length > 0) {
-                        hasChanged = true;
-                        break;
-                    }
-                } else if (initialFormState.hasOwnProperty(input.name) && initialFormState[input.name] !== input.value) {
-                    hasChanged = true;
-                    break;
-                }
-            }
-            
-            const isEmailInvalid = emailInput.classList.contains('is-invalid');
-            updateButton.disabled = !hasChanged || isEmailInvalid;
-        }
-
-        inputs.forEach(input => {
-            input.addEventListener('input', checkForChanges);
-            input.addEventListener('change', checkForChanges);
-        });
-
+    document.addEventListener('DOMContentLoaded', function() {
+        const emailInput = document.getElementById('email');
+        const emailErrorMessage = document.getElementById('email-error-message');
+        const submitButton = document.getElementById('submit-btn');
+        const adminIdToIgnore = {{ $admin->id }};
         let debounceTimer;
-        emailInput.addEventListener('input', function () {
-            checkForChanges();
+
+        emailInput.addEventListener('input', function() {
             clearTimeout(debounceTimer);
             
-            if (emailInput.value === initialFormState['email_username']) {
-                emailInput.classList.remove('is-invalid');
-                emailError.classList.remove('d-block');
-                checkForChanges();
+            const email = this.value;
+            if (email.length < 5 || !email.includes('@')) {
                 return;
             }
 
-            debounceTimer = setTimeout(function () {
-                const emailUsername = emailInput.value;
-                if (emailUsername.length > 2) {
-                    fetch('/api/check-email', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({
-                            email_username: emailUsername,
-                            ignore_user_id: {{ $admin->id }}
-                        })
+            debounceTimer = setTimeout(() => {
+                fetch('/api/check-admin-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        email: email,
+                        ignore_user_id: adminIdToIgnore 
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.is_taken) {
-                            emailInput.classList.add('is-invalid');
-                            emailError.classList.add('d-block');
-                        } else {
-                            emailInput.classList.remove('is-invalid');
-                            emailError.classList.remove('d-block');
-                        }
-                        checkForChanges();
-                    });
-                }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.is_taken) {
+                        emailInput.classList.add('is-invalid');
+                        emailErrorMessage.textContent = data.message;
+                        emailErrorMessage.style.display = 'block';
+                        submitButton.disabled = true;
+                    } else {
+                        emailInput.classList.remove('is-invalid');
+                        emailErrorMessage.style.display = 'none';
+                        submitButton.disabled = false;
+                    }
+                });
             }, 500);
         });
     });

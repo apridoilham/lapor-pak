@@ -22,7 +22,7 @@ class DeleteReportTest extends TestCase
         $this->seed(RolePermissionSeeder::class);
         $this->seed(AdminSeeder::class);
 
-        $this->adminUser = User::where('email', 'admin@laporpak.com')->first();
+        $this->adminUser = User::where('email', 'superadmin@bsblapor.com')->first();
         $this->report = Report::factory()->create();
     }
 
@@ -35,7 +35,7 @@ class DeleteReportTest extends TestCase
             ->delete(route('admin.report.destroy', $this->report->id));
 
         $response->assertRedirect(route('admin.report.index'));
-        $this->assertSoftDeleted('reports', ['id' => $this->report->id]);
+        $this->assertDatabaseMissing('reports', ['id' => $this->report->id]);
     }
 
     public function test_a_non_admin_user_cannot_delete_a_report(): void
@@ -48,6 +48,6 @@ class DeleteReportTest extends TestCase
             ->delete(route('admin.report.destroy', $this->report->id));
 
         $response->assertStatus(403);
-        $this->assertNotSoftDeleted('reports', ['id' => $this->report->id]);
+        $this->assertDatabaseHas('reports', ['id' => $this->report->id]);
     }
 }

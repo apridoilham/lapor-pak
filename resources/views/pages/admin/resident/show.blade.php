@@ -12,7 +12,15 @@
                     <h6 class="m-0 font-weight-bold text-primary">Informasi Pribadi</h6>
                 </div>
                 <div class="card-body text-center">
-                    <img src="{{ asset('storage/' . $resident->avatar) }}" alt="Avatar" class="img-thumbnail rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    @php
+                        $avatarUrl = $resident->avatar;
+                        if ($avatarUrl && !Str::startsWith($avatarUrl, 'http')) {
+                            $avatarUrl = asset('storage/' . $avatarUrl);
+                        } elseif (!$avatarUrl) {
+                            $avatarUrl = asset('assets/app/images/default-avatar.png');
+                        }
+                    @endphp
+                    <img src="{{ $avatarUrl }}" alt="Avatar" class="img-thumbnail rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
                     <h4 class="font-weight-bold">{{ $resident->user->name }}</h4>
                     <p class="text-muted">{{ $resident->user->email }}</p>
                 </div>

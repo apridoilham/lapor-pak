@@ -7,6 +7,7 @@ use App\Http\Requests\StoreLoginRequest;
 use App\Interfaces\AuthRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use RealRashid\SweetAlert\Facades\Alert as Swal;
 
 class LoginController extends Controller
 {
@@ -17,36 +18,43 @@ class LoginController extends Controller
         $this->authRepository = $authRepository;
     }
 
-    public function index()
+    public function showLoginForm()
     {
         return view('pages.auth.login');
     }
 
-    /**
-     * PERUBAHAN DI SINI:
-     * Menggunakan hasAnyRole untuk memeriksa 'admin' atau 'super-admin'.
-     */
-    public function store(StoreLoginRequest $request){
+    public function store(StoreLoginRequest $request)
+    {
         $credentials = $request->validated();
 
         if ($this->authRepository->login($credentials)) {
-            // Cek apakah pengguna memiliki peran 'admin' ATAU 'super-admin'
-            if (Auth::user()->hasAnyRole(['admin', 'super-admin'])) {
+            $user = Auth::user();
+
+            if ($user->hasAnyRole(['admin', 'super-admin'])) {
                 return redirect()->route('admin.dashboard');
+            }
+
+            if ($user->hasRole('resident')) {
+                $resident = $user->resident;
+
+                // Cek kelengkapan profil
+                if (!$resident || !$resident->rt_id || !$resident->rw_id || $resident->address === 'Alamat belum diatur') {
+                    Swal::info('Selamat Datang!', 'Harap lengkapi data diri Anda terlebih dahulu untuk melanjutkan.');
+                    return redirect()->route('profile.edit');
+                }
             }
 
             return redirect()->route('home');
         }
 
-        return redirect()->route('login')->withErrors([
+        return back()->withErrors([
             'email' => 'Email atau password salah',
         ]);
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
-        $this->authRepository->logout();
-
+        $this->authRepository->logout($request);
         return redirect()->route('login');
     }
 }

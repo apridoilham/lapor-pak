@@ -18,7 +18,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use RealRashid\SweetAlert\Facades\Alert as Swal;
 
-
 class ReportController extends Controller
 {
     use AuthorizesRequests;
@@ -79,12 +78,13 @@ class ReportController extends Controller
         $categories = $this->reportCategoryRepository->getAllReportCategories();
         return view('pages.app.report.create', compact('categories'));
     }
-
+    
     public function store(StoreReportRequest $request)
     {
         $report = $this->reportService->createReportForUser(
             $request->validated(),
-            $request->user()
+            $request->user(),
+            $request->file('image')
         );
 
         return redirect()->route('report.summary', ['report' => $report->code]);

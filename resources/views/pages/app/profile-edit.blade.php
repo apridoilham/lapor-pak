@@ -2,49 +2,81 @@
 @section('title', 'Edit Profil')
 
 @push('styles')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
-    .avatar-upload-container {
-        position: relative;
-        width: 120px;
-        height: 120px;
-        margin: 0 auto;
+    /* ... (semua style dari jawaban sebelumnya tetap sama) ... */
+    body {
+        background-color: #f8f9fa;
     }
-    .avatar-upload-container .avatar-preview {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 50%;
-        border: 4px solid #fff;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    .avatar-upload-container .avatar-edit-button {
-        position: absolute;
-        bottom: 5px;
-        right: 5px;
-        background-color: var(--primary);
+    .profile-header {
+        background: linear-gradient(135deg, var(--primary), #2c5282);
         color: white;
-        width: 35px;
-        height: 35px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 2px solid white;
-        cursor: pointer;
-        transition: background-color 0.2s;
+        padding: 2rem 1.5rem 4rem;
+        border-bottom-left-radius: 30px;
+        border-bottom-right-radius: 30px;
+        margin: -1rem -1rem 0;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
-    .avatar-upload-container .avatar-edit-button:hover {
-        background-color: var(--primaryHover);
+    .profile-header .avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 4px solid white;
+        object-fit: cover;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .profile-header .profile-info h4 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 1.25rem;
+    }
+    .profile-header .profile-info p {
+        margin: 0;
+        opacity: 0.8;
+        font-size: 0.9rem;
+    }
+    .stats-card {
+        display: flex;
+        justify-content: space-around;
+        background-color: white;
+        padding: 1.25rem 1rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        margin-top: -50px;
+        position: relative;
+        z-index: 10;
+    }
+    .stats-card .stat-item h5 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2d3748;
+    }
+    .stats-card .stat-item p {
+        font-size: 0.8rem;
+        color: var(--secondary-text);
+        margin-bottom: 0;
+    }
+    .profile-menu {
+        margin-top: 1.5rem;
+        padding-bottom: 80px;
+    }
+    #map {
+        height: 250px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        margin-top: 0.5rem;
     }
 </style>
 @endpush
 
 @section('content')
+    @include('sweetalert::alert')
+
     <div class="header-nav mb-4">
         <a href="{{ route('profile') }}" class="text-decoration-none">
             <i class="fa-solid fa-arrow-left"></i>
         </a>
-        <h1>Edit Profil</h1>
+        <h1>Lengkapi Profil Anda</h1>
     </div>
 
     <form action="{{ route('profile.update') }}" method="POST" class="mt-4" enctype="multipart/form-data" id="profile-form">
@@ -52,7 +84,15 @@
         @method('PUT')
 
         <div class="avatar-upload-container mb-4">
-            <img src="{{ $user->resident->avatar ? asset('storage/' . $user->resident->avatar) : asset('assets/app/images/default-avatar.png') }}" alt="avatar" class="avatar-preview" id="avatar-preview">
+            @php
+                $avatarUrl = $user->resident->avatar;
+                if ($avatarUrl && !Str::startsWith($avatarUrl, 'http')) {
+                    $avatarUrl = asset('storage/' . $avatarUrl);
+                } elseif (!$avatarUrl) {
+                    $avatarUrl = asset('assets/app/images/default-avatar.png');
+                }
+            @endphp
+            <img src="{{ $avatarUrl }}" alt="avatar" class="avatar-preview" id="avatar-preview">
             <label for="avatar" class="avatar-edit-button">
                 <i class="fa-solid fa-camera"></i>
             </label>
@@ -64,32 +104,22 @@
 
         <div class="mb-3">
             <label for="name" class="form-label">Nama Lengkap</label>
-            <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $user->name) }}" required>
-            @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            <input type="text" class="form-control" id="name" name="name" value="{{ old('name', $user->name) }}" readonly disabled>
         </div>
         
-        @php
-            $emailUsername = old('email_username', explode('@', $user->email)[0]);
-        @endphp
         <div class="mb-3">
-            <label for="email_username" class="form-label">Email</label>
-            <div class="input-group">
-                <input type="text" class="form-control @error('email_username') is-invalid @enderror @error('email') is-invalid @enderror" id="email_username" name="email_username" value="{{ $emailUsername }}" required>
-                <span class="input-group-text">@bsblapor.com</span>
-                <div class="invalid-feedback" id="email-error">Email sudah ada sebelumnya.</div>
-            </div>
-            @error('email_username')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
-            @error('email')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" value="{{ old('email', $user->email) }}" readonly disabled>
         </div>
 
         <hr class="my-4">
 
         <div class="row">
             <div class="col-6">
-                 <div class="mb-3">
+                <div class="mb-3">
                     <label for="rw_id" class="form-label">Pilih RW</label>
                     <select name="rw_id" id="rw_id" class="form-select @error('rw_id') is-invalid @enderror" required>
-                        <option value="" disabled>Pilih RW Anda</option>
+                        <option value="" disabled selected>Pilih RW Anda</option>
                         @foreach($rws as $rw)
                             <option value="{{ $rw->id }}" {{ old('rw_id', $user->resident->rw_id) == $rw->id ? 'selected' : '' }}>{{ $rw->number }}</option>
                         @endforeach
@@ -107,74 +137,41 @@
                 </div>
             </div>
         </div>
+
         <div class="mb-3">
-            <label for="address" class="form-label">Alamat Lengkap (Nama Jalan, No. Rumah)</label>
-            <textarea name="address" id="address" class="form-control @error('address') is-invalid @enderror" rows="3" required>{{ old('address', $user->resident->address) }}</textarea>
+            <div class="d-flex justify-content-between align-items-center">
+                <label for="address" class="form-label">Alamat Lengkap</label>
+                <button type="button" class="btn btn-outline-primary btn-sm" id="detect-location-btn">
+                    <i class="fa-solid fa-map-marker-alt"></i> Cek Lokasi Saya
+                </button>
+            </div>
+            <div id="map"></div>
+            <textarea name="address" id="address" class="form-control mt-2 @error('address') is-invalid @enderror" rows="3" required placeholder="Contoh: Jl. Merdeka No. 12">{{ old('address', $user->resident->address) }}</textarea>
             @error('address')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
         
-        <hr class="my-4">
-        
-        <p class="text-muted">Kosongkan jika tidak ingin mengubah password.</p>
-        
-        <div class="mb-3">
-            <label for="current_password" class="form-label">Password Lama</label>
-            <input type="password" class="form-control @error('current_password') is-invalid @enderror" id="current_password" name="current_password" autocomplete="new-password">
-            @error('current_password')<div class="invalid-feedback">{{ $message }}</div>@enderror
-        </div>
-        <div class="mb-3">
-            <label for="password" class="form-label">Password Baru</label>
-            <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" autocomplete="new-password">
-            @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
-        </div>
-        <div class="mb-3">
-            <label for="password_confirmation" class="form-label">Konfirmasi Password Baru</label>
-            <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" autocomplete="new-password">
-        </div>
-        
         <div class="d-grid gap-3 mt-4">
-             <button class="btn btn-primary py-2" type="submit" id="save-changes-btn" disabled>Simpan Perubahan</button>
-             <a href="{{ route('profile') }}" class="btn btn-link text-secondary text-decoration-none">Kembali</a>
+            <button class="btn btn-primary py-2" type="submit" id="save-changes-btn" disabled>Simpan Perubahan</button>
+            <a href="{{ route('home') }}" class="btn btn-link text-secondary text-decoration-none">Kembali ke Beranda</a>
         </div>
     </form>
 @endsection
 
 @section('scripts')
-    @include('sweetalert::alert')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const form = document.getElementById('profile-form');
+            const avatarInput = document.getElementById('avatar');
+            const rwSelect = document.getElementById('rw_id');
+            const rtSelect = document.getElementById('rt_id');
+            const addressInput = document.getElementById('address');
             const saveButton = document.getElementById('save-changes-btn');
-            const inputs = form.querySelectorAll('input, select, textarea');
-            let initialFormState = {};
+            const detectButton = document.getElementById('detect-location-btn');
+            const activeRtId = "{{ old('rt_id', $user->resident->rt_id) }}";
 
-            inputs.forEach(input => {
-                if (input.type === 'file' || input.type === 'password' || input.name === '_token' || input.name === '_method') return;
-                initialFormState[input.name] = input.value;
-            });
-
-            function checkForChanges() {
-                let hasChanged = false;
-                inputs.forEach(input => {
-                    if (input.type === 'password' && input.value.length > 0) {
-                        hasChanged = true;
-                    } else if (input.type === 'file' && input.files.length > 0) {
-                        hasChanged = true;
-                    } else if (initialFormState.hasOwnProperty(input.name) && initialFormState[input.name] !== input.value) {
-                        hasChanged = true;
-                    }
-                });
-                
-                const isEmailInvalid = document.getElementById('email_username').classList.contains('is-invalid');
-                saveButton.disabled = !hasChanged || isEmailInvalid;
-            }
-
-            inputs.forEach(input => {
-                input.addEventListener('input', checkForChanges);
-                input.addEventListener('change', checkForChanges);
-            });
-
-            document.getElementById('avatar').addEventListener('change', function(event) {
+            // Logic untuk avatar preview
+            avatarInput.addEventListener('change', function(event) {
                 const file = event.target.files[0];
                 if (file) {
                     const reader = new FileReader();
@@ -183,14 +180,14 @@
                 }
             });
 
-            const rwSelect = document.getElementById('rw_id');
-            const rtSelect = document.getElementById('rt_id');
-            const activeRtId = "{{ old('rt_id', $user->resident->rt_id) }}";
-
+            // Logic untuk dropdown RT/RW
             function fetchRts(rwId, selectedRtId = null) {
                 rtSelect.disabled = true;
-                rtSelect.innerHTML = '<option value="" disabled selected>Memuat RT...</option>';
-                if (!rwId) return;
+                rtSelect.innerHTML = '<option value="">Memuat RT...</option>';
+                if (!rwId) {
+                    rtSelect.innerHTML = '<option value="" disabled selected>Pilih RW terlebih dahulu</option>';
+                    return;
+                };
 
                 fetch(`/api/get-rts-by-rw/${rwId}`)
                     .then(response => response.json())
@@ -210,48 +207,111 @@
                         } else {
                             rtSelect.innerHTML = '<option value="" disabled selected>Tidak ada RT</option>';
                         }
+                        checkFormValidity();
                     });
             }
 
             rwSelect.addEventListener('change', function() { fetchRts(this.value); });
             if (rwSelect.value) { fetchRts(rwSelect.value, activeRtId); }
             
-            const emailInput = document.getElementById('email_username');
-            const emailError = document.getElementById('email-error');
-            let debounceTimer;
+            // Logic untuk Map dan Lokasi
+            const defaultLocation = [-6.3816, 106.7420];
+            const map = L.map('map').setView(defaultLocation, 13);
+            let marker = L.marker(defaultLocation, { draggable: true }).addTo(map);
 
-            emailInput.addEventListener('input', function () {
-                checkForChanges();
-                clearTimeout(debounceTimer);
-                
-                emailInput.classList.remove('is-invalid');
-                emailError.classList.remove('d-block');
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+            }).addTo(map);
 
-                debounceTimer = setTimeout(function () {
-                    const emailUsername = emailInput.value;
-                    if (emailUsername.length > 2) {
-                        fetch('/api/check-email', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: JSON.stringify({
-                                email_username: emailUsername,
-                                ignore_user_id: {{ auth()->id() }}
-                            })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.is_taken) {
-                                emailInput.classList.add('is-invalid');
-                                emailError.classList.add('d-block');
+            function updateAddress(lat, lng) {
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.display_name) {
+                            addressInput.value = data.display_name;
+                        } else {
+                            addressInput.value = 'Alamat tidak ditemukan.';
+                        }
+                        checkFormValidity();
+                    }).catch(error => {
+                        console.error('Error fetching address:', error);
+                        addressInput.value = 'Gagal mendapatkan alamat.';
+                        checkFormValidity();
+                    });
+            }
+            
+            function detectLocation() {
+                if ('geolocation' in navigator) {
+                    detectButton.disabled = true;
+                    detectButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Mencari...`;
+
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
+                            const newLatLng = new L.LatLng(lat, lng);
+                            
+                            map.setView(newLatLng, 17);
+                            marker.setLatLng(newLatLng);
+                            updateAddress(lat, lng);
+                            
+                            detectButton.disabled = false;
+                            detectButton.innerHTML = '<i class="fa-solid fa-map-marker-alt"></i> Cek Lokasi Saya';
+                            Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Lokasi Anda berhasil ditemukan.', timer: 2000, showConfirmButton: false });
+                        },
+                        (error) => {
+                            let errorMessage;
+                            switch(error.code) {
+                                case error.PERMISSION_DENIED:
+                                    errorMessage = 'Izin lokasi ditolak. Mohon aktifkan izin lokasi di pengaturan browser Anda.';
+                                    break;
+                                case error.POSITION_UNAVAILABLE:
+                                    errorMessage = 'Informasi lokasi tidak tersedia. Coba lagi atau pindahkan pin secara manual.';
+                                    break;
+                                case error.TIMEOUT:
+                                    errorMessage = 'Waktu permintaan lokasi habis. Periksa koneksi internet Anda.';
+                                    break;
+                                default:
+                                    errorMessage = 'Terjadi kesalahan tidak terduga saat mendeteksi lokasi.';
+                                    break;
                             }
-                            checkForChanges();
-                        });
-                    }
-                }, 500);
+                            Swal.fire({ icon: 'error', title: 'Gagal', text: errorMessage });
+                            detectButton.disabled = false;
+                            detectButton.innerHTML = '<i class="fa-solid fa-map-marker-alt"></i> Cek Lokasi Saya';
+                        },
+                        { timeout: 10000, enableHighAccuracy: true }
+                    );
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Tidak Didukung', text: 'Fitur geolocation tidak didukung oleh browser Anda.' });
+                }
+            }
+
+            detectButton.addEventListener('click', detectLocation);
+            
+            marker.on('dragend', function(e) {
+                const latlng = e.target.getLatLng();
+                updateAddress(latlng.lat, latlng.lng);
             });
+
+            // Logic untuk mengaktifkan tombol simpan
+            const fieldsToMonitor = [rwSelect, rtSelect, addressInput, avatarInput];
+
+            function checkFormValidity() {
+                const isRwSelected = rwSelect.value !== '';
+                const isRtSelected = rtSelect.value !== '' && !rtSelect.disabled;
+                const isAddressFilled = addressInput.value.trim() !== '' && addressInput.value.trim() !== 'Alamat belum diatur';
+
+                saveButton.disabled = !(isRwSelected && isRtSelected && isAddressFilled);
+            }
+            
+            fieldsToMonitor.forEach(element => {
+                element.addEventListener('input', checkFormValidity);
+                element.addEventListener('change', checkFormValidity);
+            });
+            
+            checkFormValidity();
+
+            // BARIS PEMANGGIL OTOMATIS TELAH DIHAPUS DARI SINI
         });
     </script>
 @endsection

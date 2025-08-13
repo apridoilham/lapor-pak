@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 
 class ReportRepository implements ReportRepositoryInterface
 {
@@ -32,18 +34,18 @@ class ReportRepository implements ReportRepositoryInterface
                 $q->orWhere(function ($q2) use ($user) {
                     $q2->where('visibility', ReportVisibilityEnum::RT)
                         ->whereHas('resident', function ($q3) use ($user) {
-                            $q3->where('rt_id', $user->resident->rt_id);
+                            $q3->where('rt_id', $user->resident->rt->id);
                         });
                 });
                 $q->orWhere(function ($q2) use ($user) {
                     $q2->where('visibility', ReportVisibilityEnum::PRIVATE)
-                       ->where('resident_id', $user->resident->id);
+                        ->where('resident_id', $user->resident->id);
                 });
             }
         });
     }
 
-    public function getAllReportsForAdmin(Request $request, int $rwId = null, int $rtId = null)
+    public function getAllReportsForAdmin(Request $request, int $rwId = null, int $rtId = null): EloquentCollection
     {
         $query = Report::with('resident.user', 'reportCategory', 'latestStatus')->whereHas('resident');
 
@@ -60,7 +62,7 @@ class ReportRepository implements ReportRepositoryInterface
         return $query->latest()->get();
     }
 
-    public function getAllReportsForUser(Request $request)
+    public function getAllReportsForUser(Request $request): EloquentCollection
     {
         $query = Report::with('resident.user', 'reportCategory', 'latestStatus');
         
@@ -87,9 +89,10 @@ class ReportRepository implements ReportRepositoryInterface
         return $query->latest()->get();
     }
 
-    public function getLatestReportsForAdmin(int $rwId = null)
+    public function getLatestReportsForAdmin(?int $rwId = null, int $limit = 5): EloquentCollection
     {
-        $query = Report::with('resident.user', 'reportCategory', 'latestStatus')->whereHas('resident');
+        $query = Report::with('resident.user', 'reportCategory', 'latestStatus')
+                        ->whereHas('resident');
 
         if ($rwId) {
             $query->whereHas('resident', function ($q) use ($rwId) {
@@ -97,10 +100,10 @@ class ReportRepository implements ReportRepositoryInterface
             });
         }
         
-        return $query->latest()->take(5)->get();
+        return $query->latest('updated_at')->take($limit)->get();
     }
     
-    public function getLatestReportsForUser(Request $request)
+    public function getLatestReportsForUser(Request $request): EloquentCollection
     {
         $query = Report::with('resident.user', 'reportCategory', 'latestStatus');
         $this->applyVisibilityFilter($query);
@@ -118,10 +121,10 @@ class ReportRepository implements ReportRepositoryInterface
             });
         }
         
-        return $query->latest()->take(5)->get();
+        return $query->latest('updated_at')->take(5)->get();
     }
-    
-    public function getReportByResidentId(int $residentId, ?string $status)
+
+    public function getReportByResidentId(int $residentId, ?string $status): EloquentCollection
     {
         $query = Report::where('resident_id', $residentId)->with('latestStatus');
 
@@ -134,17 +137,17 @@ class ReportRepository implements ReportRepositoryInterface
         return $query->latest()->get();
     }
 
-    public function getReportById(int $id)
+    public function getReportById(int $id): Report
     {
         return Report::with('resident.user', 'resident.rt', 'resident.rw', 'reportCategory', 'reportStatuses')->findOrFail($id);
     }
 
-    public function getReportByCode(string $code)
+    public function getReportByCode(string $code): Report
     {
         return Report::with('resident.user', 'resident.rt', 'resident.rw', 'reportCategory', 'reportStatuses')->where('code', $code)->firstOrFail();
     }
 
-    public function createReport(array $data)
+    public function createReport(array $data): Report
     {
         $report = Report::create($data);
 
@@ -156,12 +159,12 @@ class ReportRepository implements ReportRepositoryInterface
         return $report;
     }
 
-    public function updateReport(array $data, int $id)
+    public function updateReport(array $data, int $id): bool
     {
         return Report::findOrFail($id)->update($data);
     }
 
-    public function deleteReport(int $id)
+    public function deleteReport(int $id): bool
     {
         return Report::findOrFail($id)->delete();
     }
@@ -193,7 +196,7 @@ class ReportRepository implements ReportRepositoryInterface
         ];
     }
 
-    public function getFilteredReports(array $filters)
+    public function getFilteredReports(array $filters): EloquentCollection
     {
         $query = Report::with('resident.user', 'reportCategory', 'latestStatus');
 
@@ -237,9 +240,9 @@ class ReportRepository implements ReportRepositoryInterface
         })->count();
     }
 
-    public function getCategoryReportCounts(int $rwId = null)
+    public function getCategoryReportCounts(int $rwId = null): EloquentCollection
     {
-        return ReportCategory::withCount(['reports' => function ($query) use ($rwId) {
+        $categories = ReportCategory::withCount(['reports' => function ($query) use ($rwId) {
             $query->whereHas('resident');
             if ($rwId) {
                 $query->whereHas('resident', function ($q) use ($rwId) {
@@ -247,26 +250,42 @@ class ReportRepository implements ReportRepositoryInterface
                 });
             }
         }])->get();
+        
+        return $categories;
     }
-
-    public function getDailyReportCounts(int $rwId = null)
+    
+    public function getDailyReportCounts(int $rwId = null): Collection
     {
-        return Report::query()
+        $query = Report::query()
             ->whereHas('resident')
             ->when($rwId, function ($query) use ($rwId) {
                 $query->whereHas('resident', function ($q) use ($rwId) {
                     $q->where('rw_id', $rwId);
                 });
-            })
+            });
+
+        $now = Carbon::now('Asia/Jakarta');
+        $reports = $query
+            ->whereBetween('created_at', [$now->copy()->subDays(6)->startOfDay(), $now->copy()->endOfDay()])
             ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
-            ->where('created_at', '>=', Carbon::now()->subDays(6))
             ->groupBy('date')
             ->orderBy('date', 'ASC')
-            ->get()
-            ->pluck('count', 'date');
+            ->get();
+        
+        $labels = collect();
+        $counts = collect();
+        
+        for ($i = 6; $i >= 0; $i--) {
+            $date = $now->copy()->subDays($i);
+            $labels->push($date->isoFormat('dddd, D MMMM'));
+            $found = $reports->firstWhere('date', $date->format('Y-m-d'));
+            $counts->push($found ? $found->count : 0);
+        }
+        
+        return collect(['labels' => $labels, 'counts' => $counts]);
     }
 
-    public function getReportCountsByRw()
+    public function getReportCountsByRw(): EloquentCollection
     {
         return Report::query()
             ->whereHas('resident')
@@ -277,7 +296,7 @@ class ReportRepository implements ReportRepositoryInterface
             ->orderBy('rws.number')
             ->get();
     }
-
+    
     public function getStatusCounts(int $rwId = null): array
     {
         $query = Report::query()->whereHas('resident');
@@ -303,13 +322,15 @@ class ReportRepository implements ReportRepositoryInterface
                 if (isset($counts[$statusValue])) {
                     $counts[$statusValue]++;
                 }
+            } else {
+                $counts[ReportStatusEnum::DELIVERED->value]++;
             }
         }
 
         return $counts;
     }
     
-    public function getReportCountsByRt(int $rwId)
+    public function getReportCountsByRt(int $rwId): EloquentCollection
     {
         return Report::query()
             ->whereHas('resident')
