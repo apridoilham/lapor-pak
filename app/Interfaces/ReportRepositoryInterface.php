@@ -2,6 +2,7 @@
 
 namespace App\Interfaces;
 
+use App\Enums\ReportStatusEnum; // Pastikan ini ada
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Http\Request;
@@ -30,13 +31,15 @@ interface ReportRepositoryInterface
 
     public function countStatusesByResidentId(int $residentId): array;
 
+    // PASTIKAN BARIS INI ADA
+    public function countByStatus(int $residentId, ReportStatusEnum $status): int;
+
     public function getFilteredReports(array $filters): EloquentCollection;
 
     public function countReports(int $rwId = null): int;
     
     public function getCategoryReportCounts(int $rwId = null): EloquentCollection;
 
-    // Perbaikan: Return type sekarang adalah Illuminate\Support\Collection
     public function getDailyReportCounts(int $rwId = null): Collection;
 
     public function getReportCountsByRw(): EloquentCollection;

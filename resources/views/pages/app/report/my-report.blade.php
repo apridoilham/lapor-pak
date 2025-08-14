@@ -1,179 +1,306 @@
 @extends('layouts.app')
 
-@section('title', 'Laporanmu')
+@section('title', 'Laporan Saya')
+
+@push('styles')
+<style>
+    /* Variabel Desain "Fresh & Precise" */
+    :root {
+        --primary-color: #10B981; /* Emerald Green */
+        --primary-dark: #059669;
+        --text-dark: #111827;
+        --text-light: #6B7280;
+        --bg-body: #F9FAFB;
+        --bg-white: #FFFFFF;
+        --border-color: #F3F4F6;
+        --font-sans: 'Inter', 'Poppins', 'Segoe UI', sans-serif;
+    }
+
+    /* Pengaturan Dasar & Font */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    html, body { background-color: var(--bg-body); }
+    body {
+        font-family: var(--font-sans);
+        max-width: 480px;
+        margin: 0 auto;
+        min-height: 100vh;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.05);
+        background-color: var(--bg-white);
+    }
+    .main-content {
+        padding: 1.5rem;
+        padding-bottom: 120px;
+    }
+
+    /* Header Halaman */
+    .page-header h3 {
+        font-weight: 800;
+        font-size: 2rem;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+    }
+
+    /* Kartu Filter Statistik Interaktif */
+    .stat-filter-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    .stat-card {
+        background-color: var(--bg-body);
+        padding: 1rem;
+        border-radius: 16px;
+        text-decoration: none;
+        border: 1px solid #e5e7eb;
+        transition: all 0.2s ease-in-out;
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    }
+    .stat-card.active {
+        background-color: var(--primary-color);
+        color: var(--white);
+        border-color: var(--primary-color);
+        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+        transform: translateY(-4px);
+    }
+    .stat-card .card-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        margin-bottom: 0.75rem;
+    }
+    .stat-card .card-icon.delivered { background-color: #e0f2fe; color: #0284c7; }
+    .stat-card .card-icon.in_process { background-color: #fef3c7; color: #d97706; }
+    .stat-card .card-icon.completed { background-color: #dcfce7; color: #16a34a; }
+    .stat-card .card-icon.rejected { background-color: #fee2e2; color: #dc2626; }
+    .stat-card.active .card-icon { background-color: rgba(255,255,255,0.2); color: var(--white); }
+    
+    .stat-card .card-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-light);
+        margin-bottom: 0.25rem;
+    }
+    .stat-card.active .card-title { color: rgba(255,255,255,0.8); }
+
+    .stat-card .card-count {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-dark);
+    }
+    .stat-card.active .card-count { color: var(--white); }
+
+    /* Judul Konten Dinamis */
+    .content-title-header {
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: var(--text-dark);
+        margin: 2.5rem 0 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    /* Desain List Item Laporan */
+    .report-list-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background-color: var(--bg-white);
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .report-list-item .item-thumbnail {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+    .report-list-item .item-details { flex-grow: 1; }
+    .report-list-item .item-title {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.25rem;
+        line-height: 1.4;
+    }
+    .report-list-item .item-meta {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    .report-list-item .item-actions .dropdown-toggle { color: var(--text-light); }
+    .report-list-item .item-actions .dropdown-toggle::after { display: none; }
+
+    /* ▼▼▼ CSS BARU UNTUK MEMBUAT KOTAK BISA DI-KLIK ▼▼▼ */
+    .report-link-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-grow: 1; /* Membuat link memenuhi ruang yang tersedia */
+        text-decoration: none; /* Menghilangkan garis bawah default */
+        color: inherit; /* Mewarisi warna teks dari parent */
+    }
+
+    /* Empty State */
+    .empty-state-container { text-align: center; padding: 2rem 1rem; }
+    .empty-state-container h5 { font-weight: 700; color: var(--text-dark); margin-top: 1rem; }
+    .empty-state-container p { color: var(--text-light); max-width: 300px; margin: 0.5rem auto 1.5rem; }
+    .empty-state-container .btn-create-report {
+        background-color: var(--primary-color);
+        color: var(--white);
+        border-radius: 50px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        text-decoration: none;
+    }
+</style>
+@endpush
 
 @section('content')
+    @php
+        $active_status = request('status', 'delivered');
+    @endphp
+
     @include('sweetalert::alert')
-    <h3 class="mb-3">Laporanmu</h3>
 
-    <ul class="nav nav-tabs" id="filter-tab" role="tablist">
-        <li class="nav-item" role="presentation">
-            <a class="nav-link {{ request('status', 'delivered') === 'delivered' ? 'active' : '' }}"
-                href="{{ route('report.myreport', ['status' => 'delivered']) }}">
-                Terkirim
+    <div class="page-header">
+        <h3>Laporan Saya</h3>
+        
+        <div class="stat-filter-grid">
+            <a href="{{ route('report.myreport', ['status' => 'delivered']) }}" class="stat-card {{ $active_status === 'delivered' ? 'active' : '' }}">
+                <div class="card-icon delivered"><i class="fa-solid fa-paper-plane"></i></div>
+                <p class="card-title">Terkirim</p>
+                <h4 class="card-count">{{ $statusCounts['delivered'] }}</h4>
             </a>
-        </li>
-        <li class="nav-item" role="presentation">
-            <a class="nav-link {{ request('status') === 'in_process' ? 'active' : '' }}"
-                href="{{ route('report.myreport', ['status' => 'in_process']) }}">
-                Diproses
+            <a href="{{ route('report.myreport', ['status' => 'in_process']) }}" class="stat-card {{ $active_status === 'in_process' ? 'active' : '' }}">
+                <div class="card-icon in_process"><i class="fa-solid fa-spinner"></i></div>
+                <p class="card-title">Diproses</p>
+                <h4 class="card-count">{{ $statusCounts['in_process'] }}</h4>
             </a>
-        </li>
-        <li class="nav-item" role="presentation">
-            <a class="nav-link {{ request('status') === 'completed' ? 'active' : '' }}"
-                href="{{ route('report.myreport', ['status' => 'completed']) }}">
-                Selesai
+            <a href="{{ route('report.myreport', ['status' => 'completed']) }}" class="stat-card {{ $active_status === 'completed' ? 'active' : '' }}">
+                <div class="card-icon completed"><i class="fa-solid fa-check-double"></i></div>
+                <p class="card-title">Selesai</p>
+                <h4 class="card-count">{{ $statusCounts['completed'] }}</h4>
             </a>
-        </li>
-        <li class="nav-item" role="presentation">
-            <a class="nav-link {{ request('status') === 'rejected' ? 'active' : '' }}"
-                href="{{ route('report.myreport', ['status' => 'rejected']) }}">
-                Ditolak
+            <a href="{{ route('report.myreport', ['status' => 'rejected']) }}" class="stat-card {{ $active_status === 'rejected' ? 'active' : '' }}">
+                <div class="card-icon rejected"><i class="fa-solid fa-circle-xmark"></i></div>
+                <p class="card-title">Ditolak</p>
+                <h4 class="card-count">{{ $statusCounts['rejected'] }}</h4>
             </a>
-        </li>
-    </ul>
+        </div>
+    </div>
+    
+    <h5 class="content-title-header">
+        Laporan {{ \App\Enums\ReportStatusEnum::tryFrom($active_status)->label() }}
+    </h5>
 
-    <div class="d-flex flex-column gap-3 mt-4">
+    <div class="report-list-container">
         @forelse ($reports as $report)
-            <div class="card card-report border-0 shadow-none">
-                <div class="card-body p-0">
-                    <a href="{{ route('report.show', ['code' => $report->code, '_ref' => request()->fullUrl()]) }}" class="text-decoration-none text-dark">
-                        <div class="card-report-image position-relative mb-2">
-                            <img src="{{ asset('storage/' . $report->image) }}" alt="{{ $report->title }}">
-
-                            @if($report->latestStatus)
-                                @php
-                                    $statusValue = $report->latestStatus->status;
-                                @endphp
-
-                                @if ($statusValue === \App\Enums\ReportStatusEnum::DELIVERED)
-                                    <div class="badge-status status-delivered">
-                                        <i class="fa-solid fa-paper-plane"></i>
-                                        <span>Terkirim</span>
-                                    </div>
-                                @elseif ($statusValue === \App\Enums\ReportStatusEnum::IN_PROCESS)
-                                    <div class="badge-status status-processing">
-                                        <i class="fa-solid fa-spinner"></i>
-                                        <span>Diproses</span>
-                                    </div>
-                                @elseif ($statusValue === \App\Enums\ReportStatusEnum::COMPLETED)
-                                    <div class="badge-status status-completed">
-                                        <i class="fa-solid fa-check-double"></i>
-                                        <span>Selesai</span>
-                                    </div>
-                                @elseif ($statusValue === \App\Enums\ReportStatusEnum::REJECTED)
-                                    <div class="badge-status status-rejected">
-                                        <i class="fa-solid fa-xmark"></i>
-                                        <span>Ditolak</span>
-                                    </div>
-                                @endif
-                            @endif
-                        </div>
-
-                        <div class="d-flex justify-content-between align-items-end mb-2">
-                            <div class="d-flex align-items-center ">
-                                <img src="{{ asset('assets/app/images/icons/MapPin.png') }}" alt="map pin" class="icon me-2">
-                                <p class="text-primary city">
-                                    {{ \Str::limit($report->address, 20) }}
-                                </p>
-                            </div>
-                            <p class="text-secondary date">
-                                {{ \Carbon\Carbon::parse($report->created_at)->diffForHumans() }}
-                            </p>
-                        </div>
-                        <h1 class="card-title">{{ $report->title }}</h1>
-                    </a>
-                    
+            <div class="report-list-item">
+                <a href="{{ route('report.show', ['code' => $report->code, '_ref' => request()->fullUrl()]) }}" class="report-link-wrapper">
+                    <img src="{{ asset('storage/' . $report->image) }}" alt="Thumbnail" class="item-thumbnail">
+                    <div class="item-details">
+                        <p class="item-title">{{ Str::limit($report->title, 50) }}</p>
+                        <p class="item-meta">
+                            <i class="fa-solid fa-calendar-alt fa-xs"></i>
+                            <span>{{ \Carbon\Carbon::parse($report->created_at)->isoFormat('D MMM YYYY') }}</span>
+                        </p>
+                    </div>
+                </a>
+                <div class="item-actions">
                     @canany(['complete', 'update', 'delete'], $report)
-                        <div class="d-flex gap-2 mt-3">
-                            @can('complete', $report)
-                                <a href="{{ route('report.complete.form', $report) }}" class="btn btn-success btn-sm flex-fill">Selesaikan</a>
-                            @endcan
-                            @can('update', $report)
-                                <a href="{{ route('report.edit', $report) }}" class="btn btn-warning btn-sm flex-fill">Edit</a>
-                            @endcan
-                            @can('delete', $report)
-                                <form action="{{ route('report.destroy', $report) }}" method="POST" class="d-inline-block flex-fill delete-form">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm w-100">Hapus</button>
-                                </form>
-                            @endcan
+                        <div class="dropdown">
+                            <button class="btn btn-link dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                @can('complete', $report)
+                                    <li><a class="dropdown-item" href="{{ route('report.complete.form', $report) }}">Selesaikan</a></li>
+                                @endcan
+                                @can('update', $report)
+                                    <li><a class="dropdown-item" href="{{ route('report.edit', $report) }}">Edit</a></li>
+                                @endcan
+                                @can('delete', $report)
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form action="{{ route('report.destroy', $report) }}" method="POST" class="delete-form-myreport">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="dropdown-item text-danger">Hapus</button>
+                                        </form>
+                                    </li>
+                                @endcan
+                            </ul>
                         </div>
                     @endcanany
                 </div>
             </div>
         @empty
-            <div class="d-flex flex-column justify-content-center align-items-center text-center" style="margin-top: 80px;">
-                @php
-                    $status = request('status', 'delivered');
-                    $title = 'Belum ada laporan';
-                    $message = 'Ayo buat laporan pertamamu!';
-                    $showButton = true;
-
-                    if ($status === 'in_process') {
-                        $title = 'Tidak Ada Laporan yang Diproses';
-                        $message = 'Laporan Anda yang sedang ditangani akan muncul di sini.';
-                        $showButton = false;
-                    } elseif ($status === 'completed') {
-                        $title = 'Tidak Ada Laporan Selesai';
-                        $message = 'Laporan yang telah berhasil diselesaikan akan tercatat di sini.';
-                        $showButton = false;
-                    } elseif ($status === 'rejected') {
-                        $title = 'Tidak Ada Laporan Ditolak';
-                        $message = 'Jika ada laporan yang ditolak, informasinya akan muncul di sini.';
-                        $showButton = false;
-                    }
-                @endphp
-                
-                <div id="lottie" style="width: 250px; height: 250px;"></div>
-                <h5 class="mt-3">{{ $title }}</h5>
-                <p class="text-secondary">{{ $message }}</p>
-                
-                @if($showButton)
-                <a href="{{ route('report.take') }}" class="btn btn-primary py-2 px-4 mt-3">
-                    Buat Laporan
+            @php
+                $title = 'Belum Ada Laporan';
+                $message = 'Saat ini tidak ada laporan dengan status "' . \App\Enums\ReportStatusEnum::tryFrom($active_status)->label() . '".';
+            @endphp
+            <div class="empty-state-container">
+                <div id="lottie-empty" style="width: 250px; height: 250px; margin: 0 auto;"></div>
+                <h5>{{ $title }}</h5>
+                <p>{{ $message }}</p>
+                <a href="{{ route('report.take') }}" class="btn-create-report mt-3">
+                    <i class="fa-solid fa-plus me-1"></i> Buat Laporan Baru
                 </a>
-                @endif
             </div>
         @endforelse
     </div>
+
 @endsection
 
-@section('scripts')
+@push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
     <script>
-        var lottieContainer = document.getElementById('lottie');
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animasi Lottie
+            var lottieContainer = document.getElementById('lottie-empty');
+            if (lottieContainer) {
+                bodymovin.loadAnimation({
+                    container: lottieContainer,
+                    renderer: 'svg',
+                    loop: true,
+                    autoplay: true,
+                    path: '{{ asset('assets/app/lottie/not-found.json') }}'
+                });
+            }
 
-        if (lottieContainer) {
-            var animation = bodymovin.loadAnimation({
-                container: lottieContainer,
-                renderer: 'svg',
-                loop: true,
-                autoplay: true,
-                path: '{{ asset('assets/app/lottie/not-found.json') }}'
-            });
-        }
-
-        document.querySelectorAll('.delete-form').forEach(form => {
-            form.addEventListener('submit', function(event) {
-                event.preventDefault();
-                Swal.fire({
-                    title: 'Anda yakin?',
-                    text: "Laporan yang dihapus tidak dapat dikembalikan.",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Ya, hapus!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        form.submit();
-                    }
+            // Konfirmasi Hapus dengan SweetAlert
+            document.querySelectorAll('.delete-form-myreport').forEach(form => {
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    Swal.fire({
+                        title: 'Anda yakin ingin menghapus?',
+                        text: "Laporan yang sudah dihapus tidak dapat dikembalikan.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Ya, Hapus Saja!',
+                        cancelButtonText: 'Batalkan'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
                 });
             });
         });
     </script>
-@endsection
+@endpush

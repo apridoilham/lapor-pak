@@ -73,15 +73,13 @@ class ReportRepository implements ReportRepositoryInterface
                 $q->where('name', 'like', '%' . $category . '%');
             });
         }
-
-        // --- TAMBAHKAN LOGIKA PENCARIAN DI SINI ---
+        
         if ($search = $request->input('search')) {
             $query->where(function (Builder $q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%");
             });
         }
-        // --- AKHIR LOGIKA PENCARIAN ---
 
         $rwId = $request->input('rw');
         $rtId = $request->input('rt');
@@ -101,7 +99,7 @@ class ReportRepository implements ReportRepositoryInterface
     public function getLatestReportsForAdmin(?int $rwId = null, int $limit = 5): EloquentCollection
     {
         $query = Report::with('resident.user', 'reportCategory', 'latestStatus')
-                            ->whereHas('resident');
+            ->whereHas('resident');
 
         if ($rwId) {
             $query->whereHas('resident', function ($q) use ($rwId) {
@@ -116,15 +114,13 @@ class ReportRepository implements ReportRepositoryInterface
     {
         $query = Report::with('resident.user', 'reportCategory', 'latestStatus');
         $this->applyVisibilityFilter($query);
-
-        // --- TAMBAHKAN LOGIKA PENCARIAN DI SINI JUGA ---
+        
         if ($search = $request->input('search')) {
             $query->where(function (Builder $q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%");
             });
         }
-        // --- AKHIR LOGIKA PENCARIAN ---
 
         $rwId = $request->input('rw');
         $rtId = $request->input('rt');
@@ -172,6 +168,7 @@ class ReportRepository implements ReportRepositoryInterface
         $report->reportStatuses()->create([
             'status' => ReportStatusEnum::DELIVERED,
             'description' => 'Laporan berhasil diterima oleh sistem dan akan segera diproses.',
+            'created_by_role' => 'resident',
         ]);
 
         return $report;
@@ -212,6 +209,16 @@ class ReportRepository implements ReportRepositoryInterface
             'completed' => $completed,
             'rejected' => $rejected,
         ];
+    }
+    
+    // ▼▼▼ PASTIKAN METHOD BARU INI SUDAH ANDA TAMBAHKAN ▼▼▼
+    public function countByStatus(int $residentId, ReportStatusEnum $status): int
+    {
+        return Report::where('resident_id', $residentId)
+            ->whereHas('latestStatus', function (Builder $query) use ($status) {
+                $query->where('status', $status->value);
+            })
+            ->count();
     }
 
     public function getFilteredReports(array $filters): EloquentCollection
@@ -260,7 +267,7 @@ class ReportRepository implements ReportRepositoryInterface
 
     public function getCategoryReportCounts(int $rwId = null): EloquentCollection
     {
-        $categories = ReportCategory::withCount(['reports' => function ($query) use ($rwId) {
+        return ReportCategory::withCount(['reports' => function ($query) use ($rwId) {
             $query->whereHas('resident');
             if ($rwId) {
                 $query->whereHas('resident', function ($q) use ($rwId) {
@@ -268,8 +275,6 @@ class ReportRepository implements ReportRepositoryInterface
                 });
             }
         }])->get();
-
-        return $categories;
     }
 
     public function getDailyReportCounts(int $rwId = null): Collection
@@ -341,6 +346,7 @@ class ReportRepository implements ReportRepositoryInterface
                     $counts[$statusValue]++;
                 }
             } else {
+                // Jika tidak ada status sama sekali, anggap sebagai 'delivered'
                 $counts[ReportStatusEnum::DELIVERED->value]++;
             }
         }
