@@ -4,151 +4,226 @@
 
 @push('styles')
 <style>
-    /* Styling ini bisa dipindahkan ke app.css jika diinginkan */
+    /* Variabel Desain "Vibrant" */
+    :root {
+        --primary-color: #10B981;
+        --text-dark: #111827;
+        --text-light: #6B7280;
+        --bg-body: #F9FAFB;
+        --bg-white: #FFFFFF;
+        --border-color: #e5e7eb;
+        --font-sans: 'Inter', 'Poppins', 'Segoe UI', sans-serif;
+    }
+
+    /* Pengaturan Dasar */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    html, body { background-color: var(--bg-body); }
     body {
-        background-color: #f8f9fa;
+        font-family: var(--font-sans);
+        max-width: 480px;
+        margin: 0 auto;
+        min-height: 100vh;
+        box-shadow: 0 0 40px rgba(0, 0, 0, 0.07);
+        background-color: var(--bg-body);
+    }
+    .main-content { padding: 1.5rem; padding-bottom: 100px; }
+    .page-title {
+        font-weight: 800;
+        font-size: 2rem;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
     }
 
-    .profile-header {
-        background: linear-gradient(135deg, #16752B, #2c5282); /* Gradient dari hijau ke biru gelap */
+    /* Kartu Profil Utama */
+    .profile-card-main {
+        background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+        border-radius: 24px;
+        padding: 1.5rem;
         color: white;
-        padding: 2rem 1.5rem 4rem; /* Padding bawah lebih besar */
-        border-bottom-left-radius: 30px;
-        border-bottom-right-radius: 30px;
-        margin: -1rem -1rem 0; /* Menarik header ke tepi layar */
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    }
-    
-    .profile-header .avatar {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        border: 4px solid white;
-        object-fit: cover;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-
-    .profile-header .profile-info h4 {
-        margin-bottom: 0;
-        font-weight: 700;
-        font-size: 1.25rem;
-    }
-    
-    .profile-header .profile-info p {
-        margin-bottom: 0;
-        opacity: 0.8;
-        font-size: 0.9rem;
-    }
-
-    .stats-card {
-        display: flex;
-        justify-content: space-around;
-        background-color: white;
-        padding: 1.25rem 1rem;
-        border-radius: 15px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        margin-top: -50px; /* Membuat kartu melayang di atas header */
-        position: relative;
-        z-index: 10;
-    }
-
-    .stats-card .stat-item h5 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #2d3748;
-    }
-
-    .stats-card .stat-item p {
-        font-size: 0.8rem;
-        color: #6c757d;
-        margin-bottom: 0;
-    }
-    
-    .profile-menu {
-        margin-top: 1.5rem;
-        padding-bottom: 80px;
-    }
-
-    .btn-profile-menu {
         display: flex;
         align-items: center;
         gap: 1rem;
-        padding: 1rem;
-        background-color: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        text-decoration: none;
-        color: #495057;
-        font-weight: 600;
-        font-size: 0.95rem;
-        transition: all 0.2s ease-in-out;
+        box-shadow: 0 15px 30px -10px rgba(16, 185, 129, 0.4);
+        margin-bottom: 2rem;
     }
+    .profile-card-main .avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 4px solid var(--white);
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+    .profile-card-main .user-info .name {
+        font-weight: 700;
+        font-size: 1.5rem;
+        margin: 0;
+    }
+    .profile-card-main .user-info .address {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        margin-top: 0.25rem;
+    }
+
+    /* Section Title */
+    .section-title {
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+        font-size: 1.25rem;
+    }
+
+    /* Kartu Statistik Berwarna */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 2.5rem;
+    }
+    .stat-card {
+        padding: 1rem;
+        border-radius: 16px;
+        text-align: center;
+        color: white;
+        box-shadow: 0 8px 20px -5px rgba(0,0,0,0.2);
+    }
+    .stat-card.active { background: linear-gradient(135deg, #3B82F6, #60A5FA); }
+    .stat-card.completed { background: linear-gradient(135deg, #16A34A, #34D399); }
+    .stat-card.rejected { background: linear-gradient(135deg, #EAB308, #FBBF24); }
+
+    .stat-card .stat-icon {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.8;
+    }
+    .stat-card .stat-count {
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+    .stat-card .stat-label {
+        font-size: 0.75rem;
+        font-weight: 500;
+        opacity: 0.9;
+        margin-top: 0.25rem;
+    }
+
+    /* Menu Aksi Model Kartu */
+    .action-menu .action-card {
+        display: flex; align-items: center; gap: 1rem;
+        padding: 1rem; border-radius: 16px;
+        margin-bottom: 1rem; border: none;
+        background-color: var(--bg-white);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        font-weight: 600; font-size: 1rem; color: var(--text-dark);
+        text-decoration: none; transition: all 0.2s ease-in-out;
+    }
+    .action-menu .action-card:hover { transform: scale(1.03); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+    .action-menu .menu-icon {
+        width: 48px; height: 48px; border-radius: 14px;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 1.3rem;
+    }
+    .icon-edit { background-color: #DBEAFE; color: #2563EB; }
+    .icon-logout { background-color: #FEE2E2; color: #DC2626; }
+    .action-menu .action-card .fa-chevron-right { margin-left: auto; color: var(--text-light); }
 </style>
 @endpush
 
 @section('content')
     @php
-        // Variabel $user, $activeReportsCount, dll sudah dikirim dari controller
+        $user = Auth::user();
         $resident = $user->resident;
     @endphp
 
-    <div class="profile-header">
-        <div class="d-flex align-items-center gap-3">
-            @php
-                $avatarUrl = $resident->avatar;
-                if ($avatarUrl && !Str::startsWith($avatarUrl, 'http')) {
-                    $avatarUrl = asset('storage/' . $avatarUrl);
-                } elseif (!$avatarUrl) {
-                    $avatarUrl = asset('assets/app/images/default-avatar.png');
-                }
-            @endphp
-            <img src="{{ $avatarUrl }}" alt="avatar" class="avatar">
-            <div class="profile-info">
-                <h4>{{ $user->name }}</h4>
-                <p>{{ $user->email }}</p>
+    @include('sweetalert::alert')
+
+    <h3 class="page-title">Profil Saya</h3>
+
+    <div class="profile-card-main">
+        @php
+            $avatarUrl = $resident->avatar;
+            if ($avatarUrl && !Str::startsWith($avatarUrl, 'http')) {
+                $avatarUrl = asset('storage/' . $avatarUrl);
+            } elseif (!$avatarUrl) {
+                $avatarUrl = asset('assets/app/images/default-avatar.png');
+            }
+        @endphp
+        <img src="{{ $avatarUrl }}" alt="avatar" class="avatar">
+        <div class="user-info">
+            <h4 class="name">{{ $user->name }}</h4>
+            <p class="address">
+                @if($resident->rt && $resident->rw)
+                    RT {{ $resident->rt->number }} / RW {{ $resident->rw->number }}
+                @else
+                    {{ $user->email }}
+                @endif
+            </p>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card active">
+            <div class="stat-icon"><i class="fa-solid fa-spinner"></i></div>
+            <div class="stat-count" data-count="{{ $activeReportsCount }}">0</div>
+            <div class="stat-label">Aktif</div>
+        </div>
+        <div class="stat-card completed">
+            <div class="stat-icon"><i class="fa-solid fa-check-double"></i></div>
+            <div class="stat-count" data-count="{{ $completedReportsCount }}">0</div>
+            <div class="stat-label">Selesai</div>
+        </div>
+        <div class="stat-card rejected">
+            <div class="stat-icon"><i class="fa-solid fa-circle-xmark"></i></div>
+            <div class="stat-count" data-count="{{ $rejectedReportsCount }}">0</div>
+            <div class="stat-label">Ditolak</div>
+        </div>
+    </div>
+
+    <div class="action-menu">
+        <h5 class="section-title">Pengaturan</h5>
+        <a href="{{ route('profile.edit') }}" class="action-card">
+            <div class="menu-icon icon-edit">
+                <i class="fa-solid fa-user-pen"></i>
             </div>
-        </div>
-    </div>
-
-    <div class="stats-card text-center">
-        <div class="stat-item">
-            <h5>{{ $activeReportsCount }}</h5>
-            <p>Laporan Aktif</p>
-        </div>
-        <div class="stat-item">
-            <h5>{{ $completedReportsCount }}</h5>
-            <p>Selesai</p>
-        </div>
-        <div class="stat-item">
-            <h5>{{ $rejectedReportsCount }}</h5>
-            <p>Ditolak</p>
-        </div>
-    </div>
-
-    @if(!$resident->rt_id || !$resident->rw_id || $resident->address === 'Alamat belum diatur')
-        <div class="alert alert-warning d-flex flex-column align-items-center text-center p-3 mt-4 border-0 shadow-sm" style="border-radius: 15px; background-color: #fffbeb;">
-            <i class="fa-solid fa-triangle-exclamation fa-2x mb-2 text-warning"></i>
-            <h6 class="fw-bold mb-1">Profil Anda Belum Lengkap!</h6>
-            <p class="small text-secondary mb-2 px-3">Harap lengkapi data RT, RW, dan Alamat Anda untuk dapat menggunakan semua fitur aplikasi.</p>
-            <a href="{{ route('profile.edit') }}" class="btn btn-sm btn-warning fw-bold shadow-sm">Lengkapi Sekarang</a>
-        </div>
-    @endif
-
-    <div class="d-flex flex-column gap-3 profile-menu">
-        <a href="{{ route('profile.edit') }}" class="btn-profile-menu">
-            <i class="fa-solid fa-user-pen text-primary"></i>
             <span>Ubah Profil & Alamat</span>
-            <i class="fa-solid fa-chevron-right ms-auto text-secondary"></i>
+            <i class="fa-solid fa-chevron-right"></i>
         </a>
-        
-        <a href="#" class="btn-profile-menu" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <i class="fa-solid fa-right-from-bracket text-danger"></i>
+        <a href="#" class="action-card" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+            <div class="menu-icon icon-logout">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </div>
             <span class="text-danger">Keluar</span>
-            <i class="fa-solid fa-chevron-right ms-auto text-secondary"></i>
+            <i class="fa-solid fa-chevron-right"></i>
         </a>
-
         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
             @csrf
         </form>
     </div>
+@endsection
+
+@section('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animasi Hitung Angka Statistik
+            const counters = document.querySelectorAll('.stat-count');
+            const speed = 100; // Durasi animasi
+
+            counters.forEach(counter => {
+                const updateCount = () => {
+                    const target = +counter.getAttribute('data-count');
+                    const count = +counter.innerText;
+                    const increment = target / speed;
+
+                    if (count < target) {
+                        counter.innerText = Math.ceil(count + increment);
+                        setTimeout(updateCount, 15);
+                    } else {
+                        counter.innerText = target;
+                    }
+                };
+                updateCount();
+            });
+        });
+    </script>
 @endsection
