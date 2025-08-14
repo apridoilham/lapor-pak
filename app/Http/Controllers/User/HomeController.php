@@ -11,15 +11,13 @@ use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
-
     private ReportRepositoryInterface $reportRepository;
-
     private ReportCategoryRepositoryInterface $reportCategoryRepository;
 
     public function __construct(
         ReportRepositoryInterface $reportRepository,
         ReportCategoryRepositoryInterface $reportCategoryRepository
-    ){
+    ) {
         $this->reportRepository = $reportRepository;
         $this->reportCategoryRepository = $reportCategoryRepository;
     }
@@ -28,10 +26,13 @@ class HomeController extends Controller
     {
         $categories = $this->reportCategoryRepository->getAllReportCategories();
         $reports = $this->reportRepository->getLatestReportsForUser($request);
+
+        // --- TAMBAHAN DATA UNTUK FILTER ---
         $rws = Rw::orderBy('number')->get();
-        
+
         $rtId = $request->input('rt');
         $selectedRt = $rtId ? Rt::find($rtId) : null;
+        // --- AKHIR TAMBAHAN ---
 
         return view('pages.app.home', compact('categories', 'reports', 'rws', 'selectedRt'));
     }

@@ -65,15 +65,24 @@ class ReportRepository implements ReportRepositoryInterface
     public function getAllReportsForUser(Request $request): EloquentCollection
     {
         $query = Report::with('resident.user', 'reportCategory', 'latestStatus');
-        
+
         $this->applyVisibilityFilter($query);
 
         if ($category = $request->input('category')) {
             $query->whereHas('reportCategory', function (Builder $q) use ($category) {
-                $q->where('name', $category);
+                $q->where('name', 'like', '%' . $category . '%');
             });
         }
-        
+
+        // --- TAMBAHKAN LOGIKA PENCARIAN DI SINI ---
+        if ($search = $request->input('search')) {
+            $query->where(function (Builder $q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+        // --- AKHIR LOGIKA PENCARIAN ---
+
         $rwId = $request->input('rw');
         $rtId = $request->input('rt');
         if ($rwId || $rtId) {
@@ -85,28 +94,37 @@ class ReportRepository implements ReportRepositoryInterface
                 }
             });
         }
-        
+
         return $query->latest()->get();
     }
 
     public function getLatestReportsForAdmin(?int $rwId = null, int $limit = 5): EloquentCollection
     {
         $query = Report::with('resident.user', 'reportCategory', 'latestStatus')
-                        ->whereHas('resident');
+                            ->whereHas('resident');
 
         if ($rwId) {
             $query->whereHas('resident', function ($q) use ($rwId) {
                 $q->where('rw_id', $rwId);
             });
         }
-        
+
         return $query->latest('updated_at')->take($limit)->get();
     }
-    
+
     public function getLatestReportsForUser(Request $request): EloquentCollection
     {
         $query = Report::with('resident.user', 'reportCategory', 'latestStatus');
         $this->applyVisibilityFilter($query);
+
+        // --- TAMBAHKAN LOGIKA PENCARIAN DI SINI JUGA ---
+        if ($search = $request->input('search')) {
+            $query->where(function (Builder $q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+        // --- AKHIR LOGIKA PENCARIAN ---
 
         $rwId = $request->input('rw');
         $rtId = $request->input('rt');
@@ -120,7 +138,7 @@ class ReportRepository implements ReportRepositoryInterface
                 }
             });
         }
-        
+
         return $query->latest('updated_at')->take(5)->get();
     }
 
@@ -137,17 +155,17 @@ class ReportRepository implements ReportRepositoryInterface
         return $query->latest()->get();
     }
 
-    public function getReportById(int $id): Report
+    public function getReportById(int $id)
     {
         return Report::with('resident.user', 'resident.rt', 'resident.rw', 'reportCategory', 'reportStatuses')->findOrFail($id);
     }
 
-    public function getReportByCode(string $code): Report
+    public function getReportByCode(string $code)
     {
         return Report::with('resident.user', 'resident.rt', 'resident.rw', 'reportCategory', 'reportStatuses')->where('code', $code)->firstOrFail();
     }
 
-    public function createReport(array $data): Report
+    public function createReport(array $data)
     {
         $report = Report::create($data);
 
@@ -159,12 +177,12 @@ class ReportRepository implements ReportRepositoryInterface
         return $report;
     }
 
-    public function updateReport(array $data, int $id): bool
+    public function updateReport(array $data, int $id)
     {
         return Report::findOrFail($id)->update($data);
     }
 
-    public function deleteReport(int $id): bool
+    public function deleteReport(int $id)
     {
         return Report::findOrFail($id)->delete();
     }
@@ -250,10 +268,10 @@ class ReportRepository implements ReportRepositoryInterface
                 });
             }
         }])->get();
-        
+
         return $categories;
     }
-    
+
     public function getDailyReportCounts(int $rwId = null): Collection
     {
         $query = Report::query()
@@ -271,17 +289,17 @@ class ReportRepository implements ReportRepositoryInterface
             ->groupBy('date')
             ->orderBy('date', 'ASC')
             ->get();
-        
+
         $labels = collect();
         $counts = collect();
-        
+
         for ($i = 6; $i >= 0; $i--) {
             $date = $now->copy()->subDays($i);
             $labels->push($date->isoFormat('dddd, D MMMM'));
             $found = $reports->firstWhere('date', $date->format('Y-m-d'));
             $counts->push($found ? $found->count : 0);
         }
-        
+
         return collect(['labels' => $labels, 'counts' => $counts]);
     }
 
@@ -296,7 +314,7 @@ class ReportRepository implements ReportRepositoryInterface
             ->orderBy('rws.number')
             ->get();
     }
-    
+
     public function getStatusCounts(int $rwId = null): array
     {
         $query = Report::query()->whereHas('resident');
@@ -329,7 +347,7 @@ class ReportRepository implements ReportRepositoryInterface
 
         return $counts;
     }
-    
+
     public function getReportCountsByRt(int $rwId): EloquentCollection
     {
         return Report::query()
