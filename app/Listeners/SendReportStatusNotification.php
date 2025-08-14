@@ -3,7 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\ReportStatusUpdated;
-use App\Notifications\ReportStatusUpdatedNotification; // <-- Ganti Mailable dengan Notification
+use App\Notifications\ReportStatusUpdatedNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
@@ -20,8 +20,7 @@ class SendReportStatusNotification implements ShouldQueue
     {
         $user = $event->report->resident->user;
 
-        // PERUBAHAN DI SINI:
-        // Gunakan ->notify() untuk mengirim notifikasi
-        $user->notify(new ReportStatusUpdatedNotification($event->report));
+        // Salurkan actorId ke Notification
+        $user->notify(new ReportStatusUpdatedNotification($event->report, $event->actorId));
     }
 }

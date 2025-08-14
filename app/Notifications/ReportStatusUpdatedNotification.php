@@ -7,17 +7,18 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Auth;
 
 class ReportStatusUpdatedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public $report;
+    public Report $report;
+    public ?int $actorId; // TAMBAHKAN properti ini
 
-    public function __construct(Report $report)
+    public function __construct(Report $report, ?int $actorId) // TAMBAHKAN parameter ini
     {
         $this->report = $report;
+        $this->actorId = $actorId; // Simpan nilainya
     }
 
     public function via(object $notifiable): array
@@ -46,7 +47,8 @@ class ReportStatusUpdatedNotification extends Notification implements ShouldQueu
             'report_id' => $this->report->id,
             'report_code' => $this->report->code,
             'status_message' => $this->report->latestStatus->status->value,
-            'action_by_user_id' => Auth::id(),
+            // PERBAIKAN: Gunakan actorId, bukan Auth::id()
+            'action_by_user_id' => $this->actorId,
         ];
     }
 }

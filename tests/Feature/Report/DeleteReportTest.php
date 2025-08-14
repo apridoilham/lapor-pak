@@ -13,7 +13,7 @@ class DeleteReportTest extends TestCase
 {
     use RefreshDatabase;
 
-    private User $adminUser;
+    private User $superAdminUser;
     private Report $report;
 
     protected function setUp(): void
@@ -22,7 +22,7 @@ class DeleteReportTest extends TestCase
         $this->seed(RolePermissionSeeder::class);
         $this->seed(AdminSeeder::class);
 
-        $this->adminUser = User::where('email', 'superadmin@bsblapor.com')->first();
+        $this->superAdminUser = User::where('email', 'bsblapor@gmail.com')->first();
         $this->report = Report::factory()->create();
     }
 
@@ -31,7 +31,7 @@ class DeleteReportTest extends TestCase
         $this->assertDatabaseHas('reports', ['id' => $this->report->id]);
 
         $response = $this
-            ->actingAs($this->adminUser)
+            ->actingAs($this->superAdminUser)
             ->delete(route('admin.report.destroy', $this->report->id));
 
         $response->assertRedirect(route('admin.report.index'));

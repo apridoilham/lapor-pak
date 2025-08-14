@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\ReportStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpsertReportStatusRequest;
-use App\Interfaces\ReportStatusRepositoryInterface;
 use App\Interfaces\ReportRepositoryInterface;
+use App\Interfaces\ReportStatusRepositoryInterface;
 use App\Traits\FileUploadTrait;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Support\Facades\Storage; // TAMBAHKAN INI
+use Illuminate\Support\Facades\Auth; // Tambahkan ini
+use Illuminate\Support\Facades\Storage;
 use RealRashid\SweetAlert\Facades\Alert as Swal;
 
 class ReportStatusController extends Controller
@@ -46,7 +47,8 @@ class ReportStatusController extends Controller
         }
         $data['created_by_role'] = 'admin';
 
-        $this->reportStatusRepository->createReportStatus($data);
+        // Kirim Auth::id() ke repository
+        $this->reportStatusRepository->createReportStatus($data, Auth::id());
 
         Swal::success('Success', 'Data Progress laporan berhasil ditambahkan!')->timerProgressBar();
         return redirect()->route('admin.report.show', $request->report_id);
@@ -70,7 +72,8 @@ class ReportStatusController extends Controller
             $data['image'] = $path;
         }
 
-        $this->reportStatusRepository->updateReportStatus($data, $id);
+        // Kirim Auth::id() ke repository
+        $this->reportStatusRepository->updateReportStatus($data, $id, Auth::id());
 
         Swal::success('Success', 'Data progress laporan berhasil diubah!')->timerProgressBar();
         return redirect()->route('admin.report.show', $request->report_id);

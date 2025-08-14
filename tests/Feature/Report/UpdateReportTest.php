@@ -15,7 +15,7 @@ class UpdateReportTest extends TestCase
 {
     use RefreshDatabase;
 
-    private User $adminUser;
+    private User $superAdminUser;
     private Report $report;
 
     protected function setUp(): void
@@ -24,7 +24,7 @@ class UpdateReportTest extends TestCase
         $this->seed(RolePermissionSeeder::class);
         $this->seed(AdminSeeder::class);
 
-        $this->adminUser = User::where('email', 'admin@laporpak.com')->first();
+        $this->superAdminUser = User::where('email', 'bsblapor@gmail.com')->first();
 
         $residentUser = User::factory()->create();
         $residentUser->assignRole('resident');
@@ -51,7 +51,7 @@ class UpdateReportTest extends TestCase
         ];
 
         $response = $this
-            ->actingAs($this->adminUser)
+            ->actingAs($this->superAdminUser)
             ->put(route('admin.report.update', $this->report->id), $updatedData);
 
         $response->assertRedirect(route('admin.report.index'));
