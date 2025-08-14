@@ -13,10 +13,9 @@ class NotificationController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $notifications = $user->notifications()->latest()->paginate(10);
+        // Ambil semua notifikasi, jangan di-paginate agar bisa di-filter di view
+        $notifications = $user->notifications()->latest()->get(); 
         
-        $notifications->load('notifiable');
-
         return view('pages.app.notifications.index', compact('notifications'));
     }
 
@@ -38,16 +37,33 @@ class NotificationController extends Controller
         return redirect($baseUrl . $fragment);
     }
 
-    public function destroy(DatabaseNotification $notification)
+    // ▼▼▼ METHOD BARU YANG MEMPERBAIKI ERROR ▼▼▼
+    public function markSelectedAsRead(Request $request)
     {
-        if ($notification->notifiable_id !== Auth::id()) {
-            abort(403, 'Anda tidak diizinkan mengakses notifikasi ini.');
-        }
+        $request->validate([
+            'ids'   => 'required|array',
+            'ids.*' => 'exists:notifications,id',
+        ]);
 
-        $notification->delete();
+        Auth::user()->notifications()
+            ->whereIn('id', $request->ids)
+            ->update(['read_at' => now()]);
 
-        Swal::success('Berhasil', 'Notifikasi telah dihapus.');
+        return response()->json(['message' => 'Notifikasi berhasil ditandai sebagai sudah dibaca.']);
+    }
 
-        return back();
+    // ▼▼▼ METHOD BARU YANG MEMPERBAIKI ERROR ▼▼▼
+    public function deleteSelected(Request $request)
+    {
+        $request->validate([
+            'ids'   => 'required|array',
+            'ids.*' => 'exists:notifications,id',
+        ]);
+        
+        Auth::user()->notifications()
+            ->whereIn('id', $request->ids)
+            ->delete();
+
+        return response()->json(['message' => 'Notifikasi yang dipilih berhasil dihapus.']);
     }
 }

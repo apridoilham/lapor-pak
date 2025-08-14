@@ -41,6 +41,8 @@ Route::post('logout', [GoogleController::class, 'logout'])->name('logout')->midd
 // --- Rute Pengguna (Wajib Login & Berperan Resident) ---
 Route::middleware(['auth', 'role:resident', 'profile.completed'])->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
+
+    // Rute Laporan Pengguna
     Route::get('/reports', [UserReportController::class, 'index'])->name('report.index');
     Route::get('/report/{code}', [UserReportController::class, 'show'])->name('report.show');
     Route::get('/take-report', [UserReportController::class, 'take'])->name('report.take');
@@ -55,33 +57,51 @@ Route::middleware(['auth', 'role:resident', 'profile.completed'])->group(functio
     Route::delete('/my-reports/{report}', [UserReportController::class, 'destroy'])->name('report.destroy');
     Route::get('/my-reports/{report}/complete', [UserReportController::class, 'showCompleteForm'])->name('report.complete.form');
     Route::post('/my-reports/{report}/complete', [UserReportController::class, 'complete'])->name('report.complete');
+
+    // Rute Komentar
     Route::post('/report/{report}/comments', [CommentController::class, 'store'])->name('report.comments.store');
+    
+    // Rute Profil
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    
+    // Rute Notifikasi
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
-    Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+    Route::post('/notifications/mark-selected-as-read', [NotificationController::class, 'markSelectedAsRead'])->name('notifications.read.selected');
+    Route::post('/notifications/delete-selected', [NotificationController::class, 'deleteSelected'])->name('notifications.delete.selected');
 });
 
 // --- Rute Panel Admin (Wajib Login & Berperan Admin atau Super Admin) ---
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin|super-admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Profil Admin
     Route::get('/profile', [AdminProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile/edit', [AdminProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/update', [AdminProfileController::class, 'update'])->name('profile.update');
-    Route::resource('/resident', ResidentController::class);
+    
+    // Manajemen Pelapor
     Route::get('/residents/{resident}/reports-for-alert', [ResidentController::class, 'getReportsForDeletionAlert'])->name('residents.reports_for_alert');
-    Route::resource('/report', ReportController::class);
+    Route::resource('/resident', ResidentController::class);
+    
+    // Manajemen Laporan
     Route::get('/export-reports', [ReportExportController::class, 'create'])->name('report.export.create');
     Route::post('/export-reports', [ReportExportController::class, 'store'])->name('report.export.store');
     Route::get('/report-status/{reportId}/create', [ReportStatusController::class, 'create'])->name('report-status.create');
     Route::resource('/report-status', ReportStatusController::class)->except('create', 'index', 'show');
+    Route::resource('/report', ReportController::class);
+
+    // Log Aktivitas
     Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
 
+    // Rute Khusus Super Admin
     Route::middleware(['role:super-admin'])->group(function () {
         Route::resource('/report-category', ReportCategoryController::class);
         Route::resource('/admin-user', AdminUserController::class);
+
+        // Manajemen RT/RW
         Route::get('/rtrw', [RtRwController::class, 'index'])->name('rtrw.index');
         Route::post('/rtrw', [RtRwController::class, 'store'])->name('rtrw.store');
         Route::get('/rtrw/{rw}/edit', [RtRwController::class, 'edit'])->name('rtrw.edit');
