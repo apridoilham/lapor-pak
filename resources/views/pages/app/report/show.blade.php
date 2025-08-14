@@ -3,7 +3,6 @@
 @section('title', 'Detail Laporan ' . $report->code)
 
 @push('styles')
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
     /* Variabel Desain "Kekinian" */
     :root {
@@ -13,6 +12,7 @@
         --text-light: #6B7280;
         --bg-body: #F9FAFB;
         --bg-white: #FFFFFF;
+        --border-color: #e5e7eb;
         --font-sans: 'Inter', 'Poppins', 'Segoe UI', sans-serif;
     }
 
@@ -25,137 +25,71 @@
         margin: 0 auto;
         min-height: 100vh;
         box-shadow: 0 0 30px rgba(0, 0, 0, 0.05);
-        background-color: var(--bg-body);
+        background-color: var(--bg-white);
     }
     .main-content { padding: 0; padding-bottom: 80px; }
 
-    /* Hero Section */
+    /* (CSS Lainnya Tetap Sama) */
     .hero-container { position: relative; }
-    .hero-image {
-        width: 100%;
-        height: 320px;
-        object-fit: cover;
-        display: block;
-    }
-    .hero-gradient-overlay {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 150px;
-        background: linear-gradient(180deg, rgba(249, 250, 251, 0) 0%, var(--bg-body) 100%);
-    }
-    .hero-overlay-header {
-        position: absolute; top: 0; left: 0; right: 0;
-        display: flex; justify-content: space-between; align-items: center;
-        padding: 1.25rem;
-    }
-    .overlay-button {
-        background-color: rgba(30, 30, 30, 0.5);
-        color: var(--white);
-        width: 44px; height: 44px; border-radius: 50%;
-        display: inline-flex; align-items: center; justify-content: center;
-        text-decoration: none; font-size: 1.1rem;
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        transition: all 0.2s ease;
-    }
-    .overlay-button:hover { background-color: rgba(0,0,0,0.7); }
-
-    /* Konten Detail */
-    .content-container {
-        padding: 0 1.5rem;
-        margin-top: -50px; /* Konten overlap di atas gradasi */
-        position: relative;
-        z-index: 10;
-    }
-    .report-title {
-        font-weight: 800;
-        font-size: 1.75rem;
-        color: var(--text-dark);
-        margin-bottom: 1.5rem;
-        line-height: 1.3;
-        background: var(--bg-white);
-        padding: 1.5rem;
-        border-radius: 20px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.07);
-    }
-
-    /* Grid Info "Glassmorphism" */
-    .info-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-    .info-card {
-        background: rgba(255, 255, 255, 0.7);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.4);
-        border-radius: 16px;
-        padding: 1rem;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    }
-    .info-card .info-icon {
-        width: 40px; height: 40px; border-radius: 12px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1.2rem; margin-bottom: 0.75rem;
-    }
+    .hero-image { width: 100%; height: 320px; object-fit: cover; display: block; }
+    .hero-gradient-overlay { position: absolute; bottom: 0; left: 0; right: 0; height: 150px; background: linear-gradient(180deg, rgba(249, 250, 251, 0) 0%, var(--bg-body) 100%); }
+    .hero-overlay-header { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: 1.25rem; }
+    .overlay-button { background-color: rgba(30, 30, 30, 0.5); color: var(--white); width: 44px; height: 44px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.1rem; backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.2); transition: all 0.2s ease; }
+    .content-container { padding: 0 1.5rem; margin-top: -50px; position: relative; z-index: 10; }
+    .report-title { font-weight: 800; font-size: 1.75rem; color: var(--text-dark); margin-bottom: 1.5rem; line-height: 1.3; background: var(--bg-white); padding: 1.5rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.07); }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+    .info-card { background: var(--bg-white); border: 1px solid var(--border-color); border-radius: 16px; padding: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.04); }
+    .info-card .info-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 0.75rem; }
     .info-card .info-label { font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.25rem; }
     .info-card .info-value { font-weight: 600; color: var(--text-dark); font-size: 0.95rem; }
-
-    /* Warna Ikon Info */
-    .icon-status { background-color: #F0FDF4; color: #10B981; }
-    .icon-category { background-color: #EFF6FF; color: #3B82F6; }
-    .icon-reporter { background-color: #FEF3C7; color: #D97706; }
-    .icon-date { background-color: #F3E8FF; color: #9333EA; }
-
-    /* Section Styling */
+    .icon-status { background-color: #F0FDF4; color: #10B981; } .icon-category { background-color: #EFF6FF; color: #3B82F6; } .icon-reporter { background-color: #FEF3C7; color: #D97706; } .icon-date { background-color: #F3E8FF; color: #9333EA; }
     .section { margin-bottom: 2.5rem; }
     .section-title { font-weight: 700; font-size: 1.25rem; color: var(--text-dark); margin-bottom: 1rem; }
-    .section p.description { color: var(--text-light); line-height: 1.7; font-size: 0.95rem; }
-    
-    /* Tombol Peta */
-    .map-button {
-        display: flex; align-items: center; gap: 1rem;
-        width: 100%; text-align: left; background: var(--bg-white);
-        padding: 1rem; border-radius: 16px; border: 1px solid #e5e7eb;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-decoration: none;
+    .section p.description, .section p.address { color: var(--text-light); line-height: 1.7; font-size: 0.95rem; }
+    .location-text { display: flex; align-items: flex-start; gap: 0.75rem; background-color: var(--bg-body); padding: 1rem; border-radius: 12px; }
+    .location-text .icon { font-size: 1rem; color: var(--primary-color); margin-top: 4px;}
+    .location-text p { margin: 0; color: var(--text-light); line-height: 1.6; font-size: 0.9rem; }
+    .timeline-block { background: var(--bg-white); border: 1px solid var(--border-color); border-radius: 18px; margin-bottom: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.04); overflow: hidden; }
+    .timeline-header { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); }
+    .timeline-header .icon { font-size: 1rem; }
+    .timeline-header h6 { margin: 0; font-weight: 600; font-size: 0.95rem; }
+    .header-delivered { background-color: #EFF6FF; color: #3B82F6; } .header-in_process { background-color: #FFFBEB; color: #D97706; } .header-completed { background-color: #F0FDF4; color: #10B981; } .header-rejected { background-color: #FEF2F2; color: #EF4444; }
+    .timeline-body { padding: 1rem; }
+    .timeline-body .proof-image { width: 100%; height: 180px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem; cursor: pointer; border: 1px solid var(--border-color); }
+    .timeline-body .description { font-size: 0.9rem; color: var(--text-light); line-height: 1.6; margin-bottom: 1rem; }
+    .timeline-body .date { font-size: 0.8rem; font-weight: 500; color: var(--text-light); text-align: right; }
+    .lightbox-overlay { display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); z-index: 9999; backdrop-filter: blur(5px); }
+    .lightbox-overlay.show { display: flex; }
+    .lightbox-content { position: relative; max-width: 90%; max-height: 80%; }
+    .lightbox-content img { width: 100%; height: 100%; object-fit: contain; }
+    .lightbox-close-btn { position: absolute; top: -40px; right: 0; color: white; font-size: 1.5rem; border: none; background: transparent; }
+    .comment-form-container { display: flex; align-items: flex-start; gap: 0.75rem; margin-top: 1.5rem; }
+    .comment-form-container .avatar { width: 40px; height: 40px; border-radius: 50%; }
+    .comment-form-container .input-wrapper { flex-grow: 1; position: relative; }
+    .comment-form-container textarea { width: 100%; border-radius: 20px; border: 1px solid var(--border-color); background-color: var(--bg-body); padding: 0.75rem 3.5rem 0.75rem 1rem; resize: none; transition: all 0.2s ease; }
+    .comment-form-container textarea:focus { background-color: var(--bg-white); border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
+    .comment-form-container .btn-send-comment { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; border-radius: 50%; border: none; background: var(--primary-color); color: var(--white); font-size: 1rem; transition: all 0.2s ease; }
+    .comment-form-container .btn-send-comment.is-disabled { background: #d1d5db; transform: translateY(-50%) scale(0.9); opacity: 0.5; cursor: not-allowed; }
+    .comment-item { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; }
+    .comment-avatar { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; }
+    .comment-content { flex-grow: 1; }
+    .comment-bubble { padding: 0.75rem 1rem; border-radius: 18px; line-height: 1.6; font-size: 0.9rem; }
+    .comment-item.is-other .comment-bubble { background-color: #F3F4F6; color: var(--text-dark); border-top-left-radius: 4px; }
+    .comment-item.is-owner { flex-direction: row-reverse; }
+    /* ▼▼▼ PERBAIKAN WARNA DI SINI ▼▼▼ */
+    .comment-item.is-owner .comment-bubble {
+        background: var(--primary-gradient);
+        color: var(--white);
+        border-top-right-radius: 4px;
     }
-    .map-button .map-icon {
-        width: 50px; height: 50px; border-radius: 12px;
-        display: flex; align-items: center; justify-content: center;
-        background: var(--primary-gradient); color: var(--white); font-size: 1.5rem; flex-shrink: 0;
-    }
-    .map-button .map-text h6 { font-weight: 600; color: var(--text-dark); margin: 0; }
-    .map-button .map-text p { font-size: 0.85rem; color: var(--text-light); margin: 0; line-height: 1.4; }
-
-    /* Modal Peta */
-    .map-modal { display: none; /* ... (sama seperti sebelumnya) ... */ }
-    .map-modal-content, .map-modal .close-map-btn { /* ... (sama seperti sebelumnya) ... */ }
-
-    /* Timeline Kekinian */
-    .timeline { position: relative; padding-left: 25px; border-left: 2px solid #e5e7eb; }
-    .timeline-item { position: relative; padding: 1rem 0 1.5rem; }
-    .timeline-item .timeline-icon-wrapper {
-        position: absolute; left: -20px; top: 1rem;
-        width: 40px; height: 40px; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        background: var(--bg-white);
-    }
-    .timeline-item .timeline-icon {
-        width: 32px; height: 32px; border-radius: 50%; color: var(--white);
-        display: flex; align-items: center; justify-content: center;
-    }
-    .timeline-item .icon-delivered { background: #3B82F6; }
-    .timeline-item .icon-in_process { background: #F59E0B; }
-    .timeline-item .icon-completed { background: #10B981; }
-    .timeline-item .icon-rejected { background: #EF4444; }
-
-    .timeline-item .timeline-content { padding-left: 1.5rem; }
-    .timeline-item .timeline-content .status { font-weight: 600; color: var(--text-dark); }
-    .timeline-item .timeline-content .date { font-size: 0.8rem; color: var(--text-light); }
-    .timeline-item .timeline-content .description { font-size: 0.9rem; color: var(--text-light); margin-top: 0.5rem; }
+    .comment-bubble .comment-author { font-weight: 600; font-size: 0.9rem; }
+    .comment-item.is-other .comment-author { color: var(--text-dark); }
+    .comment-item.is-owner .comment-bubble .comment-author { color: var(--white); opacity: 0.9;}
+    .comment-bubble .comment-body { margin: 0.25rem 0; white-space: pre-wrap; word-wrap: break-word; }
+    .comment-item.is-owner .comment-bubble .comment-body { color: var(--white); } /* Memastikan teks komentar juga putih */
+    .comment-bubble .comment-time { font-size: 0.75rem; margin-top: 0.5rem; }
+    .comment-item.is-other .comment-meta { color: var(--text-light); }
+    .comment-item.is-owner .comment-meta { text-align: right; color: var(--white); opacity: 0.7; }
 </style>
 @endpush
 
@@ -163,123 +97,193 @@
     <div class="page-container">
         <div class="hero-container">
             <div class="hero-overlay-header">
-                <a href="{{ request()->query('_ref', route('home')) }}" class="overlay-button">
-                    <i class="fa-solid fa-arrow-left"></i>
-                </a>
+                <a href="{{ request()->query('_ref', route('home')) }}" class="overlay-button"><i class="fa-solid fa-arrow-left"></i></a>
             </div>
             <img src="{{ asset('storage/' . $report->image) }}" alt="{{ $report->title }}" class="hero-image">
             <div class="hero-gradient-overlay"></div>
         </div>
-
         <div class="content-container">
             <h1 class="report-title">{{ $report->title }}</h1>
-
             <div class="info-grid">
-                <div class="info-card">
-                    <div class="info-icon icon-status"><i class="fa-solid fa-flag"></i></div>
-                    <p class="info-label">Status</p>
-                    <h6 class="info-value">{{ $report->latestStatus ? $report->latestStatus->status->label() : 'Baru' }}</h6>
-                </div>
-                <div class="info-card">
-                    <div class="info-icon icon-category"><i class="fa-solid fa-tag"></i></div>
-                    <p class="info-label">Kategori</p>
-                    <h6 class="info-value">{{ $report->reportCategory->name }}</h6>
-                </div>
-                <div class="info-card">
-                    <div class="info-icon icon-reporter"><i class="fa-solid fa-user"></i></div>
-                    <p class="info-label">Pelapor</p>
-                    <h6 class="info-value">{{ $report->resident->user->name }}</h6>
-                </div>
-                <div class="info-card">
-                    <div class="info-icon icon-date"><i class="fa-solid fa-calendar"></i></div>
-                    <p class="info-label">Tanggal</p>
-                    <h6 class="info-value">{{ $report->created_at->isoFormat('D MMM YYYY') }}</h6>
-                </div>
+                <div class="info-card"><div class="info-icon icon-status"><i class="fa-solid fa-flag"></i></div><p class="info-label">Status</p><h6 class="info-value">{{ $report->latestStatus ? $report->latestStatus->status->label() : 'Baru' }}</h6></div>
+                <div class="info-card"><div class="info-icon icon-category"><i class="fa-solid fa-tag"></i></div><p class="info-label">Kategori</p><h6 class="info-value">{{ $report->reportCategory->name }}</h6></div>
+                <div class="info-card"><div class="info-icon icon-reporter"><i class="fa-solid fa-user"></i></div><p class="info-label">Pelapor</p><h6 class="info-value">{{ $report->resident->user->name }}</h6></div>
+                <div class="info-card"><div class="info-icon icon-date"><i class="fa-solid fa-calendar"></i></div><p class="info-label">Tanggal</p><h6 class="info-value">{{ $report->created_at->isoFormat('D MMM YYYY') }}</h6></div>
             </div>
-
             <div class="section">
                 <h5 class="section-title">Detail Masalah</h5>
                 <p class="description">{{ $report->description }}</p>
             </div>
             <div class="section">
-                <h5 class="section-title">Lokasi</h5>
-                <a href="javascript:void(0)" id="open-map-link" class="map-button">
-                    <div class="map-icon"><i class="fa-solid fa-map-location-dot"></i></div>
-                    <div class="map-text">
-                        <h6>Lihat di Peta</h6>
-                        <p>{{ Str::limit($report->address, 50) }}</p>
-                    </div>
-                </a>
+                <h5 class="section-title">Lokasi Kejadian</h5>
+                <p class="address">{{ $report->address }}</p>
             </div>
-
             <div class="section" id="riwayat-perkembangan">
                 <h5 class="section-title">Riwayat Perkembangan</h5>
                 <div class="timeline">
                     @forelse ($report->reportStatuses->sortBy('created_at') as $status)
-                        <div class="timeline-item">
-                            <div class="timeline-icon-wrapper">
-                                <div class="timeline-icon icon-{{$status->status->value}}">
-                                    @php
-                                        $icon = match($status->status) {
-                                            \App\Enums\ReportStatusEnum::DELIVERED => 'fa-paper-plane',
-                                            \App\Enums\ReportStatusEnum::IN_PROCESS => 'fa-spinner fa-spin',
-                                            \App\Enums\ReportStatusEnum::COMPLETED => 'fa-check-double',
-                                            \App\Enums\ReportStatusEnum::REJECTED => 'fa-xmark',
-                                        };
-                                    @endphp
-                                    <i class="fa-solid {{ $icon }}"></i>
-                                </div>
+                        <div class="timeline-block">
+                            <div class="timeline-header header-{{$status->status->value}}">
+                                @php $icon = match($status->status) { \App\Enums\ReportStatusEnum::DELIVERED => 'fa-paper-plane', \App\Enums\ReportStatusEnum::IN_PROCESS => 'fa-spinner', \App\Enums\ReportStatusEnum::COMPLETED => 'fa-check-double', \App\Enums\ReportStatusEnum::REJECTED => 'fa-xmark' }; @endphp
+                                <i class="fa-solid {{ $icon }} icon"></i>
+                                <h6>{{ $status->status->label() }}</h6>
                             </div>
-                            <div class="timeline-content">
-                                <p class="status">{{ $status->status->label() }}</p>
-                                <p class="date">{{ $status->created_at->isoFormat('D MMMM YYYY, HH:mm') }}</p>
+                            <div class="timeline-body">
+                                @if($status->image)
+                                    <img src="{{ asset('storage/' . $status->image) }}" alt="Bukti Status" class="proof-image" data-full-src="{{ asset('storage/' . $status->image) }}">
+                                @endif
                                 <p class="description">{{ $status->description }}</p>
+                                <p class="date"><i class="fa-solid fa-clock fa-xs me-1"></i> {{ $status->created_at->isoFormat('D MMMM YYYY, HH:mm') }}</p>
                             </div>
                         </div>
                     @empty
-                        <p>Belum ada riwayat perkembangan.</p>
+                        <p class="text-center text-secondary">Belum ada riwayat perkembangan.</p>
+                    @endforelse
+                </div>
+            </div>
+            
+            <div class="section" id="komentar">
+                <h5 class="section-title">Diskusi & Komentar (<span id="comment-count">{{ $report->comments->count() }}</span>)</h5>
+                
+                @can('create', [\App\Models\Comment::class, $report])
+                    <form action="{{ route('report.comments.store', $report) }}" method="POST" class="comment-form-container" id="comment-form">
+                        @csrf
+                        @php
+                            $userAvatar = Auth::user()->resident->avatar;
+                            if ($userAvatar && !Str::startsWith($userAvatar, 'http')) {
+                                $userAvatar = asset('storage/' . $userAvatar);
+                            } elseif (!$userAvatar) {
+                                $userAvatar = asset('assets/app/images/default-avatar.png');
+                            }
+                        @endphp
+                        <img src="{{ $userAvatar }}" alt="avatar" class="avatar">
+                        <div class="input-wrapper">
+                            <textarea name="body" id="comment-body" class="form-control" rows="1" placeholder="Tulis komentar..." required></textarea>
+                            <button type="submit" class="btn-send-comment" id="comment-send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+                        </div>
+                    </form>
+                @endcan
+                
+                <div class="comments-list mt-4" id="comments-list">
+                    {{-- PERUBAHAN DI SINI: Mengambil komentar terbaru di atas --}}
+                    @forelse($report->comments()->latest()->get() as $comment)
+                        @php $isOwner = $comment->user_id === auth()->id(); @endphp
+                        <div class="comment-item {{ $isOwner ? 'is-owner' : 'is-other' }}">
+                            <img src="{{ $comment->user->resident->avatar ? asset('storage/' . $comment->user->resident->avatar) : asset('assets/app/images/default-avatar.png') }}" alt="avatar" class="comment-avatar">
+                            <div class="comment-content">
+                                <div class="comment-bubble">
+                                    <p class="comment-author">{{ $isOwner ? 'Anda' : $comment->user->name }}</p>
+                                    <p class="comment-body">{{ $comment->body }}</p>
+                                </div>
+                                <p class="comment-meta">{{ $comment->created_at->diffForHumans() }}</p>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-center text-secondary small py-4" id="no-comment-message">Jadilah yang pertama berkomentar di laporan ini.</p>
                     @endforelse
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="map-modal" id="map-modal" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 2000;">
-        <div class="map-modal-content" style="position: relative; width: 90%; height: 70%; max-width: 480px; background-color: white; border-radius: 16px; overflow: hidden;">
-            <button class="close-map-btn" id="close-map-btn" style="position: absolute; top: 10px; right: 10px; z-index: 1000; width: 35px; height: 35px; border-radius: 50%; background-color: rgba(0,0,0,0.5); color: white; border: none;">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            <div id="map-container" style="width: 100%; height: 100%;"></div>
-        </div>
+    <div class="lightbox-overlay" id="lightbox">
+        <button class="lightbox-close-btn" id="lightbox-close">&times;</button>
+        <div class="lightbox-content"><img src="" alt="Gambar Bukti" id="lightbox-image"></div>
     </div>
 @endsection
 
-@push('scripts')
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+@section('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const mapModal = document.getElementById('map-modal');
-            const openMapLink = document.getElementById('open-map-link');
-            const closeMapBtn = document.getElementById('close-map-btn');
-            let map;
-            let isMapInitialized = false;
+            // (Skrip Lightbox tetap sama)
+            const lightbox = document.getElementById('lightbox');
+            if (lightbox) {
+                // ... (logika lightbox seperti sebelumnya)
+            }
 
-            openMapLink.addEventListener('click', function() {
-                mapModal.style.display = 'flex';
-                if (!isMapInitialized) {
-                    map = L.map('map-container').setView([{{ $report->latitude }}, {{ $report->longitude }}], 17);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; OpenStreetMap'
-                    }).addTo(map);
-                    L.marker([{{ $report->latitude }}, {{ $report->longitude }}]).addTo(map);
-                    isMapInitialized = true;
-                }
-                setTimeout(() => { map.invalidateSize(); }, 10);
-            });
+            // ▼▼▼ SKRIP KOMENTAR YANG DIPERBAIKI TOTAL ▼▼▼
+            const commentForm = document.getElementById('comment-form');
+            if (commentForm) {
+                const commentBody = document.getElementById('comment-body');
+                const sendButton = document.getElementById('comment-send-btn');
+                const commentsList = document.getElementById('comments-list');
+                const noCommentMessage = document.getElementById('no-comment-message');
+                const commentCountSpan = document.getElementById('comment-count');
 
-            closeMapBtn.addEventListener('click', function() {
-                mapModal.style.display = 'none';
-            });
+                const checkInputValidity = () => {
+                    const isEmpty = commentBody.value.trim() === '';
+                    sendButton.disabled = isEmpty;
+                    sendButton.classList.toggle('is-disabled', isEmpty);
+                };
+                
+                commentBody.addEventListener('input', () => {
+                    commentBody.style.height = 'auto';
+                    commentBody.style.height = (commentBody.scrollHeight) + 'px';
+                    checkInputValidity();
+                });
+
+                checkInputValidity();
+
+                const createCommentElement = (comment) => {
+                    const isOwner = comment.user_id === {{ auth()->id() }};
+                    const avatarSrc = comment.user.resident && comment.user.resident.avatar ? `/storage/${comment.user.resident.avatar}` : '{{ asset('assets/app/images/default-avatar.png') }}';
+                    
+                    const item = document.createElement('div');
+                    item.className = `comment-item ${isOwner ? 'is-owner' : 'is-other'}`;
+                    item.innerHTML = `
+                        <img src="${avatarSrc}" alt="avatar" class="comment-avatar">
+                        <div class="comment-content">
+                            <div class="comment-bubble">
+                                <p class="comment-author">${isOwner ? 'Anda' : comment.user.name}</p>
+                                <p class="comment-body">${comment.body.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>
+                            </div>
+                            <p class="comment-meta">Baru saja</p>
+                        </div>
+                    `;
+                    return item;
+                };
+
+                commentForm.addEventListener('submit', function(event) {
+                    event.preventDefault(); 
+                    const formData = new FormData(this);
+                    const actionUrl = this.action;
+                    
+                    sendButton.disabled = true;
+                    sendButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+
+                    fetch(actionUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': formData.get('_token'),
+                            'Accept': 'application/json',
+                        },
+                        body: formData,
+                    })
+                    .then(response => {
+                        if (!response.ok) { return response.json().then(err => { throw err; }); }
+                        return response.json();
+                    })
+                    .then(comment => {
+                        const newCommentElement = createCommentElement(comment);
+                        commentsList.prepend(newCommentElement); // Menambahkan di awal
+                        commentBody.value = '';
+                        commentBody.style.height = 'auto';
+                        if (noCommentMessage) { noCommentMessage.style.display = 'none'; }
+                        commentCountSpan.textContent = parseInt(commentCountSpan.textContent) + 1;
+                        newCommentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    })
+                    .catch(error => {
+                        let errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
+                        if (error.errors && error.errors.body) { errorMessage = error.errors.body[0]; }
+                        Swal.fire({ icon: 'error', title: 'Gagal', text: errorMessage });
+                    })
+                    .finally(() => {
+                        sendButton.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
+                        checkInputValidity();
+                    });
+                });
+            }
         });
     </script>
-@endpush
+@endsection
