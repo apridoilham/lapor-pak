@@ -32,45 +32,49 @@ class GoogleController extends Controller
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
 
-            $user = User::updateOrCreate(
-                [
-                    'email' => $googleUser->getEmail(),
-                ],
-                [
-                    'name' => $googleUser->getName(),
-                    'google_id' => $googleUser->getId(),
-                ]
-            );
+            // Cek apakah user sudah ada
+            $user = User::where('email', $googleUser->getEmail())->first();
 
-            // Buat profil resident jika pengguna baru
-            if ($user->wasRecentlyCreated) {
-                $user->assignRole('resident');
-
-                // Logika untuk mengunduh foto profil dari Google dan menyimpannya secara lokal
-                $avatarPath = null;
-                try {
-                    // Ambil URL avatar dari Google
-                    $avatarUrl = $googleUser->getAvatar();
-                    if ($avatarUrl) {
-                        // Dapatkan konten gambar
-                        $avatarContents = file_get_contents($avatarUrl);
-                        // Buat nama file yang unik
-                        $avatarName = 'assets/avatar/' . Str::random(40) . '.jpg';
-                        // Simpan file ke dalam storage publik Anda
-                        Storage::disk('public')->put($avatarName, $avatarContents);
-                        // Simpan path lokalnya
-                        $avatarPath = $avatarName;
-                    }
-                } catch (\Exception $e) {
-                    // Jika gagal download, biarkan avatar kosong (null)
-                    // Anda bisa menambahkan log error di sini jika perlu
-                    $avatarPath = null;
+            if ($user) {
+                // User sudah ada, update google_id jika belum ada
+                if (!$user->google_id) {
+                    $user->update(['google_id' => $googleUser->getId()]);
                 }
-
-                $user->resident()->create([
-                    'avatar'  => $avatarPath, // Simpan path lokal, bukan URL Google
-                    'address' => 'Alamat belum diatur',
+            } else {
+                // Buat user baru
+                $user = User::create([
+                    'name' => $googleUser->getName(),
+                    'email' => $googleUser->getEmail(),
+                    'google_id' => $googleUser->getId(),
                 ]);
+
+                // Cek apakah ini email super-admin
+                if ($googleUser->getEmail() === 'bsblapor@gmail.com') {
+                    $user->assignRole('super-admin');
+                } else {
+                    // Assign role resident untuk user biasa
+                    $user->assignRole('resident');
+
+                    // Download dan simpan avatar
+                    $avatarPath = null;
+                    try {
+                        $avatarUrl = $googleUser->getAvatar();
+                        if ($avatarUrl) {
+                            $avatarContents = file_get_contents($avatarUrl);
+                            $avatarName = 'assets/avatar/' . Str::random(40) . '.jpg';
+                            Storage::disk('public')->put($avatarName, $avatarContents);
+                            $avatarPath = $avatarName;
+                        }
+                    } catch (\Exception $e) {
+                        $avatarPath = null;
+                    }
+
+                    // Buat profil resident
+                    $user->resident()->create([
+                        'avatar'  => $avatarPath,
+                        'address' => 'Alamat belum diatur',
+                    ]);
+                }
             }
 
             Auth::login($user, true);

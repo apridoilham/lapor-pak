@@ -4,11 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\ReportStatusEnum;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\UpsertReportStatusRequest; // Ganti ini
+use App\Http\Requests\UpsertReportStatusRequest;
 use App\Interfaces\ReportStatusRepositoryInterface;
 use App\Interfaces\ReportRepositoryInterface;
 use App\Traits\FileUploadTrait;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Storage; // TAMBAHKAN INI
 use RealRashid\SweetAlert\Facades\Alert as Swal;
 
 class ReportStatusController extends Controller
@@ -34,7 +35,7 @@ class ReportStatusController extends Controller
         return view('pages.admin.report-status.create', compact('report', 'statuses'));
     }
 
-    public function store(UpsertReportStatusRequest $request) // Ganti ini
+    public function store(UpsertReportStatusRequest $request)
     {
         $report = $this->reportRepository->getReportById($request->report_id);
         $this->authorize('manageStatus', $report);
@@ -59,7 +60,7 @@ class ReportStatusController extends Controller
         return view('pages.admin.report-status.edit', compact('status', 'statuses'));
     }
 
-    public function update(UpsertReportStatusRequest $request, string $id) // Ganti ini
+    public function update(UpsertReportStatusRequest $request, string $id)
     {
         $status = $this->reportStatusRepository->getReportStatusById($id);
         $this->authorize('manageStatus', $status->report);
@@ -79,6 +80,10 @@ class ReportStatusController extends Controller
     {
         $status = $this->reportStatusRepository->getReportStatusById($id);
         $this->authorize('manageStatus', $status->report);
+
+        if ($status->image) {
+            Storage::disk('public')->delete($status->image);
+        }
 
         $this->reportStatusRepository->deleteReportStatus($id);
 

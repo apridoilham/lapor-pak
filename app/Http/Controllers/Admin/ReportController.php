@@ -4,20 +4,21 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\ReportVisibilityEnum;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreReportRequest; // Pastikan namespace ini benar
-use App\Http\Requests\UpdateReportRequest; // Pastikan namespace ini benar
+use App\Http\Requests\StoreReportRequest;
+use App\Http\Requests\UpdateReportRequest;
 use App\Interfaces\ReportRepositoryInterface;
 use App\Interfaces\ResidentRepositoryInterface;
 use App\Interfaces\ReportCategoryRepositoryInterface;
 use App\Models\RW;
 use App\Models\RT;
-use App\Traits\FileUploadTrait; // Tambahkan ini
+use App\Traits\FileUploadTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage; // TAMBAHKAN INI
 use RealRashid\SweetAlert\Facades\Alert as Swal;
 
 class ReportController extends Controller
 {
-    use FileUploadTrait; // Gunakan Trait di sini
+    use FileUploadTrait;
 
     private ReportRepositoryInterface $reportRepository;
     private ResidentRepositoryInterface $residentRepository;
@@ -35,7 +36,6 @@ class ReportController extends Controller
 
     public function index(Request $request)
     {
-        // Logic yang ada sudah benar, asumsikan getAllReportsForAdmin menangani filter
         $user = auth()->user();
         $rwId = $user->hasRole('super-admin') ? $request->query('rw') : $user->rw_id;
         $rtId = $request->query('rt');
@@ -105,7 +105,7 @@ class ReportController extends Controller
         $report = $this->reportRepository->getReportById($id);
 
         if ($report->image) {
-            Storage::disk('public')->delete($report->image); // Gunakan Storage::disk('public')
+            Storage::disk('public')->delete($report->image);
         }
 
         $this->reportRepository->deleteReport($id);
@@ -113,6 +113,4 @@ class ReportController extends Controller
         Swal::success('Success', 'Data laporan berhasil dihapus!')->timerProgressBar();
         return redirect()->route('admin.report.index');
     }
-
-    // HAPUS metode private handleFileUpload dari sini karena sudah ada di Trait.
 }

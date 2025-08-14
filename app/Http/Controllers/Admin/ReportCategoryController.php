@@ -6,12 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreReportCategoryRequest;
 use App\Http\Requests\Admin\UpdateReportCategoryRequest;
 use App\Interfaces\ReportCategoryRepositoryInterface;
-use App\Traits\FileUploadTrait; // Tambahkan ini
+use App\Traits\FileUploadTrait;
+use Illuminate\Support\Facades\Storage; // TAMBAHKAN INI
 use RealRashid\SweetAlert\Facades\Alert as Swal;
 
 class ReportCategoryController extends Controller
 {
-    use FileUploadTrait; // Gunakan Trait di sini
+    use FileUploadTrait;
 
     private ReportCategoryRepositoryInterface $reportCategoryRepository;
 
@@ -75,13 +76,11 @@ class ReportCategoryController extends Controller
         $category = $this->reportCategoryRepository->getReportCategoryById($id);
 
         if ($category->image) {
-            Storage::disk('public')->delete($category->image); // Gunakan Storage::disk('public')
+            Storage::disk('public')->delete($category->image);
         }
 
         $this->reportCategoryRepository->deleteReportCategory($id);
         Swal::success('Berhasil', 'Kategori Laporan berhasil dihapus.');
         return redirect()->route('admin.report-category.index');
     }
-
-    // HAPUS metode private handleFileUpload dari sini karena sudah ada di Trait.
 }

@@ -13,13 +13,19 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        User::firstOrCreate(
+        // Create or update super-admin
+        $superAdmin = User::updateOrCreate(
             ['email' => 'bsblapor@gmail.com'],
             [
-                'name'      => 'Nama Admin Utama',
-                'google_id' => null, // Atur ke null secara default
-                'password'  => null, // Atur ke null secara default
+                'name' => 'Super Admin Haeritage 31',
+                'google_id' => null, // Akan diisi saat login dengan Google
+                'password' => Hash::make('password'), // Password backup jika perlu
             ]
-        )->assignRole('super-admin');
+        );
+        
+        // Assign role super-admin
+        if (!$superAdmin->hasRole('super-admin')) {
+            $superAdmin->assignRole('super-admin');
+        }
     }
 }
