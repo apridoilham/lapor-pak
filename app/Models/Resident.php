@@ -13,7 +13,7 @@ class Resident extends Model
     protected $fillable = [
         'user_id',
         'avatar',
-        'phone',
+        'phone', // <-- TAMBAHKAN INI
         'address',
         'rt_id',
         'rw_id',

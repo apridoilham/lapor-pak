@@ -15,6 +15,8 @@ class UpdateProfileRequest extends FormRequest
     {
         return [
             'avatar'  => 'nullable|file|image|max:2048',
+            'phone'   => 'nullable|string|digits_between:10,15',
+            
             'rt_id'   => 'required|exists:rts,id',
             'rw_id'   => 'required|exists:rws,id',
             'address' => 'required|string|max:255',

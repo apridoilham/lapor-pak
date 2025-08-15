@@ -58,7 +58,7 @@ class ResidentRepository implements ResidentRepositoryInterface
         return DB::transaction(function () use ($data, $id) {
             $resident = $this->getResidentById($id);
 
-            if (isset($data['password'])) {
+            if (isset($data['password']) && !empty($data['password'])) {
                 $resident->user()->update([
                     'password' => bcrypt($data['password'])
                 ]);
@@ -70,10 +70,12 @@ class ResidentRepository implements ResidentRepositoryInterface
                 ]);
             }
 
+            // ▼▼▼ PERBAIKAN UTAMA DI SINI ▼▼▼
             $residentData = [
                 'rt_id' => $data['rt_id'],
                 'rw_id' => $data['rw_id'],
                 'address' => $data['address'],
+                'phone' => $data['phone'] ?? null, // Tambahkan baris ini untuk menyimpan no. telepon
             ];
 
             if (isset($data['avatar'])) {
