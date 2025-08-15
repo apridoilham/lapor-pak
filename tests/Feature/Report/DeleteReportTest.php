@@ -3,10 +3,13 @@
 namespace Tests\Feature\Report;
 
 use App\Models\Report;
+use App\Models\ReportCategory;
+use App\Models\Resident;
 use App\Models\User;
 use Database\Seeders\AdminSeeder;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class DeleteReportTest extends TestCase
@@ -23,10 +26,22 @@ class DeleteReportTest extends TestCase
         $this->seed(AdminSeeder::class);
 
         $this->superAdminUser = User::where('email', 'bsblapor@gmail.com')->first();
-        $this->report = Report::factory()->create();
+
+        // Buat data relasi yang diperlukan
+        $residentUser = User::factory()->create();
+        $residentUser->assignRole('resident');
+        $resident = Resident::factory()->for($residentUser)->create();
+        $category = ReportCategory::factory()->create();
+
+        // Kaitkan relasi saat membuat report
+        $this->report = Report::factory()->create([
+            'resident_id' => $resident->id,
+            'report_category_id' => $category->id,
+        ]);
     }
 
-    public function test_an_admin_can_delete_a_report(): void
+    #[Test]
+    public function an_admin_can_delete_a_report(): void
     {
         $this->assertDatabaseHas('reports', ['id' => $this->report->id]);
 
@@ -38,7 +53,8 @@ class DeleteReportTest extends TestCase
         $this->assertDatabaseMissing('reports', ['id' => $this->report->id]);
     }
 
-    public function test_a_non_admin_user_cannot_delete_a_report(): void
+    #[Test]
+    public function a_non_admin_user_cannot_delete_a_report(): void
     {
         $residentUser = User::factory()->create();
         $residentUser->assignRole('resident');

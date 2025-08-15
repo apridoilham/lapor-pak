@@ -51,27 +51,27 @@ class AdminUserController extends Controller
     /**
      * Menampilkan detail seorang admin.
      */
-    public function show(User $admin_user)
+    public function show(User $admin)
     {
         // Pastikan kita hanya menampilkan user dengan role admin
-        if (!$admin_user->hasRole('admin')) {
+        if (!$admin->hasRole('admin')) {
             abort(404);
         }
-        $admin_user->load('rw');
-        return view('pages.admin.user.show', ['admin' => $admin_user]);
+        $admin->load('rw');
+        return view('pages.admin.user.show', ['admin' => $admin]);
     }
 
     /**
      * Menampilkan form untuk mengedit admin.
      */
-    public function edit(User $admin_user)
+    public function edit(User $admin)
     {
-        if (!$admin_user->hasRole('admin')) {
+        if (!$admin->hasRole('admin')) {
             abort(404);
         }
         $rws = Rw::orderBy('number')->get();
         return view('pages.admin.user.edit', [
-            'admin' => $admin_user,
+            'admin' => $admin,
             'rws' => $rws,
         ]);
     }
@@ -79,9 +79,9 @@ class AdminUserController extends Controller
     /**
      * Memperbarui data admin di database.
      */
-    public function update(UpdateAdminRequest $request, User $admin_user)
+    public function update(UpdateAdminRequest $request, User $admin)
     {
-        $this->adminRepository->updateAdmin($request->validated(), $admin_user->id);
+        $this->adminRepository->updateAdmin($request->validated(), $admin->id);
 
         Swal::success('Berhasil', 'Data admin berhasil diperbarui.');
         return redirect()->route('admin.admin-user.index');
@@ -90,9 +90,9 @@ class AdminUserController extends Controller
     /**
      * Menghapus admin dari database.
      */
-    public function destroy(User $admin_user)
+    public function destroy(User $admin)
     {
-        $this->adminRepository->deleteAdmin($admin_user->id);
+        $this->adminRepository->deleteAdmin($admin->id);
 
         Swal::success('Berhasil', 'Admin berhasil dihapus.');
         return redirect()->route('admin.admin-user.index');
