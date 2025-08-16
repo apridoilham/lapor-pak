@@ -17,6 +17,8 @@
                         <div class="form-group">
                             <label for="number">Nomor RW</label>
                             <input type="text" name="number" id="rw_number_input" class="form-control @error('number') is-invalid @enderror" value="{{ old('number', $rw->number) }}" required maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                            {{-- TAMBAHKAN DIV UNTUK PESAN ERROR DARI JAVASCRIPT --}}
+                            <div class="invalid-feedback" id="rw-error" style="display: none;">Nomor RW ini sudah ada.</div>
                             @error('number')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div class="form-group">
@@ -24,7 +26,8 @@
                             <input type="text" name="rt_count" class="form-control @error('rt_count') is-invalid @enderror" value="{{ old('rt_count', $rtCount) }}" required maxlength="2" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                             @error('rt_count')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
-                        <button type="submit" class="btn btn-primary">
+                        {{-- TAMBAHKAN ID PADA TOMBOL SUBMIT --}}
+                        <button type="submit" class="btn btn-primary" id="update-btn">
                             <i class="fa fa-save"></i> Simpan Perubahan
                         </button>
                         <a href="{{ route('admin.rtrw.index') }}" class="btn btn-secondary">Batal</a>
@@ -35,17 +38,67 @@
     </div>
 @endsection
 
-{{-- TAMBAHKAN BLOK SCRIPT INI --}}
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const rwInput = document.getElementById('rw_number_input');
-
-        rwInput.addEventListener('blur', function() {
+        // Skrip untuk padding nol (sudah ada)
+        const rwInputPadding = document.getElementById('rw_number_input');
+        rwInputPadding.addEventListener('blur', function() {
             let value = this.value;
             if (value && !isNaN(value)) {
                 this.value = value.padStart(3, '0');
             }
+        });
+
+        // --- SKRIP VALIDASI REAL-TIME BARU ---
+        const updateButton = document.getElementById('update-btn');
+        const rwInput = document.getElementById('rw_number_input');
+        const rwError = document.getElementById('rw-error');
+        const initialRwNumber = '{{ $rw->number }}';
+        const rwIdToIgnore = {{ $rw->id }};
+        let debounceTimer;
+
+        function checkFormValidity() {
+            const isRwInvalid = rwInput.classList.contains('is-invalid');
+            updateButton.disabled = isRwInvalid;
+        }
+
+        rwInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            rwInput.classList.remove('is-invalid');
+            rwError.style.display = 'none';
+            checkFormValidity();
+
+            const currentRwNumber = this.value.padStart(3, '0');
+            // Tidak perlu cek jika nilainya masih sama dengan nilai awal
+            if (currentRwNumber === initialRwNumber) {
+                return;
+            }
+
+            debounceTimer = setTimeout(() => {
+                const rwNumber = rwInput.value;
+                if (rwNumber.length > 0) {
+                    fetch('/api/check-rw', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            number: rwNumber,
+                            ignore_rw_id: rwIdToIgnore // Kirim ID untuk diabaikan
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.is_taken) {
+                            rwInput.classList.add('is-invalid');
+                            rwError.style.display = 'block';
+                        }
+                        checkFormValidity();
+                    });
+                }
+            }, 500);
         });
     });
 </script>

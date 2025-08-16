@@ -14,8 +14,13 @@ class UpdateProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // TAMBAHKAN ATURAN UNTUK NAMA
+            'name'    => 'required|string|max:255',
+            
             'avatar'  => 'nullable|file|image|max:2048',
-            'phone'   => 'nullable|string|digits_between:10,15',
+            
+            // UBAH ATURAN TELEPON MENJADI 'required'
+            'phone'   => 'required|string|digits_between:10,15',
             
             'rt_id'   => 'required|exists:rts,id',
             'rw_id'   => 'required|exists:rws,id',
