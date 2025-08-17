@@ -2,6 +2,125 @@
 
 @section('title', 'Buat Laporan Baru')
 
+{{-- PERUBAHAN HANYA ADA DI DALAM BLOK STYLE INI --}}
+@push('styles')
+<style>
+    :root {
+        --primary-color: #0ea5e9; /* Sky Blue */
+        --text-dark: #1e2b3b;
+        --text-light: #64748b;
+        --bg-body: #f1f5f9;
+        --bg-white: #FFFFFF;
+        --border-color: #e2e8f0;
+        --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        --font-sans: 'Inter', sans-serif;
+    }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    body {
+        font-family: var(--font-sans);
+        background-color: var(--bg-body);
+    }
+    .main-content {
+        padding: 1.5rem;
+        padding-bottom: 100px;
+    }
+
+    /* Header */
+    .header-nav {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: var(--text-dark);
+    }
+    .header-nav a {
+        font-size: 1.5rem;
+        color: var(--text-dark);
+    }
+    .header-nav h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    .text-description {
+        color: var(--text-light);
+    }
+
+    /* Form Styling */
+    form .mb-3 {
+        padding: 1.25rem;
+        background: var(--bg-white);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+    }
+    .form-label {
+        font-weight: 600 !important;
+        color: var(--text-dark);
+    }
+    .form-control, .form-select {
+        border-radius: 12px;
+        background-color: var(--bg-body);
+        border-color: var(--border-color);
+        padding: 0.8rem 1rem;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    /* Image Preview */
+    #image-preview-container {
+        width: 100%;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .image-placeholder-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 200px;
+        background-color: var(--bg-body);
+        border: 2px dashed var(--border-color);
+        border-radius: 12px;
+    }
+    
+    /* Map Container Fix */
+    #map {
+        height: 250px;
+        border: 1px solid var(--border-color);
+    }
+
+    /* Visibility Radio Buttons */
+    .form-check {
+        padding: 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        margin-bottom: 0.5rem;
+        transition: all 0.2s ease-in-out;
+    }
+    .form-check:has(input:checked) {
+        background-color: #f0f9ff;
+        border-color: var(--primary-color);
+    }
+
+    /* Button */
+    .d-grid .btn-primary {
+        padding: 0.9rem !important;
+        border-radius: 12px !important;
+        font-weight: 700;
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    .d-grid .btn-primary:disabled {
+        background-color: #94a3b8;
+        border-color: #94a3b8;
+    }
+</style>
+@endpush
+
+{{-- STRUKTUR HTML DAN JAVASCRIPT DI BAWAH INI SAMA PERSIS SEPERTI YANG ANDA BERIKAN --}}
 @section('content')
     <div class="header-nav mb-4">
         <a href="{{ route('report.take') }}" class="text-decoration-none">
@@ -81,7 +200,6 @@
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="visibility" id="visibility-{{ $visibility->value }}" value="{{ $visibility->value }}" {{ old('visibility', 'public') == $visibility->value ? 'checked' : '' }}>
                     <label class="form-check-label" for="visibility-{{ $visibility->value }}">
-                        {{-- PERUBAHAN DI SINI --}}
                         {{ $visibility->label(Auth::user()) }}
                     </label>
                 </div>
@@ -151,9 +269,16 @@
 
                 imagePreview.src = URL.createObjectURL(file);
                 imagePreview.style.display = 'block';
-                imagePlaceholder.style.display = 'none';
+                if(imagePlaceholder) {
+                    imagePlaceholder.style.display = 'none';
+                }
 
                 checkFormValidity();
+            } else {
+                // Jika tidak ada gambar, jangan redirect, biarkan placeholder terlihat
+                if(imagePlaceholder) {
+                    imagePlaceholder.style.display = 'flex';
+                }
             }
 
             // Map Script Integration
