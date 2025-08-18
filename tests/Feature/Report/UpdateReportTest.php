@@ -29,7 +29,6 @@ class UpdateReportTest extends TestCase
 
         $this->superAdminUser = User::where('email', 'bsblapor@gmail.com')->first();
 
-        // Simpan resident user ke properti untuk digunakan di test lain
         $this->residentUser = User::factory()->create();
         $this->residentUser->assignRole('resident');
         Resident::factory()->for($this->residentUser)->create();
@@ -41,10 +40,11 @@ class UpdateReportTest extends TestCase
             'report_category_id' => $category->id,
         ]);
 
-        // TAMBAHAN: Buat status awal untuk laporan agar bisa lolos policy
+        // [PERBAIKAN] Tambahkan status awal 'delivered' untuk laporan
+        // agar bisa lolos dari policy otorisasi saat update.
         $this->report->reportStatuses()->create([
             'status' => ReportStatusEnum::DELIVERED,
-            'description' => 'Laporan awal untuk pengujian.',
+            'description' => 'Laporan dibuat untuk pengujian.',
             'created_by_role' => 'resident',
         ]);
     }
@@ -67,10 +67,8 @@ class UpdateReportTest extends TestCase
             ->actingAs($this->residentUser)
             ->put(route('report.update', $this->report->id), $updatedData);
 
-        // Pastikan redirect ke halaman daftar laporannya
         $response->assertRedirect(route('report.myreport'));
 
-        // Pastikan data di database sudah berubah
         $this->assertDatabaseHas('reports', [
             'id' => $this->report->id,
             'title' => 'Judul Laporan Diubah oleh Pemilik',

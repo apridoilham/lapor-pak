@@ -63,19 +63,20 @@ class ResidentRepository implements ResidentRepositoryInterface
                     'password' => bcrypt($data['password'])
                 ]);
             }
-            
+
             if (isset($data['name'])) {
                 $resident->user()->update([
                     'name' => $data['name']
                 ]);
             }
 
-            // ▼▼▼ PERBAIKAN UTAMA DI SINI ▼▼▼
+            // [PENJELASAN] Array ini akan diupdate ke tabel 'residents'
             $residentData = [
                 'rt_id' => $data['rt_id'],
                 'rw_id' => $data['rw_id'],
                 'address' => $data['address'],
-                'phone' => $data['phone'] ?? null, // Tambahkan baris ini untuk menyimpan no. telepon
+                // [PERBAIKAN] Tambahkan baris ini untuk menyimpan nomor telepon
+                'phone' => $data['phone'] ?? $resident->phone,
             ];
 
             if (isset($data['avatar'])) {
@@ -84,7 +85,7 @@ class ResidentRepository implements ResidentRepositoryInterface
                 }
                 $residentData['avatar'] = $data['avatar'];
             }
-            
+
             $resident->update($residentData);
 
             return $resident;
@@ -106,7 +107,7 @@ class ResidentRepository implements ResidentRepositoryInterface
             $query->where('rw_id', $rwId);
         })->count();
     }
-    
+
     public function getTopReporters(int $rwId = null)
     {
         return Resident::with('user', 'rt', 'rw')

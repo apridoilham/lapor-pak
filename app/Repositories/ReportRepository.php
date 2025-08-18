@@ -107,7 +107,7 @@ class ReportRepository implements ReportRepositoryInterface
             });
         }
 
-        return $query->latest('updated_at')->take($limit)->get();
+        return $query->latest('created_at')->take($limit)->get();
     }
 
     public function getLatestReportsForUser(Request $request): EloquentCollection
@@ -274,7 +274,9 @@ class ReportRepository implements ReportRepositoryInterface
                     $q->where('rw_id', $rwId);
                 });
             }
-        }])->get();
+        }])
+        ->having('reports_count', '>', 0)
+        ->get();
     }
 
     public function getDailyReportCounts(int $rwId = null): Collection
@@ -357,7 +359,6 @@ class ReportRepository implements ReportRepositoryInterface
     public function getReportCountsByRt(int $rwId): EloquentCollection
     {
         return Report::query()
-            ->whereHas('resident')
             ->join('residents', 'reports.resident_id', '=', 'residents.id')
             ->join('rts', 'residents.rt_id', '=', 'rts.id')
             ->where('residents.rw_id', $rwId)

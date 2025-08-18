@@ -76,7 +76,9 @@
     }
     .filter-active-info{background-color:#e8f5e9;color:#16752B;padding:.5rem 1rem;border-radius:8px;font-size:.8rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
 
-    .report-card{background-color:#fff;border-radius:16px;box-shadow:0 4px 25px rgba(17,24,39,.05);text-decoration:none;color:#2d3748;display:block;overflow:hidden;margin-bottom:1.5rem;border:1px solid var(--border-color)}.report-card:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(17,24,39,.08)}.report-card .card-header{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem}.report-card .card-header .avatar{width:32px;height:32px;border-radius:50%;object-fit:cover}.report-card .card-header .user-info{font-size:.85rem}.report-card .card-header .user-name{font-weight:600}.report-card .card-header .user-location{font-size:.75rem;color:var(--secondary-text)}.report-card .card-image-container{position:relative}.report-card .card-image-container img{width:100%;height:200px;object-fit:cover}.report-card .card-content{padding:1rem}.report-card .card-title{font-weight:700;line-height:1.4;margin-bottom:.25rem;font-size:1.1rem}.report-card .card-description{font-size:.9rem;color:var(--secondary-text);margin-bottom:.75rem}.report-card .card-footer{display:flex;justify-content:space-between;align-items:center;font-size:.75rem;color:var(--secondary-text);padding:.75rem 1rem;background-color:var(--light-gray-bg);border-top:1px solid var(--border-color)}.badge-status{position:absolute;bottom:10px;left:10px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;color:#fff;border:1px solid rgba(0,0,0,.1)}.badge-status.status-delivered{background-color:#3B82F6}.badge-status.status-processing{background-color:#F59E0B}.badge-status.status-completed{background-color:#10B981}.badge-status.status-rejected{background-color:#EF4444}
+    .report-card{background-color:#fff;border-radius:16px;box-shadow:0 4px 25px rgba(17,24,39,.05);text-decoration:none;color:#2d3748;display:block;overflow:hidden;margin-bottom:1.5rem;border:1px solid var(--border-color)}.report-card:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(17,24,39,.08)}.report-card .card-header{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem}.report-card .card-header .avatar{width:32px;height:32px;border-radius:50%;object-fit:cover}.report-card .card-header .user-info{font-size:.85rem}.report-card .card-header .user-name{font-weight:600}.report-card .card-header .user-location{font-size:.75rem;color:var(--secondary-text)}.report-card .card-image-container{position:relative}.report-card .card-image-container img{width:100%;height:200px;object-fit:cover}.report-card .card-content{padding:1rem}.report-card .card-title{font-weight:700;line-height:1.4;margin-bottom:.25rem;font-size:1.1rem}.report-card .card-description{font-size:.9rem;color:var(--secondary-text);margin-bottom:.75rem}.report-card .card-footer{display:flex;justify-content:space-between;align-items:center;font-size:.75rem;color:var(--secondary-text);padding:.75rem 1rem;background-color:var(--light-gray-bg);border-top:1px solid var(--border-color)}.badge-status{position:absolute;bottom:10px;left:10px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;color:#fff;border:1px solid rgba(0,0,0,.1)}.badge-status.status-delivered{background-color:#3B82F6}
+    .badge-status.status-in_process{background-color:#F59E0B}
+    .badge-status.status-completed{background-color:#10B981}.badge-status.status-rejected{background-color:#EF4444}
 </style>
 @endpush
 
@@ -162,10 +164,11 @@
                             $status = $report->latestStatus->status;
                             $statusClass = 'status-' . $status->value;
                             $statusIcon = match($status) {
-                                \App\Enums\ReportStatusEnum::DELIVERED => 'fa-paper-plane',
-                                \App\Enums\ReportStatusEnum::IN_PROCESS => 'fa-spinner',
-                                \App\Enums\ReportStatusEnum::COMPLETED => 'fa-check-double',
-                                \App\Enums\ReportStatusEnum::REJECTED => 'fa-xmark',
+                                \App\Enums\ReportStatusEnum::DELIVERED => 'fa-paper-plane fa-bounce',
+                                \App\Enums\ReportStatusEnum::IN_PROCESS => 'fa-spinner fa-spin',
+                                \App\Enums\ReportStatusEnum::COMPLETED => 'fa-check-double fa-beat',
+                                \App\Enums\ReportStatusEnum::REJECTED => 'fa-xmark fa-shake',
+                                default => 'fa-question-circle',
                             };
                         @endphp
                         <div class="badge-status {{ $statusClass }}"><i class="fa-solid {{ $statusIcon }}"></i><span>{{ $status->label() }}</span></div>
@@ -180,18 +183,7 @@
                 <div class="card-footer">
                     <span>
                         <i class="fa-solid fa-map-marker-alt me-1"></i>
-                        @php
-                            $addressParts = explode(',', $report->address);
-                            $location = 'Lokasi tidak diketahui';
-                            if (count($addressParts) >= 5) {
-                                $kelurahan = trim($addressParts[count($addressParts) - 5]);
-                                $kecamatan = trim($addressParts[count($addressParts) - 4]);
-                                $location = $kelurahan . ', ' . $kecamatan;
-                            } else {
-                                $location = \Str::limit(explode(',', $report->address)[0], 25);
-                            }
-                        @endphp
-                        {{ $location }}
+                        {{ Str::limit($report->address, 35) }}
                     </span>
                     <span>{{ \Carbon\Carbon::parse($report->created_at)->diffForHumans() }}</span>
                 </div>

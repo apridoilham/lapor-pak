@@ -6,9 +6,7 @@ use App\Enums\ReportStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Interfaces\ReportRepositoryInterface;
 use App\Interfaces\ResidentRepositoryInterface;
-// Hapus 'use Carbon\Carbon;' karena tidak lagi digunakan di sini
 use Illuminate\Support\Facades\Auth;
-// Hapus 'use Illuminate\Support\Str;' karena tidak lagi digunakan di sini
 
 class DashboardController extends Controller
 {
@@ -26,36 +24,44 @@ class DashboardController extends Controller
         $user = Auth::user();
         $rwId = $user->hasRole('super-admin') ? null : $user->rw_id;
 
-        // --- Data untuk KPI Cards ---
         $reportCounts = $this->reportRepository->getStatusCounts($rwId);
         $totalReports = array_sum($reportCounts);
         $totalResidents = $this->residentRepository->countResidents($rwId);
 
-        // --- Data untuk Bar Chart (Laporan per RW) ---
-        $reportsByRw = $this->reportRepository->getReportCountsByRw();
-        $rwLabels = $reportsByRw->pluck('rw_number');
-        $rwData = $reportsByRw->pluck('count');
-
-        // --- Data untuk Line Chart (Laporan 7 hari terakhir) ---
-        // Logika ini sekarang lebih sederhana!
         $dailyReports = $this->reportRepository->getDailyReportCounts($rwId);
-        $dailyLabels = $dailyReports['labels'];
-        $dailyData = $dailyReports['counts'];
+
+        $reportsByCategory = $this->reportRepository->getCategoryReportCounts($rwId);
+        $categoryLabels = $reportsByCategory->pluck('name');
+        $categoryData = $reportsByCategory->pluck('reports_count');
+
+        $areaLabels = collect();
+        $areaData = collect();
+        if ($user->hasRole('super-admin')) {
+            $reportsByArea = $this->reportRepository->getReportCountsByRw();
+            $areaLabels = $reportsByArea->pluck('rw_number')->map(fn($num) => "RW {$num}");
+            $areaData = $reportsByArea->pluck('count');
+        } else {
+            $reportsByArea = $this->reportRepository->getReportCountsByRt($rwId);
+            $areaLabels = $reportsByArea->pluck('rt_number')->map(fn($num) => "RT {$num}");
+            $areaData = $reportsByArea->pluck('count');
+        }
+
+        $topReporters = $this->residentRepository->getTopReporters($rwId);
+        $latestReports = $this->reportRepository->getLatestReportsForAdmin($rwId, 5);
 
         return view('pages.admin.dashboard', [
-            // KPI Data
             'totalReports' => $totalReports,
             'totalResidents' => $totalResidents,
-            'deliveredCount' => $reportCounts[ReportStatusEnum::DELIVERED->value] ?? 0,
             'inProcessCount' => $reportCounts[ReportStatusEnum::IN_PROCESS->value] ?? 0,
             'completedCount' => $reportCounts[ReportStatusEnum::COMPLETED->value] ?? 0,
-            'rejectedCount' => $reportCounts[ReportStatusEnum::REJECTED->value] ?? 0,
-
-            // Chart Data
-            'rwLabels' => $rwLabels,
-            'rwData' => $rwData,
-            'dailyLabels' => $dailyLabels,
-            'dailyData' => $dailyData,
+            'dailyLabels' => $dailyReports['labels'],
+            'dailyData' => $dailyReports['counts'],
+            'categoryLabels' => $categoryLabels,
+            'categoryData' => $categoryData,
+            'areaLabels' => $areaLabels,
+            'areaData' => $areaData,
+            'topReporters' => $topReporters,
+            'latestReports' => $latestReports,
         ]);
     }
 }

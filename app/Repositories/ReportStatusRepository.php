@@ -5,7 +5,7 @@ namespace App\Repositories;
 use App\Events\ReportStatusUpdated;
 use App\Interfaces\ReportStatusRepositoryInterface;
 use App\Models\ReportStatus;
-use Illuminate\Support\Facades\Auth; // Tambahkan ini
+use Illuminate\Support\Facades\Auth;
 
 class ReportStatusRepository implements ReportStatusRepositoryInterface
 {
@@ -20,24 +20,25 @@ class ReportStatusRepository implements ReportStatusRepositoryInterface
         return ReportStatus::with('report')->findOrFail($id);
     }
 
-    // TAMBAHKAN parameter baru: ?int $actorId = null
+    // [PERBAIKAN] Tambahkan parameter ?int $actorId = null
     public function createReportStatus(array $data, ?int $actorId = null)
     {
         $reportStatus = ReportStatus::create($data);
 
-        // Salurkan actorId ke event
+        // [PENJELASAN] Salurkan actorId ke event. Jika actorId tidak diberikan (misalnya dari seeder/tinker),
+        // gunakan Auth::id() sebagai fallback.
         ReportStatusUpdated::dispatch($reportStatus->report, $actorId ?? Auth::id());
 
         return $reportStatus;
     }
 
-    // TAMBAHKAN parameter baru: ?int $actorId = null
+    // [PERBAIKAN] Tambahkan parameter ?int $actorId = null
     public function updateReportStatus(array $data, int $id, ?int $actorId = null)
     {
         $reportStatus = $this->getReportStatusById($id);
         $reportStatus->update($data);
 
-        // Salurkan actorId ke event
+        // [PENJELASAN] Salurkan actorId ke event dengan fallback yang sama.
         ReportStatusUpdated::dispatch($reportStatus->report, $actorId ?? Auth::id());
 
         return $reportStatus;

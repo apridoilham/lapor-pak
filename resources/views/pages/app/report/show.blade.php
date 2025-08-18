@@ -28,13 +28,11 @@
         background-color: var(--bg-white);
     }
     .main-content { padding: 0; padding-bottom: 80px; }
-
-    /* (CSS Lainnya Tetap Sama) */
     .hero-container { position: relative; }
     .hero-image { width: 100%; height: 320px; object-fit: cover; display: block; }
     .hero-gradient-overlay { position: absolute; bottom: 0; left: 0; right: 0; height: 150px; background: linear-gradient(180deg, rgba(249, 250, 251, 0) 0%, var(--bg-body) 100%); }
     .hero-overlay-header { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: 1.25rem; }
-    .overlay-button { background-color: rgba(30, 30, 30, 0.5); color: var(--white); width: 44px; height: 44px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.1rem; backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.2); transition: all 0.2s ease; }
+    .overlay-button { background-color: rgba(30, 30, 30, 0.5); color: white; width: 44px; height: 44px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.1rem; backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.2); transition: all 0.2s ease; }
     .content-container { padding: 0 1.5rem; margin-top: -50px; position: relative; z-index: 10; }
     .report-title { font-weight: 800; font-size: 1.75rem; color: var(--text-dark); margin-bottom: 1.5rem; line-height: 1.3; background: var(--bg-white); padding: 1.5rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.07); }
     .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
@@ -68,7 +66,7 @@
     .comment-form-container .input-wrapper { flex-grow: 1; position: relative; }
     .comment-form-container textarea { width: 100%; border-radius: 20px; border: 1px solid var(--border-color); background-color: var(--bg-body); padding: 0.75rem 3.5rem 0.75rem 1rem; resize: none; transition: all 0.2s ease; }
     .comment-form-container textarea:focus { background-color: var(--bg-white); border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
-    .comment-form-container .btn-send-comment { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; border-radius: 50%; border: none; background: var(--primary-color); color: var(--white); font-size: 1rem; transition: all 0.2s ease; }
+    .comment-form-container .btn-send-comment { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; border-radius: 50%; border: none; background: var(--primary-color); color: white; font-size: 1rem; transition: all 0.2s ease; }
     .comment-form-container .btn-send-comment.is-disabled { background: #d1d5db; transform: translateY(-50%) scale(0.9); opacity: 0.5; cursor: not-allowed; }
     .comment-item { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; }
     .comment-avatar { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; }
@@ -76,20 +74,15 @@
     .comment-bubble { padding: 0.75rem 1rem; border-radius: 18px; line-height: 1.6; font-size: 0.9rem; }
     .comment-item.is-other .comment-bubble { background-color: #F3F4F6; color: var(--text-dark); border-top-left-radius: 4px; }
     .comment-item.is-owner { flex-direction: row-reverse; }
-    /* ▼▼▼ PERBAIKAN WARNA DI SINI ▼▼▼ */
-    .comment-item.is-owner .comment-bubble {
-        background: var(--primary-gradient);
-        color: var(--white);
-        border-top-right-radius: 4px;
-    }
+    .comment-item.is-owner .comment-bubble { background: var(--primary-gradient); color: white; border-top-right-radius: 4px; }
     .comment-bubble .comment-author { font-weight: 600; font-size: 0.9rem; }
     .comment-item.is-other .comment-author { color: var(--text-dark); }
-    .comment-item.is-owner .comment-bubble .comment-author { color: var(--white); opacity: 0.9;}
+    .comment-item.is-owner .comment-bubble .comment-author { color: white; opacity: 0.9;}
     .comment-bubble .comment-body { margin: 0.25rem 0; white-space: pre-wrap; word-wrap: break-word; }
-    .comment-item.is-owner .comment-bubble .comment-body { color: var(--white); } /* Memastikan teks komentar juga putih */
+    .comment-item.is-owner .comment-bubble .comment-body { color: white; }
     .comment-bubble .comment-time { font-size: 0.75rem; margin-top: 0.5rem; }
     .comment-item.is-other .comment-meta { color: var(--text-light); }
-    .comment-item.is-owner .comment-meta { text-align: right; color: var(--white); opacity: 0.7; }
+    .comment-item.is-owner .comment-meta { text-align: right; color: white; opacity: 0.7; }
 </style>
 @endpush
 
@@ -105,10 +98,26 @@
         <div class="content-container">
             <h1 class="report-title">{{ $report->title }}</h1>
             <div class="info-grid">
-                <div class="info-card"><div class="info-icon icon-status"><i class="fa-solid fa-flag"></i></div><p class="info-label">Status</p><h6 class="info-value">{{ $report->latestStatus ? $report->latestStatus->status->label() : 'Baru' }}</h6></div>
-                <div class="info-card"><div class="info-icon icon-category"><i class="fa-solid fa-tag"></i></div><p class="info-label">Kategori</p><h6 class="info-value">{{ $report->reportCategory->name }}</h6></div>
-                <div class="info-card"><div class="info-icon icon-reporter"><i class="fa-solid fa-user"></i></div><p class="info-label">Pelapor</p><h6 class="info-value">{{ $report->resident->user->name }}</h6></div>
-                <div class="info-card"><div class="info-icon icon-date"><i class="fa-solid fa-calendar"></i></div><p class="info-label">Tanggal</p><h6 class="info-value">{{ $report->created_at->isoFormat('D MMM YYYY') }}</h6></div>
+                <div class="info-card">
+                    <div class="info-icon icon-status"><i class="fa-solid fa-flag"></i></div>
+                    <p class="info-label">Status</p>
+                    <h6 class="info-value">{{ $report->latestStatus ? $report->latestStatus->status->label() : 'Baru' }}</h6>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon icon-category"><i class="fa-solid fa-tag"></i></div>
+                    <p class="info-label">Kategori</p>
+                    <h6 class="info-value">{{ $report->reportCategory->name }}</h6>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon icon-reporter"><i class="fa-solid fa-user"></i></div>
+                    <p class="info-label">Pelapor</p>
+                    <h6 class="info-value">{{ $isReportOwner ? $report->resident->user->name : $report->resident->user->censored_name }}</h6>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon icon-date"><i class="fa-solid fa-calendar"></i></div>
+                    <p class="info-label">Tanggal</p>
+                    <h6 class="info-value">{{ $report->created_at->isoFormat('D MMM YYYY') }}</h6>
+                </div>
             </div>
             <div class="section">
                 <h5 class="section-title">Detail Masalah</h5>
@@ -141,48 +150,57 @@
                     @endforelse
                 </div>
             </div>
-            
-            <div class="section" id="komentar">
-                <h5 class="section-title">Diskusi & Komentar (<span id="comment-count">{{ $report->comments->count() }}</span>)</h5>
-                
-                @can('create', [\App\Models\Comment::class, $report])
-                    <form action="{{ route('report.comments.store', $report) }}" method="POST" class="comment-form-container" id="comment-form">
-                        @csrf
-                        @php
-                            $userAvatar = Auth::user()->resident->avatar;
-                            if ($userAvatar && !Str::startsWith($userAvatar, 'http')) {
-                                $userAvatar = asset('storage/' . $userAvatar);
-                            } elseif (!$userAvatar) {
-                                $userAvatar = asset('assets/app/images/default-avatar.png');
-                            }
-                        @endphp
-                        <img src="{{ $userAvatar }}" alt="avatar" class="avatar">
-                        <div class="input-wrapper">
-                            <textarea name="body" id="comment-body" class="form-control" rows="1" placeholder="Tulis komentar..." required></textarea>
-                            <button type="submit" class="btn-send-comment" id="comment-send-btn"><i class="fa-solid fa-paper-plane"></i></button>
-                        </div>
-                    </form>
-                @endcan
-                
-                <div class="comments-list mt-4" id="comments-list">
-                    {{-- PERUBAHAN DI SINI: Mengambil komentar terbaru di atas --}}
-                    @forelse($report->comments()->latest()->get() as $comment)
-                        @php $isOwner = $comment->user_id === auth()->id(); @endphp
-                        <div class="comment-item {{ $isOwner ? 'is-owner' : 'is-other' }}">
-                            <img src="{{ $comment->user->resident->avatar ? asset('storage/' . $comment->user->resident->avatar) : asset('assets/app/images/default-avatar.png') }}" alt="avatar" class="comment-avatar">
-                            <div class="comment-content">
-                                <div class="comment-bubble">
-                                    <p class="comment-author">{{ $isOwner ? 'Anda' : $comment->user->name }}</p>
-                                    <p class="comment-body">{{ $comment->body }}</p>
-                                </div>
-                                <p class="comment-meta">{{ $comment->created_at->diffForHumans() }}</p>
+
+            @if ($report->visibility !== \App\Enums\ReportVisibilityEnum::PRIVATE)
+                <div class="section" id="komentar">
+                    <h5 class="section-title">Diskusi & Komentar (<span id="comment-count">{{ $report->comments->count() }}</span>)</h5>
+
+                    @can('create', [\App\Models\Comment::class, $report])
+                        <form action="{{ route('report.comments.store', $report) }}" method="POST" class="comment-form-container" id="comment-form">
+                            @csrf
+                            @php
+                                $userAvatar = Auth::user()->resident->avatar;
+                                if ($userAvatar && !Str::startsWith($userAvatar, 'http')) {
+                                    $userAvatar = asset('storage/' . $userAvatar);
+                                } elseif (!$userAvatar) {
+                                    $userAvatar = asset('assets/app/images/default-avatar.png');
+                                }
+                            @endphp
+                            <img src="{{ $userAvatar }}" alt="avatar" class="avatar">
+                            <div class="input-wrapper">
+                                <textarea name="body" id="comment-body" class="form-control" rows="1" placeholder="Tulis komentar..." required></textarea>
+                                <button type="submit" class="btn-send-comment" id="comment-send-btn"><i class="fa-solid fa-paper-plane"></i></button>
                             </div>
-                        </div>
-                    @empty
-                        <p class="text-center text-secondary small py-4" id="no-comment-message">Jadilah yang pertama berkomentar di laporan ini.</p>
-                    @endforelse
+                        </form>
+                    @endcan
+
+                    <div class="comments-list mt-4" id="comments-list">
+                        @forelse($report->comments()->latest()->get() as $comment)
+                            @php $isCommentOwner = $comment->user_id === auth()->id(); @endphp
+                            <div class="comment-item {{ $isCommentOwner ? 'is-owner' : 'is-other' }}">
+                                <img src="{{ $comment->user->resident->avatar ? asset('storage/' . $comment->user->resident->avatar) : asset('assets/app/images/default-avatar.png') }}" alt="avatar" class="comment-avatar">
+                                <div class="comment-content">
+                                    <div class="comment-bubble">
+                                        <p class="comment-author">
+                                            @if ($isCommentOwner)
+                                                Anda
+                                            @elseif ($isReportOwner)
+                                                {{ $comment->user->name }}
+                                            @else
+                                                {{ $comment->user->censored_name }}
+                                            @endif
+                                        </p>
+                                        <p class="comment-body">{{ $comment->body }}</p>
+                                    </div>
+                                    <p class="comment-meta">{{ $comment->created_at->diffForHumans() }}</p>
+                                </div>
+                            </div>
+                        @empty
+                            <p class="text-center text-secondary small py-4" id="no-comment-message">Jadilah yang pertama berkomentar di laporan ini.</p>
+                        @endforelse
+                    </div>
                 </div>
-            </div>
+            @endif
         </div>
     </div>
 
@@ -196,13 +214,19 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // (Skrip Lightbox tetap sama)
             const lightbox = document.getElementById('lightbox');
-            if (lightbox) {
-                // ... (logika lightbox seperti sebelumnya)
-            }
+            const lightboxImage = document.getElementById('lightbox-image');
+            const lightboxClose = document.getElementById('lightbox-close');
+            document.querySelectorAll('.proof-image').forEach(image => {
+                image.addEventListener('click', function() {
+                    lightboxImage.src = this.dataset.fullSrc;
+                    lightbox.classList.add('show');
+                });
+            });
+            const closeLightbox = () => lightbox.classList.remove('show');
+            if(lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
+            if(lightbox) lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
 
-            // ▼▼▼ SKRIP KOMENTAR YANG DIPERBAIKI TOTAL ▼▼▼
             const commentForm = document.getElementById('comment-form');
             if (commentForm) {
                 const commentBody = document.getElementById('comment-body');
@@ -227,15 +251,25 @@
 
                 const createCommentElement = (comment) => {
                     const isOwner = comment.user_id === {{ auth()->id() }};
+                    const isReportOwner = {{ $isReportOwner ? 'true' : 'false' }};
                     const avatarSrc = comment.user.resident && comment.user.resident.avatar ? `/storage/${comment.user.resident.avatar}` : '{{ asset('assets/app/images/default-avatar.png') }}';
                     
+                    let authorName = '';
+                    if (isOwner) {
+                        authorName = 'Anda';
+                    } else if (isReportOwner) {
+                        authorName = comment.user.name;
+                    } else {
+                        authorName = comment.user.censored_name;
+                    }
+
                     const item = document.createElement('div');
                     item.className = `comment-item ${isOwner ? 'is-owner' : 'is-other'}`;
                     item.innerHTML = `
                         <img src="${avatarSrc}" alt="avatar" class="comment-avatar">
                         <div class="comment-content">
                             <div class="comment-bubble">
-                                <p class="comment-author">${isOwner ? 'Anda' : comment.user.name}</p>
+                                <p class="comment-author">${authorName}</p>
                                 <p class="comment-body">${comment.body.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>
                             </div>
                             <p class="comment-meta">Baru saja</p>
@@ -266,7 +300,7 @@
                     })
                     .then(comment => {
                         const newCommentElement = createCommentElement(comment);
-                        commentsList.prepend(newCommentElement); // Menambahkan di awal
+                        commentsList.prepend(newCommentElement);
                         commentBody.value = '';
                         commentBody.style.height = 'auto';
                         if (noCommentMessage) { noCommentMessage.style.display = 'none'; }

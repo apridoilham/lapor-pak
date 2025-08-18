@@ -310,7 +310,7 @@
     }
 
     .report-card .badge-status.status-delivered { background-color: #3B82F6; }
-    .report-card .badge-status.status-processing { background-color: #F59E0B; }
+    .report-card .badge-status.status-in_process { background-color: #F59E0B; }
     .report-card .badge-status.status-completed { background-color: #10B981; }
     .report-card .badge-status.status-rejected { background-color: #EF4444; }
 
@@ -426,7 +426,7 @@
                     @endphp
                     <img src="{{ $reporterAvatar }}" alt="Avatar Pelapor" class="avatar">
                     <div class="user-info">
-                        <div class="user-name">{{ $report->resident->user->name }}</div>
+                        <div class="user-name">{{ $report->resident->user->censored_name }}</div>
                         <div class="user-location">RT {{ $report->resident->rt->number }}/RW {{ $report->resident->rw->number }}</div>
                     </div>
                 </div>
@@ -438,10 +438,10 @@
                     $status = $report->latestStatus->status;
                     $statusClass = 'status-' . $status->value;
                     $statusIcon = match($status) {
-                        \App\Enums\ReportStatusEnum::DELIVERED => 'fa-paper-plane',
+                        \App\Enums\ReportStatusEnum::DELIVERED => 'fa-paper-plane fa-bounce',
                         \App\Enums\ReportStatusEnum::IN_PROCESS => 'fa-spinner fa-spin',
-                        \App\Enums\ReportStatusEnum::COMPLETED => 'fa-check-double',
-                        \App\Enums\ReportStatusEnum::REJECTED => 'fa-xmark',
+                        \App\Enums\ReportStatusEnum::COMPLETED => 'fa-check-double fa-beat',
+                        \App\Enums\ReportStatusEnum::REJECTED => 'fa-xmark fa-shake',
                         default => 'fa-question-circle',
                     };
                     @endphp
@@ -460,38 +460,26 @@
                 <div class="card-footer">
                     <span>
                         <i class="fa-solid fa-map-marker-alt me-1"></i>
-                        @php
-                        $addressParts = explode(',', $report->address);
-                        $location = 'Lokasi tidak diketahui';
-                        $partsCount = count($addressParts);
-                        if ($partsCount >= 4) {
-                            $kelurahan = trim($addressParts[$partsCount - 4]);
-                            $kecamatan = trim($addressParts[$partsCount - 3]);
-                            $location = $kelurahan . ', ' . $kecamatan;
-                        } else {
-                            $location = \Str::limit(explode(',', $report->address)[0], 25);
-                        }
-                        @endphp
-                        {{ $location }}
+                        {{ Str::limit($report->address, 35) }}
                     </span>
                     <span>{{ \Carbon\Carbon::parse($report->created_at)->diffForHumans() }}</span>
                 </div>
             </a>
             @empty
-            <div class="d-flex flex-column justify-content-center align-items:center text-center py-5">
+            <div class="d-flex flex-column justify-content-center align-items-center text-center py-5">
                 <div id="lottie-empty-home" style="width: 250px; height: 250px;"></div>
                 <h5 class="mt-3 fw-bold">Laporan Tidak Ditemukan</h5>
                 <p class="text-secondary px-4">
                     @if(request('search'))
-                        Tidak ada laporan yang cocok dengan pencarian Anda.
+                    Tidak ada laporan yang cocok dengan pencarian Anda.
                     @else
-                        Saat ini belum ada pengaduan sama sekali.
+                    Saat ini belum ada pengaduan sama sekali.
                     @endif
                 </p>
                 @if(request('search'))
-                    <a href="{{ route('home') }}" class="btn btn-secondary rounded-pill py-2 px-4 mt-3">
-                        Lihat Semua Laporan
-                    </a>
+                <a href="{{ route('home') }}" class="btn btn-secondary rounded-pill py-2 px-4 mt-3">
+                    Lihat Semua Laporan
+                </a>
                 @endif
             </div>
             @endforelse
