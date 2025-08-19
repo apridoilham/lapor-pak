@@ -30,18 +30,29 @@ class ResidentController extends Controller
         $user = Auth::user();
         $rws = [];
         $rts = [];
-        $residents = [];
+
+        // [PERBAIKAN] Modifikasi query untuk mengambil jumlah laporan secara efisien
+        $query = Resident::with(['user', 'rt', 'rw'])->withCount('reports');
 
         if ($user->hasRole('super-admin')) {
             $rwId = $request->input('rw');
             $rtId = $request->input('rt');
-            $residents = $this->residentRepository->getAllResidents($rwId, $rtId);
+            if ($rtId) {
+                $query->where('rt_id', $rtId);
+            } elseif ($rwId) {
+                $query->where('rw_id', $rwId);
+            }
             $rws = Rw::orderBy('number')->get();
         } else {
             $rtId = $request->input('rt');
-            $residents = $this->residentRepository->getAllResidents($user->rw_id, $rtId);
+            $query->where('rw_id', $user->rw_id);
+            if ($rtId) {
+                $query->where('rt_id', $rtId);
+            }
             $rts = Rt::where('rw_id', $user->rw_id)->orderBy('number')->get();
         }
+
+        $residents = $query->get();
 
         return view('pages.admin.resident.index', compact('residents', 'rws', 'rts'));
     }
