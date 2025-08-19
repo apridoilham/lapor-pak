@@ -9,11 +9,12 @@ use App\Http\Requests\UpdateReportRequest;
 use App\Interfaces\ReportRepositoryInterface;
 use App\Interfaces\ResidentRepositoryInterface;
 use App\Interfaces\ReportCategoryRepositoryInterface;
+use App\Models\Report; // Pastikan Model Report di-import
 use App\Models\RW;
 use App\Models\RT;
 use App\Traits\FileUploadTrait;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage; // TAMBAHKAN INI
+use Illuminate\Support\Facades\Storage;
 use RealRashid\SweetAlert\Facades\Alert as Swal;
 
 class ReportController extends Controller
@@ -37,10 +38,32 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $rwId = $user->hasRole('super-admin') ? $request->query('rw') : $user->rw_id;
-        $rtId = $request->query('rt');
+        
+        // [PERBAIKAN] Menggunakan query builder untuk pagination
+        $query = Report::with(['resident.user', 'resident.rt', 'resident.rw', 'reportCategory', 'latestStatus'])
+                       ->whereHas('resident')
+                       ->latest('created_at');
 
-        $reports = $this->reportRepository->getAllReportsForAdmin($request, $rwId, $rtId);
+        // Filter berdasarkan peran dan input
+        if ($user->hasRole('super-admin')) {
+            $rwId = $request->query('rw');
+            $rtId = $request->query('rt');
+            if ($rtId) {
+                $query->whereHas('resident', fn($q) => $q->where('rt_id', $rtId));
+            } elseif ($rwId) {
+                $query->whereHas('resident', fn($q) => $q->where('rw_id', $rwId));
+            }
+        } else {
+            $query->whereHas('resident', fn($q) => $q->where('rw_id', $user->rw_id));
+            $rtId = $request->query('rt');
+            if ($rtId) {
+                $query->whereHas('resident', fn($q) => $q->where('rt_id', $rtId));
+            }
+        }
+
+        // Terapkan pagination
+        $reports = $query->paginate(10)->withQueryString();
+
         $rws = RW::all();
         $rts = RT::all();
 
@@ -57,7 +80,6 @@ class ReportController extends Controller
     public function store(StoreReportRequest $request)
     {
         $data = $request->validated();
-
         $data['code'] = config('report.code_prefix.admin') . mt_rand(100000, 999999);
         $data['visibility'] = ReportVisibilityEnum::PUBLIC->value;
 

@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\ReportStatusEnum;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreResidentRequest;
-use App\Http\Requests\UpdateResidentRequest;
 use App\Interfaces\ResidentRepositoryInterface;
 use App\Models\Resident;
 use App\Models\Rt;
@@ -31,76 +30,39 @@ class ResidentController extends Controller
         $rws = [];
         $rts = [];
 
-        // [PERBAIKAN] Modifikasi query untuk mengambil jumlah laporan secara efisien
         $query = Resident::with(['user', 'rt', 'rw'])->withCount('reports');
 
         if ($user->hasRole('super-admin')) {
             $rwId = $request->input('rw');
             $rtId = $request->input('rt');
-            if ($rtId) {
-                $query->where('rt_id', $rtId);
-            } elseif ($rwId) {
-                $query->where('rw_id', $rwId);
-            }
+            if ($rtId) { $query->where('rt_id', $rtId); } 
+            elseif ($rwId) { $query->where('rw_id', $rwId); }
             $rws = Rw::orderBy('number')->get();
         } else {
             $rtId = $request->input('rt');
             $query->where('rw_id', $user->rw_id);
-            if ($rtId) {
-                $query->where('rt_id', $rtId);
-            }
+            if ($rtId) { $query->where('rt_id', $rtId); }
             $rts = Rt::where('rw_id', $user->rw_id)->orderBy('number')->get();
         }
 
-        $residents = $query->get();
+        $residents = $query->paginate(9)->withQueryString();
 
         return view('pages.admin.resident.index', compact('residents', 'rws', 'rts'));
     }
 
-    public function create()
-    {
-        $rts = Rt::orderBy('number')->get();
-        $rws = Rw::orderBy('number')->get();
-        return view('pages.admin.resident.create', compact('rts', 'rws'));
-    }
-
-    public function store(StoreResidentRequest $request)
-    {
-        $data = $request->validated();
-        if ($path = $this->handleFileUpload($request, 'avatar', 'assets/avatar')) {
-            $data['avatar'] = $path;
-        }
-        $this->residentRepository->createResident($data);
-        Swal::success('Berhasil', 'Data pelapor berhasil ditambahkan!');
-        return redirect()->route('admin.resident.index');
-    }
-
     public function show(string $id)
     {
-        $resident = $this->residentRepository->getResidentById($id);
-        
-        $resident->load(['reports.latestStatus', 'reports.reportCategory']);
+        $resident = $this->residentRepository->getResidentById($id)->load(['reports.latestStatus', 'reports.reportCategory', 'reports.resident.user']);
 
-        return view('pages.admin.resident.show', compact('resident'));
-    }
+        // [PERBAIKAN] Mengembalikan logika untuk menghitung statistik
+        $stats = [
+            'total' => $resident->reports->count(),
+            'in_process' => $resident->reports->where('latestStatus.status', ReportStatusEnum::IN_PROCESS)->count(),
+            'completed' => $resident->reports->where('latestStatus.status', ReportStatusEnum::COMPLETED)->count(),
+            'rejected' => $resident->reports->where('latestStatus.status', ReportStatusEnum::REJECTED)->count(),
+        ];
 
-    public function edit(string $id)
-    {
-        $resident = $this->residentRepository->getResidentById($id);
-        $rts = Rt::orderBy('number')->get();
-        $rws = Rw::orderBy('number')->get();
-        return view('pages.admin.resident.edit', compact('resident', 'rts', 'rws'));
-    }
-
-    public function update(UpdateResidentRequest $request, string $id)
-    {
-        $data = $request->validated();
-        if ($path = $this->handleFileUpload($request, 'avatar', 'assets/avatar')) {
-            $data['avatar'] = $path;
-        }
-        $this->residentRepository->updateResident($data, $id);
-        Swal::success('Berhasil', 'Data pelapor berhasil diubah!');
-        return redirect()->route('admin.resident.index');
+        return view('pages.admin.resident.show', compact('resident', 'stats'));
     }
 
     public function destroy(string $id)

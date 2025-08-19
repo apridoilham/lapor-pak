@@ -1,109 +1,275 @@
 @extends('layouts.admin')
 
-@section('title', 'Detail Data Pelapor')
+@section('title', 'Detail Pelapor')
+
+@push('styles')
+<style>
+    .profile-header-card {
+        background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
+        border: none;
+    }
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        border: 4px solid #fff;
+        box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,.1);
+    }
+    .profile-meta-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .profile-meta-list li {
+        display: flex;
+        align-items: flex-start;
+        font-size: 0.9rem;
+        color: #5a5c69;
+        margin-bottom: 0.75rem;
+    }
+    .profile-meta-list li:last-child {
+        margin-bottom: 0;
+    }
+    .profile-meta-list i {
+        color: #b7b9cc;
+        width: 20px;
+        text-align: center;
+        margin-right: 0.75rem;
+        margin-top: 4px;
+    }
+
+    .stat-card-v2 {
+        background-color: #fff;
+        border: 1px solid #e3e6f0;
+        border-radius: .75rem;
+        padding: 1.25rem;
+        transition: all 0.3s ease;
+        border-bottom-width: 4px;
+    }
+    .stat-card-v2:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.075)!important;
+    }
+    .stat-card-v2.border-bottom-primary { border-color: #4e73df; }
+    .stat-card-v2.border-bottom-warning { border-color: #f6c23e; }
+    .stat-card-v2.border-bottom-success { border-color: #1cc88a; }
+    .stat-card-v2.border-bottom-danger { border-color: #e74a3b; }
+
+    .stat-card-v2 .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: #fff;
+        flex-shrink: 0;
+    }
+    .stat-card-v2 .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #343a40;
+    }
+    .stat-card-v2 .stat-label {
+        font-size: 0.85rem;
+        color: #858796;
+        text-transform: uppercase;
+        font-weight: 500;
+    }
+
+    .table-reports thead th {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #dee2e6;
+        font-weight: 600;
+        color: #5a5c69;
+    }
+    .table-reports tbody tr {
+        transition: background-color 0.2s ease-in-out;
+    }
+    .table-reports tbody tr:hover {
+        background-color: #f8f9fc;
+    }
+    .table-reports td, .table-reports th {
+        vertical-align: middle;
+        padding: 1rem;
+    }
+
+    .soft-badge {
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: .4em .8em;
+        border-radius: 20px;
+    }
+    .soft-badge.badge-success { background-color: #d1fae5; color: #065f46; }
+    .soft-badge.badge-warning { background-color: #fef3c7; color: #92400e; }
+    .soft-badge.badge-danger { background-color: #fee2e2; color: #991b1b; }
+    .soft-badge.badge-secondary { background-color: #e5e7eb; color: #4b5563; }
+</style>
+@endpush
 
 @section('content')
-    <a href="{{ route('admin.resident.index') }}" class="btn btn-danger mb-3">Kembali</a>
+    <div class="d-flex align-items-center mb-4">
+        <a href="{{ route('admin.resident.index') }}" class="btn btn-outline-primary btn-circle mr-3">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+            <h1 class="h3 mb-0 text-gray-900 font-weight-bold">Detail Pelapor</h1>
+            <p class="mb-0 text-muted">Ringkasan profil dan aktivitas warga.</p>
+        </div>
+    </div>
 
-    <div class="row">
-        <div class="col-lg-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Informasi Pribadi</h6>
-                </div>
-                <div class="card-body text-center">
-                    @php
-                        $avatarUrl = $resident->avatar;
-                        if ($avatarUrl && !Str::startsWith($avatarUrl, 'http')) {
-                            $avatarUrl = asset('storage/' . $avatarUrl);
-                        } elseif (!$avatarUrl) {
-                            $avatarUrl = asset('assets/app/images/default-avatar.png');
-                        }
-                    @endphp
-                    <img src="{{ $avatarUrl }}" alt="Avatar" class="img-thumbnail rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
-                    <h4 class="font-weight-bold">{{ $resident->user->name }}</h4>
-                    <p class="text-muted">{{ $resident->user->email }}</p>
-                </div>
-                <div class="card-footer">
-                    <a href="{{ route('admin.resident.edit', $resident->id) }}" class="btn btn-warning btn-block">Ubah Data Pelapor</a>
+    <div class="card shadow-sm mb-4 profile-header-card">
+        <div class="card-body">
+            <div class="d-flex align-items-center">
+                @php
+                    $avatarUrl = $resident->avatar;
+                    if ($avatarUrl && !Str::startsWith($avatarUrl, 'http')) {
+                        $avatarUrl = asset('storage/' . $avatarUrl);
+                    } elseif (!$avatarUrl) {
+                        $avatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode($resident->user->name) . '&background=1a202c&color=fff&size=128&font-size=0.33';
+                    }
+                @endphp
+                <img src="{{ $avatarUrl }}" alt="Avatar" class="rounded-circle profile-avatar mr-4">
+                <div class="w-100">
+                    <h2 class="font-weight-bold text-gray-800 mb-1">{{ $resident->user->name }}</h2>
+                    <p class="text-muted mb-3">{{ $resident->user->email }}</p>
+                    <hr class="mt-0 mb-3">
+                    <ul class="profile-meta-list">
+                        <li><i class="fas fa-map-marker-alt fa-fw"></i> RT {{ $resident->rt->number }} / RW {{ $resident->rw->number }}</li>
+                        <li><i class="fas fa-phone fa-fw"></i> {{ $resident->phone ?? 'Belum diisi' }}</li>
+                        <li><i class="fas fa-calendar-alt fa-fw"></i> Terdaftar {{ $resident->created_at->diffForHumans() }}</li>
+                    </ul>
+                    {{-- [PENAMBAHAN] Menampilkan alamat lengkap pelapor --}}
+                    <ul class="profile-meta-list mt-2">
+                        <li><i class="fas fa-home fa-fw"></i> <span>{{ $resident->address }}</span></li>
+                    </ul>
                 </div>
             </div>
         </div>
-        <div class="col-lg-8">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Detail & Riwayat Laporan</h6>
+    </div>
+
+    <h6 class="text-uppercase text-muted font-weight-bold small mb-3">Ringkasan Aktivitas</h6>
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card-v2 h-100 shadow-sm border-bottom-primary">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-primary mr-3"><i class="fas fa-file-alt"></i></div>
+                    <div>
+                        <div class="stat-value">{{ $stats['total'] }}</div>
+                        <div class="stat-label">Total Laporan</div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <h5>Alamat</h5>
-                    <table class="table table-bordered mb-4">
-                        <tr>
-                            <th style="width: 150px;">Alamat Lengkap</th>
-                            <td>{{ $resident->address }}</td>
-                        </tr>
-                        <tr>
-                            <th>RT / RW</th>
-                            <td>RT {{ $resident->rt->number }} / RW {{ $resident->rw->number }}</td>
-                        </tr>
-                    </table>
-
-                    <hr>
-
-                    <h5 class="mt-4">Riwayat Laporan ({{ $resident->reports->count() }} Laporan)</h5>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Kode</th>
-                                    <th>Judul</th>
-                                    <th>Kategori</th>
-                                    <th>Status Terakhir</th>
-                                    <th>Tanggal Update</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($resident->reports as $report)
-                                    <tr>
-                                        <td>
-                                            <a href="{{ route('admin.report.show', $report->id) }}">{{ $report->code }}</a>
-                                        </td>
-                                        <td>{{ Str::limit($report->title, 25) }}</td>
-                                        <td>{{ $report->reportCategory->name }}</td>
-                                        <td>
-                                            @if ($report->latestStatus)
-                                                @php
-                                                    $status = $report->latestStatus->status;
-                                                    $badgeClass = match($status) {
-                                                        \App\Enums\ReportStatusEnum::DELIVERED => 'badge-secondary',
-                                                        \App\Enums\ReportStatusEnum::IN_PROCESS => 'badge-info',
-                                                        \App\Enums\ReportStatusEnum::COMPLETED => 'badge-success',
-                                                        \App\Enums\ReportStatusEnum::REJECTED => 'badge-danger',
-                                                        default => 'badge-light',
-                                                    };
-                                                @endphp
-                                                <span class="badge {{ $badgeClass }}">{{ $status->label() }}</span>
-                                            @else
-                                                <span class="badge badge-secondary">Baru</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @if ($report->latestStatus)
-                                                {{ $report->latestStatus->updated_at->isoFormat('D MMM Y, HH:mm') }}
-                                            @else
-                                                {{ $report->created_at->isoFormat('D MMM Y, HH:mm') }}
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="5" class="text-center">Masyarakat ini belum pernah membuat laporan.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card-v2 h-100 shadow-sm border-bottom-warning">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-warning mr-3"><i class="fas fa-cogs"></i></div>
+                    <div>
+                        <div class="stat-value">{{ $stats['in_process'] }}</div>
+                        <div class="stat-label">Diproses</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card-v2 h-100 shadow-sm border-bottom-success">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-success mr-3"><i class="fas fa-check-circle"></i></div>
+                    <div>
+                        <div class="stat-value">{{ $stats['completed'] }}</div>
+                        <div class="stat-label">Selesai</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card stat-card-v2 h-100 shadow-sm border-bottom-danger">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-danger mr-3"><i class="fas fa-times-circle"></i></div>
+                    <div>
+                        <div class="stat-value">{{ $stats['rejected'] }}</div>
+                        <div class="stat-label">Ditolak</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Riwayat Laporan</h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-reports" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Kode</th>
+                            <th>Judul</th>
+                            <th>Kategori</th>
+                            <th class="text-center">Status</th>
+                            <th>Tanggal Update</th>
+                            <th class="text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($resident->reports as $report)
+                            <tr>
+                                <td><a href="{{ route('admin.report.show', $report->id) }}" class="font-weight-bold">{{ $report->code }}</a></td>
+                                <td>{{ Str::limit($report->title, 35) }}</td>
+                                <td>{{ $report->reportCategory->name }}</td>
+                                <td class="text-center">
+                                    @if ($report->latestStatus)
+                                        @php
+                                            $status = $report->latestStatus->status;
+                                            $badgeClass = match($status) {
+                                                \App\Enums\ReportStatusEnum::DELIVERED => 'badge-secondary',
+                                                \App\Enums\ReportStatusEnum::IN_PROCESS => 'badge-warning',
+                                                \App\Enums\ReportStatusEnum::COMPLETED => 'badge-success',
+                                                \App\Enums\ReportStatusEnum::REJECTED => 'badge-danger',
+                                                default => 'badge-light',
+                                            };
+                                        @endphp
+                                        <span class="soft-badge {{ $badgeClass }}">{{ $status->label() }}</span>
+                                    @else
+                                        <span class="soft-badge badge-secondary">Baru</span>
+                                    @endif
+                                </td>
+                                <td>{{ optional($report->latestStatus)->updated_at->isoFormat('D MMM Y, HH:mm') ?? $report->created_at->isoFormat('D MMM Y, HH:mm') }}</td>
+                                <td class="text-right">
+                                    <a href="{{ route('admin.report.show', $report->id) }}" class="btn btn-sm btn-light btn-circle" title="Lihat Detail Laporan">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <div id="lottie-empty" style="width: 150px; height: 150px; margin: 0 auto;"></div>
+                                    <p class="text-muted mt-2">Pelapor ini belum pernah membuat laporan.</p>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@section('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
+<script>
+    var lottieContainer = document.getElementById('lottie-empty');
+    if (lottieContainer) {
+        bodymovin.loadAnimation({
+            container: lottieContainer,
+            renderer: 'svg',
+            loop: true,
+            autoplay: true,
+            path: '{{ asset('assets/app/lottie/empty-box.json') }}'
+        });
+    }
+</script>
 @endsection
