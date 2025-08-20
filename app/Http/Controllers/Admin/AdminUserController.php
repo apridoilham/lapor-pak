@@ -19,27 +19,18 @@ class AdminUserController extends Controller
         $this->adminRepository = $adminRepository;
     }
 
-    /**
-     * Menampilkan daftar semua admin.
-     */
     public function index()
     {
-        $admins = $this->adminRepository->getAllAdmins();
+        $admins = User::role('admin')->with('rw')->get();
         return view('pages.admin.user.index', compact('admins'));
     }
 
-    /**
-     * Menampilkan form untuk membuat admin baru.
-     */
     public function create()
     {
         $rws = Rw::orderBy('number')->get();
         return view('pages.admin.user.create', compact('rws'));
     }
 
-    /**
-     * Menyimpan admin baru ke database.
-     */
     public function store(StoreAdminRequest $request)
     {
         $this->adminRepository->createAdmin($request->validated());
@@ -48,51 +39,43 @@ class AdminUserController extends Controller
         return redirect()->route('admin.admin-user.index');
     }
 
-    /**
-     * Menampilkan detail seorang admin.
-     */
-    public function show(User $admin)
+    public function show(User $admin_user)
     {
-        // Pastikan kita hanya menampilkan user dengan role admin
-        if (!$admin->hasRole('admin')) {
+        if (!$admin_user->hasRole('admin')) {
             abort(404);
         }
-        $admin->load('rw');
-        return view('pages.admin.user.show', ['admin' => $admin]);
+        $admin_user->load('rw');
+        return view('pages.admin.user.show', ['admin' => $admin_user]);
     }
 
-    /**
-     * Menampilkan form untuk mengedit admin.
-     */
-    public function edit(User $admin)
+    public function edit(User $admin_user)
     {
-        if (!$admin->hasRole('admin')) {
+        if (!$admin_user->hasRole('admin')) {
             abort(404);
         }
         $rws = Rw::orderBy('number')->get();
         return view('pages.admin.user.edit', [
-            'admin' => $admin,
+            'admin' => $admin_user,
             'rws' => $rws,
         ]);
     }
 
-    /**
-     * Memperbarui data admin di database.
-     */
-    public function update(UpdateAdminRequest $request, User $admin)
+    public function update(UpdateAdminRequest $request, User $admin_user)
     {
-        $this->adminRepository->updateAdmin($request->validated(), $admin->id);
+        $this->adminRepository->updateAdmin($request->validated(), $admin_user->id);
 
         Swal::success('Berhasil', 'Data admin berhasil diperbarui.');
         return redirect()->route('admin.admin-user.index');
     }
 
-    /**
-     * Menghapus admin dari database.
-     */
-    public function destroy(User $admin)
+    public function destroy(User $admin_user)
     {
-        $this->adminRepository->deleteAdmin($admin->id);
+        if ($admin_user->id === auth()->id()) {
+            Swal::error('Gagal', 'Anda tidak dapat menghapus akun Anda sendiri.');
+            return back();
+        }
+        
+        $this->adminRepository->deleteAdmin($admin_user->id);
 
         Swal::success('Berhasil', 'Admin berhasil dihapus.');
         return redirect()->route('admin.admin-user.index');

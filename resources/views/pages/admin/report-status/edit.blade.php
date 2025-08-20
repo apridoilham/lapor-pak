@@ -1,94 +1,155 @@
 @extends('layouts.admin')
 
-@section('title', 'Edit Data Progress Laporan')
+@section('title', 'Edit Progress Laporan')
+
+@push('styles')
+<style>
+    .report-summary-card img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: .35rem;
+    }
+    .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+        width: 100%;
+        height: 150px;
+        background-color: #f8f9fc;
+        border: 2px dashed #e3e6f0;
+        border-radius: .35rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        cursor: pointer;
+        transition: border-color 0.2s ease-in-out;
+    }
+    .file-input-wrapper:hover {
+        border-color: #4e73df;
+    }
+    .file-input-wrapper input[type=file] {
+        font-size: 100px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+    #image-preview {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+        border-radius: .35rem;
+    }
+</style>
+@endpush
 
 @section('content')
-    <a href="{{ route('admin.report.show', $status->report->id) }}" class="btn btn-danger mb-3">Kembali</a>
-
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Form Ubah Data Progress Laporan {{ $status->report->code }}</h6>
+    <div class="d-flex align-items-center mb-4">
+        <a href="{{ route('admin.report.show', $status->report->id) }}" class="btn btn-outline-primary btn-circle mr-3" title="Kembali">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+            <h1 class="h3 mb-0 text-gray-900 font-weight-bold">Edit Progress Laporan</h1>
+            <p class="mb-0 text-muted">Untuk Laporan Kode: <strong>{{ $status->report->code }}</strong></p>
         </div>
-        <div class="card-body">
-            <form action="{{ route('admin.report-status.update', $status->id)}}" method="POST" enctype="multipart/form-data" id="edit-status-form">
-                @csrf
-                @method('PUT')
-                <input type="hidden" name="report_id" value="{{ $status->report_id }}">
-                <div class="form-group">
-                    <label for="image">Bukti Progress Laporan (Opsional)</label>
-                    @if ($status->image)
-                        <img src="{{ asset('storage/' . $status->image) }}" alt="image" width="200" class="d-block mb-2">
-                    @endif
-                    <input type="file" class="form-control @error('image') is-invalid @enderror" id="image" name="image">
+    </div>
 
-                    @error('image')
-                        <div class="invalid-feedback">
-                            {{ $message }}
-                        </div>
-                    @enderror
+    <div class="row">
+        {{-- Kolom Kiri: Ringkasan Laporan --}}
+        <div class="col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-file-alt mr-2"></i> Ringkasan Laporan
+                    </h6>
                 </div>
-                <div class="form-group">
-                    <label for="status">Status Progress Laporan</label>
-                    <select name="status" class="form-control @error('status') is-invalid @enderror">
-                        @foreach ($statuses as $enumStatus)
-                            <option value="{{ $enumStatus->value }}" @if (old('status', $status->status->value) == $enumStatus->value) selected @endif>
-                                {{ $enumStatus->label() }}
-                            </option>
-                        @endforeach
-                    </select>
-
-                    @error('status')
-                        <div class="invalid-feedback">
-                            {{ $message }}
-                        </div>
-                    @enderror
+                <div class="card-body report-summary-card">
+                    <img src="{{ asset('storage/' . $status->report->image) }}" alt="Foto Laporan" class="mb-3">
+                    <h5 class="font-weight-bold">{{ $status->report->title }}</h5>
+                    <p class="small text-muted mb-2">
+                        <i class="fas fa-user mr-2"></i>{{ $status->report->resident->user->name }}
+                    </p>
+                    <p class="small text-muted">
+                        <i class="far fa-clock mr-2"></i>{{ $status->report->created_at->isoFormat('D MMMM YYYY, HH:mm') }}
+                    </p>
                 </div>
+            </div>
+        </div>
 
-                <div class="form-group">
-                    <label for="description">Deskripsi Progress Laporan</label>
-                    <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description" rows="5">{{ old('description', $status->description) }}</textarea>
-
-                    @error('description')
-                        <div class="invalid-feedback">
-                            {{ $message }}
-                        </div>
-                    @enderror
+        {{-- Kolom Kanan: Form Input --}}
+        <div class="col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-pencil-alt mr-2"></i> Form Ubah Progress
+                    </h6>
                 </div>
-                <button type="submit" class="btn btn-primary" id="update-btn" disabled>Simpan Perubahan</button>
-            </form>
+                <div class="card-body">
+                    <form action="{{ route('admin.report-status.update', $status->id) }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="report_id" value="{{ $status->report_id }}">
+
+                        <div class="form-group">
+                            <label for="image" class="font-weight-bold">Bukti Progress (Opsional)</label>
+                            <div class="file-input-wrapper">
+                                <input type="file" name="image" id="image" class="@error('image') is-invalid @enderror" onchange="previewImage(event)">
+                                <div id="image-placeholder" style="{{ $status->image ? 'display: none;' : '' }}">
+                                    <i class="fas fa-camera fa-2x text-gray-400"></i>
+                                    <p class="text-gray-500 mt-2">Klik untuk mengganti gambar</p>
+                                </div>
+                                <img id="image-preview" src="{{ $status->image ? asset('storage/' . $status->image) : '' }}" style="{{ $status->image ? 'display: block;' : 'display: none;' }}" alt="Pratinjau Gambar"/>
+                            </div>
+                             @error('image') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="status" class="font-weight-bold">Status Progress</label>
+                            <select name="status" id="status" class="form-control @error('status') is-invalid @enderror" required>
+                                @foreach ($statuses as $enumStatus)
+                                    <option value="{{ $enumStatus->value }}" @if (old('status', $status->status->value) == $enumStatus->value) selected @endif>
+                                        {{ $enumStatus->label() }}
+                                    </option>
+                                @endforeach
+                            </select>
+                             @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description" class="font-weight-bold">Catatan / Deskripsi Progress</label>
+                            <textarea name="description" id="description" class="form-control @error('description') is-invalid @enderror" rows="5" required>{{ old('description', $status->description) }}</textarea>
+                            @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save mr-2"></i>Simpan Perubahan
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const form = document.getElementById('edit-status-form');
-        const updateButton = document.getElementById('update-btn');
-        const inputs = form.querySelectorAll('input, select, textarea');
-        let initialFormState = {};
+    function previewImage(event) {
+        const reader = new FileReader();
+        const imagePreview = document.getElementById('image-preview');
+        const imagePlaceholder = document.getElementById('image-placeholder');
 
-        inputs.forEach(input => {
-            if (input.type === 'file' || input.name === '_token' || input.name === '_method') return;
-            initialFormState[input.name] = input.value;
-        });
-
-        function checkForChanges() {
-            let hasChanged = false;
-            inputs.forEach(input => {
-                if (input.type === 'file' && input.files.length > 0) {
-                    hasChanged = true;
-                } else if (initialFormState.hasOwnProperty(input.name) && initialFormState[input.name] !== input.value) {
-                    hasChanged = true;
-                }
-            });
-            updateButton.disabled = !hasChanged;
+        reader.onload = function(){
+            imagePreview.src = reader.result;
+            imagePreview.style.display = 'block';
+            imagePlaceholder.style.display = 'none';
         }
-
-        inputs.forEach(input => {
-            input.addEventListener('input', checkForChanges);
-            input.addEventListener('change', checkForChanges);
-        });
-    });
+        reader.readAsDataURL(event.target.files[0]);
+    }
 </script>
-@endsection
+@endpush

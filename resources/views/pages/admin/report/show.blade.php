@@ -1,223 +1,341 @@
 @extends('layouts.admin')
 
-@section('title', 'Detail Laporan')
+@section('title', 'Detail Laporan ' . $report->code)
 
 @push('styles')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
-    .report-hero-header {
-        position: relative;
-        border-radius: .75rem;
+    /* === FONT & PALET WARNA BARU === */
+    :root {
+        --primary-color: #4e73df;
+        --success-color: #1cc88a;
+        --warning-color: #f6c23e;
+        --danger-color: #e74a3b;
+        --bg-main: #f8f9fc;
+        --bg-card: #ffffff;
+        --border-color: #eaecf4;
+        --text-dark: #3a3b45;
+        --text-light: #858796;
+        --font-sans: 'Inter', sans-serif;
+    }
+    #content-wrapper, #content { background-color: var(--bg-main) !important; }
+    body { font-family: var(--font-sans); }
+
+    /* === HEADER HALAMAN === */
+    .page-header-v6 {
+        background-color: var(--bg-card);
+        padding: 1.5rem 2rem;
+        border-radius: 0.75rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--border-color);
+    }
+
+    /* === KARTU KONTEN UTAMA DENGAN TAB === */
+    .main-content-card {
+        background-color: var(--bg-card);
+        border-radius: 0.75rem;
+        border: 1px solid var(--border-color);
         overflow: hidden;
-        padding: 2.5rem;
-        color: white;
-        background-color: #1a202c;
     }
-    .report-hero-bg {
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background-size: cover;
-        background-position: center;
-        filter: brightness(0.4);
-        transform: scale(1.1);
+    .nav-tabs-custom {
+        border-bottom: 1px solid var(--border-color);
     }
-    .report-hero-content {
+    .nav-tabs-custom .nav-link {
+        padding: 1rem 1.5rem;
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: var(--text-light);
+        border: none;
+        border-bottom: 3px solid transparent;
+    }
+    .nav-tabs-custom .nav-link.active,
+    .nav-tabs-custom .nav-link:hover {
+        color: var(--primary-color);
+        border-bottom: 3px solid var(--primary-color);
+    }
+    .tab-content {
+        padding: 2rem;
+    }
+
+    /* === KONTEN DALAM TAB === */
+    .report-main-image {
+        width: 100%;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        border: 1px solid var(--border-color);
+    }
+    #map {
+        height: 250px;
+        width: 100%;
+        border-radius: 0.5rem;
+        z-index: 1;
+    }
+    .reporter-profile-card {
+        max-width: 500px;
+    }
+    .reporter-profile-card .avatar {
+        width: 80px; height: 80px;
+        border-radius: 50%; object-fit: cover;
+    }
+
+    /* === TIMELINE === */
+    .timeline-v6 {
+        border-left: 3px solid var(--border-color);
+        padding-left: 2rem;
+        margin-left: 1rem;
+    }
+    .timeline-item {
         position: relative;
-        z-index: 2;
+        padding-bottom: 2.5rem;
     }
-    .report-hero-content .badge-category {
-        background-color: rgba(255,255,255,0.15);
-        border: 1px solid rgba(255,255,255,0.2);
-        backdrop-filter: blur(10px);
-        font-weight: 500;
-        padding: .5em 1em;
-        color: white;
-    }
-    .report-hero-content .report-title {
-        font-size: 2.25rem;
-        font-weight: 700;
-        text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-    }
-    .meta-info {
+    .timeline-item:last-child { padding-bottom: 0; }
+    .timeline-item .icon {
+        position: absolute;
+        left: -2.3rem;
+        top: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
         display: flex;
         align-items: center;
-        gap: 1.5rem;
-        opacity: 0.8;
-        font-size: 0.9rem;
+        justify-content: center;
+        color: #fff;
+        z-index: 1;
     }
-    .meta-info .avatar {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        object-fit: cover;
+    .timeline-item .card {
+        border: 1px solid var(--border-color);
+        box-shadow: none;
     }
+    .timeline-item .card-header {
+        background-color: var(--light-gray);
+    }
+    .timeline-item .proof-image { max-width: 100%; cursor: pointer; border-radius: 8px; margin-top: 1rem; }
 
-    .info-dl dt {
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: #858796;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+    /* LIGHTBOX */
+    .lightbox-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background-color: rgba(0, 0, 0, 0.85); display: flex; align-items: center; justify-content: center;
+        z-index: 9999; opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
+        backdrop-filter: blur(5px);
     }
-    .info-dl dd {
-        font-weight: 500;
-        color: #2c3e50;
-        margin-bottom: 1.25rem;
-        font-size: 1rem;
-    }
-    .info-dl dd:last-child {
-        margin-bottom: 0;
-    }
-
-    .timeline { position: relative; padding-left: 10px; }
-    .timeline::before { content: ''; position: absolute; left: 20px; top: 10px; bottom: 10px; width: 3px; background: #e3e6f0; border-radius: 3px; }
-    .timeline-item { position: relative; margin-bottom: 2rem; }
-    .timeline-item:last-child { margin-bottom: 0; }
-    .timeline-icon { position: absolute; left: 0; top: 0; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; z-index: 1; border: 3px solid #f8f9fc; }
-    .timeline-content { margin-left: 55px; }
-    .timeline-content .proof-image { max-width: 150px; border-radius: .35rem; cursor: pointer; }
+    .lightbox-overlay.show { opacity: 1; visibility: visible; }
+    .lightbox-content img { max-width: 90vw; max-height: 90vh; object-fit: contain; }
+    .lightbox-close-btn { position: absolute; top: 20px; right: 30px; color: white; font-size: 2.5rem; border: none; background: transparent; cursor: pointer; }
 </style>
 @endpush
 
 @section('content')
-    <div class="d-flex align-items-center mb-4">
-        <a href="{{ route('admin.report.index') }}" class="btn btn-outline-primary btn-circle mr-3" title="Kembali">
-            <i class="fas fa-arrow-left"></i>
-        </a>
-        <div>
-            <h1 class="h3 mb-0 text-gray-900 font-weight-bold">Detail Kasus Laporan</h1>
-            <p class="mb-0 text-muted">Kode: {{ $report->code }}</p>
-        </div>
-    </div>
+    @php
+        $resident = $report->resident;
+        $avatarUrl = optional($resident->user)->avatar;
+        if ($avatarUrl && !Str::startsWith($avatarUrl, 'http')) {
+            $avatarUrl = asset('storage/' . $avatarUrl);
+        } elseif (!$avatarUrl) {
+            $avatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode(optional($resident->user)->name) . '&background=4e73df&color=fff&size=128';
+        }
+        $latestStatusEnum = $report->latestStatus ? $report->latestStatus->status : \App\Enums\ReportStatusEnum::DELIVERED;
+    @endphp
 
-    <div class="report-hero-header mb-4">
-        <div class="report-hero-bg" style="background-image: url('{{ asset('storage/' . $report->image) }}')"></div>
-        <div class="report-hero-content">
-            <p class="mb-2"><span class="badge-category">{{ $report->reportCategory->name }}</span></p>
-            <h1 class="report-title">{{ $report->title }}</h1>
-            <div class="meta-info mt-3">
-                @php
-                    $resident = $report->resident;
-                    $avatarUrl = optional($resident->user)->avatar;
-                    if ($avatarUrl && !Str::startsWith($avatarUrl, 'http')) { $avatarUrl = asset('storage/' . $avatarUrl); }
-                    elseif (!$avatarUrl) { $avatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode(optional($resident->user)->name) . '&background=fff&color=1a202c&size=64'; }
+    {{-- HEADER HALAMAN BARU --}}
+    <div class="page-header-v6">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <a href="{{ route('admin.report.index') }}" class="small text-decoration-none text-muted mb-2 d-inline-block">← Kembali ke Daftar Laporan</a>
+                <h1 class="h3 mb-1 text-gray-900 font-weight-bold">{{ $report->title }}</h1>
+                <p class="mb-0 text-muted">Kode Laporan: <strong>{{ $report->code }}</strong></p>
+            </div>
+            <div class="col-md-4 text-md-right mt-3 mt-md-0">
+                 @php
+                    $badgeClass = match($latestStatusEnum) {
+                        \App\Enums\ReportStatusEnum::IN_PROCESS => 'badge-warning',
+                        \App\Enums\ReportStatusEnum::COMPLETED => 'badge-success',
+                        \App\Enums\ReportStatusEnum::REJECTED => 'badge-danger',
+                        default => 'badge-primary',
+                    };
                 @endphp
-                <img src="{{ $avatarUrl }}" alt="Avatar" class="avatar">
-                <span class="font-weight-bold">{{ optional($resident->user)->name }}</span>
-                <span><i class="far fa-clock mr-1"></i> Dilaporkan {{ $report->created_at->diffForHumans() }}</span>
+                <span class="badge {{ $badgeClass }} p-2" style="font-size: 1rem;">{{ $latestStatusEnum->label() }}</span>
+                 @can('manageStatus', $report)
+                    <a href="{{ route('admin.report-status.create', $report->id) }}" class="btn btn-primary shadow-sm ml-2">
+                        <i class="fas fa-plus fa-sm mr-1"></i> Update Status
+                    </a>
+                @endcan
             </div>
         </div>
     </div>
     
-    <div class="row">
-        <div class="col-lg-7">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-file-alt mr-2"></i>Deskripsi & Lokasi</h6>
-                </div>
-                <div class="card-body">
-                    <p class="text-gray-700 mb-4" style="line-height: 1.8;">{{ $report->description }}</p>
-                    <hr>
-                    <p class="text-muted mt-4 mb-3">{{ $report->address }}</p>
-                    <div id="map" style="height: 350px; border-radius: .35rem; border: 1px solid #e3e6f0;"></div>
-                </div>
-            </div>
-            <div class="card shadow mb-4">
-                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-history mr-2"></i>Riwayat Perkembangan</h6>
-                    <a href="{{ route('admin.report-status.create', $report->id) }}" class="btn btn-sm btn-primary shadow-sm">
-                        <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Progress
-                    </a>
-                </div>
-                <div class="card-body">
-                    <div class="timeline">
-                        @forelse ($report->reportStatuses->sortBy('created_at') as $status)
-                            <div class="timeline-item">
-                                @php
-                                    $icon = match($status->status) {
-                                        \App\Enums\ReportStatusEnum::DELIVERED => ['icon' => 'fa-paper-plane', 'bg' => 'bg-primary'],
-                                        \App\Enums\ReportStatusEnum::IN_PROCESS => ['icon' => 'fa-cogs', 'bg' => 'bg-warning'],
-                                        \App\Enums\ReportStatusEnum::COMPLETED => ['icon' => 'fa-check-circle', 'bg' => 'bg-success'],
-                                        \App\Enums\ReportStatusEnum::REJECTED => ['icon' => 'fa-times-circle', 'bg' => 'bg-danger'],
-                                    };
-                                @endphp
-                                <div class="timeline-icon {{ $icon['bg'] }}"><i class="fas {{ $icon['icon'] }}"></i></div>
-                                <div class="timeline-content">
-                                    <h6 class="font-weight-bold">{{ $status->status->label() }} <span class="text-muted font-weight-normal">oleh</span> <span class="font-weight-bold text-capitalize">{{ $status->created_by_role }}</span></h6>
-                                    <p class="small text-muted mb-2"><i class="far fa-clock"></i> {{ $status->created_at->isoFormat('dddd, D MMMM YYYY - HH:mm') }} WIB</p>
-                                    <p>{{ $status->description }}</p>
-                                    @if($status->image)
-                                        <a href="{{ asset('storage/' . $status->image) }}" target="_blank">
-                                            <img src="{{ asset('storage/' . $status->image) }}" class="img-thumbnail proof-image" alt="Bukti Progress">
-                                        </a>
-                                    @endif
-                                </div>
-                            </div>
-                        @empty
-                             <div class="timeline-item">
-                                <div class="timeline-icon bg-secondary"><i class="fas fa-question-circle"></i></div>
-                                <div class="timeline-content"><p class="text-muted">Belum ada riwayat perkembangan untuk laporan ini.</p></div>
-                            </div>
-                        @endforelse
+    {{-- KONTEN UTAMA DENGAN TAB --}}
+    <div class="main-content-card">
+        <ul class="nav nav-tabs nav-tabs-custom" id="reportTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="detail-tab" data-toggle="tab" href="#detail" role="tab" aria-controls="detail" aria-selected="true">Detail Laporan</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="timeline-tab" data-toggle="tab" href="#timeline" role="tab" aria-controls="timeline" aria-selected="false">Riwayat Aktivitas</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="reporter-tab" data-toggle="tab" href="#reporter" role="tab" aria-controls="reporter" aria-selected="false">Info Pelapor</a>
+            </li>
+        </ul>
+        <div class="tab-content" id="reportTabContent">
+            {{-- TAB 1: DETAIL LAPORAN --}}
+            <div class="tab-pane fade show active" id="detail" role="tabpanel" aria-labelledby="detail-tab">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="font-weight-bold text-dark mb-3">Foto Laporan</h5>
+                        <img src="{{ asset('storage/' . $report->image) }}" alt="Foto Laporan" class="report-main-image">
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="font-weight-bold text-dark mb-3">Deskripsi & Lokasi</h5>
+                        <p class="text-gray-700" style="line-height: 1.7;">{{ $report->description }}</p>
+                        <hr>
+                        <p class="font-weight-bold text-dark mb-2">Alamat:</p>
+                        <p class="text-muted">{{ $report->address }}</p>
+                        <div id="map"></div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-lg-5">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-user mr-2"></i>Informasi Pelapor</h6>
-                </div>
-                <div class="card-body">
-                    <dl class="info-dl">
-                        <dt>Nama Lengkap</dt>
-                        <dd>{{ optional($resident->user)->name }}</dd>
-                        <dt>Email</dt>
-                        <dd>{{ optional($resident->user)->email }}</dd>
-                        <dt>Nomor Telepon</dt>
-                        <dd>{{ optional($resident)->phone ?? 'Tidak diisi' }}</dd>
-                        <dt>Wilayah</dt>
-                        <dd>RT {{ optional($resident->rt)->number }} / RW {{ optional($resident->rw)->number }}</dd>
-                    </dl>
-                </div>
-                 <div class="card-footer text-center">
-                    <a href="{{ route('admin.resident.show', $resident->id) }}" class="btn btn-sm btn-outline-primary">Lihat Profil Lengkap Pelapor</a>
+            {{-- TAB 2: RIWAYAT AKTIVITAS --}}
+            <div class="tab-pane fade" id="timeline" role="tabpanel" aria-labelledby="timeline-tab">
+                 <div class="timeline-v6">
+                    @forelse ($report->reportStatuses->sortBy('created_at') as $status)
+                        <div class="timeline-item">
+                             @php
+                                $iconInfo = match($status->status) {
+                                    \App\Enums\ReportStatusEnum::DELIVERED => ['icon' => 'fa-paper-plane', 'bg' => 'bg-primary'],
+                                    \App\Enums\ReportStatusEnum::IN_PROCESS => ['icon' => 'fa-cogs', 'bg' => 'bg-warning'],
+                                    \App\Enums\ReportStatusEnum::COMPLETED => ['icon' => 'fa-check-circle', 'bg' => 'bg-success'],
+                                    \App\Enums\ReportStatusEnum::REJECTED => ['icon' => 'fa-times-circle', 'bg' => 'bg-danger'],
+                                };
+                            @endphp
+                            <div class="icon {{ $iconInfo['bg'] }}"><i class="fas {{ $iconInfo['icon'] }}"></i></div>
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="font-weight-bold text-dark mb-0">{{ $status->status->label() }}</h6>
+                                        <small class="text-muted">
+                                            oleh <strong>@if($status->created_by_role === 'resident') Pelapor @else {{ ucfirst($status->created_by_role) }} @endif</strong>
+                                        </small>
+                                    </div>
+                                    <small class="text-muted">{{ $status->created_at->isoFormat('D MMM YYYY, HH:mm') }}</small>
+                                </div>
+                                <div class="card-body">
+                                    <p>{{ $status->description }}</p>
+                                    @if($status->image)
+                                        <img src="{{ asset('storage/' . $status->image) }}" class="img-fluid proof-image" alt="Bukti Progress">
+                                    @endif
+                                </div>
+                                @can('manageStatus', $report)
+                                <div class="card-footer text-right bg-white">
+                                    <a href="{{ route('admin.report-status.edit', $status->id) }}" class="btn btn-sm btn-light" title="Edit"><i class="fas fa-edit fa-sm"></i> Edit</a>
+                                    <form action="{{ route('admin.report-status.destroy', $status->id) }}" method="POST" class="d-inline delete-form">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-light" title="Hapus" data-title="Hapus Progress?" data-text="Anda yakin?"><i class="fas fa-trash fa-sm"></i> Hapus</button>
+                                    </form>
+                                </div>
+                                @endcan
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-muted ml-4">Belum ada riwayat aktivitas.</p>
+                    @endforelse
                 </div>
             </div>
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-info-circle mr-2"></i>Detail Teknis</h6>
-                </div>
-                <div class="card-body">
-                    <dl class="info-dl">
-                        <dt>Kode Laporan</dt>
-                        <dd class="text-monospace">{{ $report->code }}</dd>
-                        <dt>Status Terakhir</dt>
-                        <dd>{{ $report->latestStatus ? $report->latestStatus->status->label() : 'Baru' }}</dd>
-                        <dt>Tanggal Dibuat</dt>
-                        <dd>{{ $report->created_at->isoFormat('D MMM YYYY, HH:mm') }}</dd>
-                        <dt>Visibilitas</dt>
-                        <dd>{{ $report->visibility->label(Auth::user()) }}</dd>
-                        {{-- [PENAMBAHAN] Menampilkan informasi koordinat --}}
-                        <dt>Koordinat</dt>
-                        <dd class="text-monospace small">{{ $report->latitude }}, {{ $report->longitude }}</dd>
-                    </dl>
+
+            {{-- TAB 3: INFO PELAPOR --}}
+            <div class="tab-pane fade" id="reporter" role="tabpanel" aria-labelledby="reporter-tab">
+                <div class="reporter-profile-card">
+                     <div class="d-flex align-items-center mb-4">
+                        <img src="{{ $avatarUrl }}" alt="Avatar" class="avatar mr-3">
+                        <div>
+                            <h5 class="font-weight-bold text-dark mb-0">{{ $resident->user->name }}</h5>
+                            <p class="text-muted mb-0">{{ $resident->user->email }}</p>
+                        </div>
+                    </div>
+                    <table class="table table-borderless">
+                        <tr><td class="font-weight-bold text-muted" style="width:120px;">Telepon</td><td>{{ $resident->phone ?? '-' }}</td></tr>
+                        <tr><td class="font-weight-bold text-muted">Wilayah</td><td>RT {{ $resident->rt->number }} / RW {{ $resident->rw->number }}</td></tr>
+                        <tr><td class="font-weight-bold text-muted">Alamat</td><td>{{ $resident->address }}</td></tr>
+                    </table>
+                    <a href="{{ route('admin.resident.show', $resident->id) }}" class="btn btn-outline-primary mt-3">Lihat Halaman Profil Lengkap <i class="fas fa-arrow-right fa-sm ml-1"></i></a>
                 </div>
             </div>
         </div>
+    </div>
+    
+    {{-- LIGHTBOX ELEMENT --}}
+    <div class="lightbox-overlay" id="lightbox">
+        <button class="lightbox-close-btn" id="lightbox-close">&times;</button>
+        <div class="lightbox-content"><img src="" alt="Gambar Bukti Laporan" id="lightbox-image"></div>
     </div>
 @endsection
 
 @section('scripts')
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    var map = L.map('map').setView([{{ $report->latitude }}, {{ $report->longitude }}], 16);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-    L.marker([{{ $report->latitude }}, {{ $report->longitude }}]).addTo(map)
-        .bindPopup('<b>{{ Str::limit($report->title, 20) }}</b><br>Lokasi kejadian.')
-        .openPopup();
+    document.addEventListener('DOMContentLoaded', function() {
+        var map = L.map('map', {
+            center: [{{ $report->latitude }}, {{ $report->longitude }}],
+            zoom: 16
+        });
+        var mapInitialized = false;
+
+        function initializeMap() {
+            if (!mapInitialized) {
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(map);
+                L.marker([{{ $report->latitude }}, {{ $report->longitude }}]).addTo(map);
+                mapInitialized = true;
+            }
+            setTimeout(() => map.invalidateSize(), 10);
+        }
+        
+        // Inisialisasi peta saat tab detail pertama kali ditampilkan
+        if ($('#detail-tab').hasClass('active')) {
+            initializeMap();
+        }
+        
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            if (e.target.id === 'detail-tab') {
+                initializeMap();
+            }
+        });
+
+        // Konfirmasi Hapus
+        document.querySelectorAll('.delete-form').forEach(form => {
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const button = this.querySelector('button[type="submit"]');
+                Swal.fire({
+                    title: button.dataset.title || 'Anda yakin?',
+                    text: button.dataset.text || 'Tindakan ini tidak dapat dibatalkan!',
+                    icon: 'warning', showCancelButton: true,
+                    confirmButtonColor: '#e74a3b', cancelButtonColor: '#858796',
+                    confirmButtonText: 'Ya, Hapus!', cancelButtonText: 'Batal'
+                }).then((result) => { if (result.isConfirmed) { this.submit(); } });
+            });
+        });
+
+        // Lightbox
+        const lightbox = document.getElementById('lightbox');
+        if(lightbox) {
+            const allImages = document.querySelectorAll('.report-main-image, .proof-image');
+            const lightboxImage = document.getElementById('lightbox-image');
+            const lightboxClose = document.getElementById('lightbox-close');
+
+            allImages.forEach(image => {
+                image.addEventListener('click', function() {
+                    lightboxImage.src = this.src;
+                    lightbox.classList.add('show');
+                });
+            });
+
+            const closeLightbox = () => lightbox.classList.remove('show');
+            lightboxClose.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+            document.addEventListener('keydown', (e) => { if (e.key === "Escape" && lightbox.classList.contains('show')) closeLightbox(); });
+        }
+    });
 </script>
 @endsection

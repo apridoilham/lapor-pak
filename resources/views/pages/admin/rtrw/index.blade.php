@@ -1,174 +1,169 @@
 @extends('layouts.admin')
-@section('title', 'Data RT & RW')
+@section('title', 'Manajemen Wilayah')
 
-@section('styles')
+@push('styles')
 <style>
-    .rt-list {
+    .table thead th {
+        font-weight: 700;
+        color: #5a5c69;
         background-color: #f8f9fc;
-        border-radius: .35rem;
+        border-bottom-width: 1px;
+    }
+    .table td, .table th {
+        vertical-align: middle;
+        padding: 1rem;
+    }
+    .table tbody tr:hover {
+        background-color: #f8f9fc;
     }
 </style>
-@endsection
+@endpush
 
 @section('content')
-    <h1 class="h3 mb-4 text-gray-800">Manajemen Data RW & RT</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Manajemen Wilayah RW & RT</h1>
+            <p class="mb-0 text-muted">Atur data wilayah untuk pendaftaran warga dan admin.</p>
+        </div>
+        <button type="button" class="btn btn-primary shadow-sm rounded-pill py-2 px-3" data-toggle="modal" data-target="#addRwModal">
+            <i class="fas fa-plus fa-sm mr-2"></i>Tambah Wilayah RW
+        </button>
+    </div>
 
-    <div class="row">
-
-        <div class="col-lg-4 mb-4">
-            <div class="card shadow">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Tambah Data RW Baru</h6>
+    <div class="card shadow border-0">
+        <div class="card-body">
+            @if($rws->isEmpty())
+                <div class="text-center py-5">
+                    <h5 class="mt-3 font-weight-bold">Belum Ada Data Wilayah</h5>
+                    <p class="text-muted">Silakan tambahkan data RW pertama Anda untuk memulai.</p>
+                    <button type="button" class="btn btn-primary mt-2" data-toggle="modal" data-target="#addRwModal">
+                        <i class="fas fa-plus mr-1"></i> Tambah Data RW
+                    </button>
                 </div>
-                <div class="card-body">
-                    <form action="{{ route('admin.rtrw.store') }}" method="POST" id="add-rtrw-form">
-                        @csrf
+            @else
+                <div class="table-responsive">
+                    <table class="table table-borderless table-hover" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Nomor RW</th>
+                                <th>Jumlah RT</th>
+                                <th>Total Warga Terdaftar</th>
+                                <th class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($rws as $rw)
+                                <tr>
+                                    <td>
+                                        <a href="{{ route('admin.rtrw.show', $rw) }}" class="font-weight-bold h5 text-primary text-decoration-none">
+                                            RW {{ $rw->number }}
+                                        </a>
+                                    </td>
+                                    <td>{{ $rw->rts->count() }} RT</td>
+                                    <td>{{ $rw->residents_count }} Warga</td>
+                                    <td class="text-center">
+                                        <a href="{{ route('admin.rtrw.show', $rw) }}" class="btn btn-info btn-sm" title="Lihat Detail">
+                                            <i class="fa fa-eye"></i> Detail
+                                        </a>
+                                        <a href="{{ route('admin.rtrw.edit', $rw) }}" class="btn btn-warning btn-sm" title="Ubah Data RW">
+                                            <i class="fa fa-edit"></i> Ubah
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+    </div>
+
+    <div class="modal fade" id="addRwModal" tabindex="-1" role="dialog" aria-labelledby="addRwModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title font-weight-bold" id="addRwModalLabel">Tambah Data RW Baru</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{ route('admin.rtrw.store') }}" method="POST" id="add-rtrw-form">
+                    @csrf
+                    <div class="modal-body">
                         <div class="form-group">
-                            <label for="number">Nomor RW Baru</label>
-                            <input type="text" name="number" id="rw_number_input" class="form-control @error('number') is-invalid @enderror" placeholder="Contoh: 005" required maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-                            <div class="invalid-feedback" id="rw-error">Nomor RW ini sudah ada.</div>
-                            @error('number')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                            <label for="number_modal" class="font-weight-bold small">Nomor RW Baru</label>
+                            <input type="text" name="number" id="rw_number_input_modal" class="form-control @error('number', 'store') is-invalid @enderror" placeholder="Contoh: 005" required maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="{{ old('number') }}">
+                            <div class="invalid-feedback" id="rw-error-modal">Nomor RW ini sudah ada.</div>
+                            @error('number', 'store')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div class="form-group">
-                            <label for="rt_count">Jumlah RT di Dalamnya</label>
-                            <input type="text" name="rt_count" class="form-control @error('rt_count') is-invalid @enderror" placeholder="Contoh: 10" required maxlength="2" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-                            @error('rt_count')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                            <label for="rt_count_modal" class="font-weight-bold small">Jumlah RT di Dalamnya</label>
+                            <input type="text" name="rt_count" id="rt_count_modal" class="form-control @error('rt_count', 'store') is-invalid @enderror" placeholder="Contoh: 10" required maxlength="2" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="{{ old('rt_count') }}">
+                            @error('rt_count', 'store')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
-                        <button type="submit" class="btn btn-primary btn-block" id="tambah-btn" disabled>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-light" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="tambah-btn-modal" disabled>
                             <i class="fa fa-plus-circle"></i> Tambah RW & RT
                         </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-8">
-            <div class="card shadow">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Daftar RW dan RT yang Terdata</h6>
-                </div>
-                <div class="card-body">
-                    @if($rws->isEmpty())
-                        <p class="text-center text-muted my-3">Belum ada data RW. Silakan tambahkan data baru di form sebelah kiri.</p>
-                    @else
-                        <ul class="list-group list-group-flush">
-                            @foreach ($rws as $rw)
-                                <li class="list-group-item">
-                                    <div class="d-flex w-100 justify-content-between align-items-center">
-                                        <div>
-                                            <h6 class="mb-0">RW {{ $rw->number }}</h6>
-                                            <small class="text-muted">{{ $rw->rts->count() }} RT terdaftar</small>
-                                        </div>
-                                        <div>
-                                            <button class="btn btn-info btn-sm mr-2" type="button" data-toggle="collapse" data-target="#collapse{{ $rw->id }}">
-                                                <i class="fa fa-eye"></i> Detail RT
-                                            </button>
-
-                                            <a href="{{ route('admin.rtrw.edit', $rw->id) }}" class="btn btn-warning btn-sm mr-2">
-                                                <i class="fa fa-edit"></i> Ubah
-                                            </a>
-
-                                            <form action="{{ route('admin.rtrw.destroy', $rw->id) }}" method="POST" class="d-inline delete-form">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm" data-title="Hapus RW?" data-text="Anda yakin ingin menghapus RW {{ $rw->number }} beserta seluruh RT di dalamnya?">
-                                                    <i class="fa fa-trash"></i> Hapus
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                    <div class="collapse mt-3" id="collapse{{ $rw->id }}">
-                                        <div class="p-3 rt-list">
-                                            <h6 class="font-weight-bold">Daftar RT di RW {{ $rw->number }}:</h6>
-                                            <ul class="list-unstyled mb-0">
-                                                @forelse ($rw->rts->sortBy('number') as $rt)
-                                                    <li>- RT {{ $rt->number }}</li>
-                                                @empty
-                                                    <li class="text-muted">Belum ada data RT.</li>
-                                                @endforelse
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </li>
-                            @endforeach
-                        </ul>
-                    @endif
-                </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 @endsection
 
 @section('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const addForm = document.getElementById('add-rtrw-form');
-            const tambahButton = document.getElementById('tambah-btn');
-            const requiredInputs = addForm.querySelectorAll('[required]');
-            const rwNumberInput = document.getElementById('rw_number_input');
-            const rwError = document.getElementById('rw-error');
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const rwNumberInputModal = document.getElementById('rw_number_input_modal');
+        const rtCountInput = document.getElementById('rt_count_modal');
+        const tambahButton = document.getElementById('tambah-btn-modal');
+        const rwError = document.getElementById('rw-error-modal');
+        let debounceTimer;
 
-            function checkFormValidity() {
-                let allFieldsFilled = true;
-                requiredInputs.forEach(input => {
-                    if (input.value.trim() === '') {
-                        allFieldsFilled = false;
-                    }
-                });
+        function checkModalFormValidity() {
+            const isRwValid = rwNumberInputModal.value.trim() !== '' && !rwNumberInputModal.classList.contains('is-invalid');
+            const isRtCountValid = rtCountInput.value.trim() !== '';
+            tambahButton.disabled = !(isRwValid && isRtCountValid);
+        }
 
-                const isRwInvalid = rwNumberInput.classList.contains('is-invalid');
-                tambahButton.disabled = !allFieldsFilled || isRwInvalid;
-            }
-
-            requiredInputs.forEach(input => {
-                input.addEventListener('input', checkFormValidity);
-            });
-
-            let debounceTimer;
-            rwNumberInput.addEventListener('input', function() {
-                checkFormValidity();
-                clearTimeout(debounceTimer);
-                
-                const parentFormGroup = this.closest('.form-group');
-                if (parentFormGroup) {
-                    parentFormGroup.classList.remove('has-error');
-                    this.classList.remove('is-invalid');
-                    const errorDiv = parentFormGroup.querySelector('.invalid-feedback');
-                    if(errorDiv) errorDiv.classList.remove('d-block');
-                }
-
-                debounceTimer = setTimeout(function() {
-                    const rwNumber = rwNumberInput.value;
-                    if (rwNumber.length > 0) {
-                        fetch('/api/check-rw', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: JSON.stringify({
-                                number: rwNumber
-                            })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.is_taken) {
-                                rwNumberInput.classList.add('is-invalid');
-                                rwError.classList.add('d-block');
-                            }
-                            checkFormValidity();
-                        });
-                    }
-                }, 500);
-            });
-
-            // Logika untuk auto-padding input nomor RW
-            rwNumberInput.addEventListener('blur', function() {
-                let value = this.value;
-                if (value && !isNaN(value)) {
-                    this.value = value.padStart(3, '0');
-                }
-            });
+        [rwNumberInputModal, rtCountInput].forEach(input => {
+            input.addEventListener('input', checkModalFormValidity);
         });
-    </script>
+
+        rwNumberInputModal.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            this.classList.remove('is-invalid');
+            rwError.style.display = 'none';
+
+            debounceTimer = setTimeout(() => {
+                if (this.value.length > 0) {
+                    fetch('/api/check-rw', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+                        body: JSON.stringify({ number: this.value })
+                    }).then(res => res.json()).then(data => {
+                        if (data.is_taken) {
+                            rwNumberInputModal.classList.add('is-invalid');
+                            rwError.style.display = 'block';
+                        }
+                        checkModalFormValidity();
+                    });
+                }
+            }, 500);
+        });
+
+        rwNumberInputModal.addEventListener('blur', function() {
+            if (this.value) this.value = this.value.padStart(3, '0');
+        });
+
+        @if ($errors->store->any())
+            $('#addRwModal').modal('show');
+        @endif
+        
+        checkModalFormValidity();
+    });
+</script>
 @endsection

@@ -3,21 +3,33 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\UpdateRtRwRequest; // Import request baru
+use App\Http\Requests\UpdateRtRwRequest;
+use App\Models\Resident;
 use App\Models\Rt;
 use App\Models\Rw;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert as Swal;
 
 class RtRwController extends Controller
 {
     public function index()
     {
-        $rws = Rw::with('rts')->orderBy('number')->get();
+        $rws = Rw::withCount('residents')->orderBy('number')->get();
         return view('pages.admin.rtrw.index', compact('rws'));
     }
 
+    public function show(Rw $rtrw)
+    {
+        $residentCount = $rtrw->rts()->withCount('residents')->get()->sum('residents_count');
+
+        return view('pages.admin.rtrw.show', [
+            'rw' => $rtrw,
+            'residentCount' => $residentCount,
+        ]);
+    }
+    
     public function store(Request $request)
     {
         if ($request->has('number')) {
@@ -26,17 +38,22 @@ class RtRwController extends Controller
             ]);
         }
 
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'number' => 'required|string|digits:3|unique:rws,number',
             'rt_count' => 'required|integer|min:1|max:99',
         ], [
             'rt_count.max' => 'Jumlah RT tidak boleh lebih dari 99.',
             'rt_count.min' => 'Jumlah RT minimal harus 1.',
         ]);
+        
+        if ($validator->fails()) {
+            return redirect()->route('admin.rtrw.index')
+                ->withErrors($validator, 'store')
+                ->withInput();
+        }
 
         DB::transaction(function () use ($request) {
             $rw = Rw::create(['number' => $request->number]);
-
             for ($i = 1; $i <= $request->rt_count; $i++) {
                 Rt::create([
                     'rw_id' => $rw->id,
@@ -45,44 +62,44 @@ class RtRwController extends Controller
             }
         });
 
-        Swal::success('Berhasil', 'Data RW ' . $request->number . ' dengan ' . $request->rt_count . ' RT berhasil ditambahkan.');
+        Swal::success('Berhasil', 'Data RW ' . $request->number . ' berhasil ditambahkan.');
         return redirect()->route('admin.rtrw.index');
     }
-
-    // TAMBAHKAN METODE edit() BARU DI SINI
-    public function edit(Rw $rw)
+    
+    public function edit(Rw $rtrw)
     {
-        $rtCount = $rw->rts()->count();
-        return view('pages.admin.rtrw.edit', compact('rw', 'rtCount'));
+        $rtCount = $rtrw->rts()->count();
+        return view('pages.admin.rtrw.edit', ['rw' => $rtrw, 'rtCount' => $rtCount]);
     }
 
-    // TAMBAHKAN METODE update() BARU DI SINI
-    public function update(UpdateRtRwRequest $request, Rw $rw)
+    public function update(UpdateRtRwRequest $request, Rw $rtrw)
     {
         $validated = $request->validated();
-
-        DB::transaction(function () use ($validated, $rw) {
+        
+        DB::transaction(function () use ($validated, $rtrw) {
             $newRwNumber = str_pad($validated['number'], 3, '0', STR_PAD_LEFT);
             $newRtCount = (int) $validated['rt_count'];
-            $oldRtCount = $rw->rts()->count();
+            $oldRtCount = $rtrw->rts()->count();
 
-            // 1. Update nomor RW
-            $rw->update(['number' => $newRwNumber]);
+            $rtrw->update(['number' => $newRwNumber]);
 
-            // 2. Sesuaikan jumlah RT
-            if ($newRtCount > $oldRtCount) {
-                // Jika jumlah RT bertambah, buat RT baru
-                for ($i = $oldRtCount + 1; $i <= $newRtCount; $i++) {
-                    Rt::create([
-                        'rw_id' => $rw->id,
-                        'number' => str_pad($i, 3, '0', STR_PAD_LEFT),
-                    ]);
-                }
-            } elseif ($newRtCount < $oldRtCount) {
-                // Jika jumlah RT berkurang, hapus RT yang berlebih
-                Rt::where('rw_id', $rw->id)
+            if ($newRtCount < $oldRtCount) {
+                $rtsToDelete = Rt::where('rw_id', $rtrw->id)
                     ->where('number', '>', str_pad($newRtCount, 3, '0', STR_PAD_LEFT))
-                    ->delete();
+                    ->withCount('residents')
+                    ->get();
+                
+                foreach ($rtsToDelete as $rt) {
+                    if ($rt->residents_count > 0) {
+                        throw new \Exception('Gagal mengurangi jumlah RT karena RT ' . $rt->number . ' masih memiliki data warga.');
+                    }
+                }
+                $rtsToDelete->each->delete();
+
+            } elseif ($newRtCount > $oldRtCount) {
+                for ($i = $oldRtCount + 1; $i <= $newRtCount; $i++) {
+                    Rt::create(['rw_id' => $rtrw->id, 'number' => str_pad($i, 3, '0', STR_PAD_LEFT)]);
+                }
             }
         });
 
@@ -90,17 +107,39 @@ class RtRwController extends Controller
         return redirect()->route('admin.rtrw.index');
     }
 
-    public function destroy(Rw $rw)
+    public function destroy(Rw $rtrw)
     {
-        // Pastikan tidak ada relasi sebelum menghapus
-        if ($rw->admins()->exists() || $rw->residents()->exists()) {
-            Swal::error('Gagal', 'RW ini tidak dapat dihapus karena masih terikat dengan data Admin atau Pelapor.');
+        $residentCount = $rtrw->rts()->withCount('residents')->get()->sum('residents_count');
+
+        if ($rtrw->admins()->count() > 0 || $residentCount > 0) {
+            Swal::error('Gagal', 'RW ini tidak dapat dihapus karena masih terikat dengan data Admin atau Warga.');
             return back();
         }
 
-        $rwNumber = $rw->number;
-        $rw->delete(); // On-delete cascade akan menghapus RT terkait
+        $rwNumber = $rtrw->number;
+
+        DB::transaction(function () use ($rtrw) {
+            // Kita tidak perlu lagi menghapus laporan secara terpisah, karena jika warga sudah 0, laporan pasti juga sudah 0
+            $rtrw->rts()->delete();
+            $rtrw->delete();
+        });
+        
         Swal::success('Berhasil', 'Data RW ' . $rwNumber . ' dan semua RT di dalamnya berhasil dihapus.');
         return redirect()->route('admin.rtrw.index');
+    }
+
+    public function destroyRt(Rt $rt)
+    {
+        if ($rt->residents()->exists()) {
+            Swal::error('Gagal', 'RT ' . $rt->number . ' tidak dapat dihapus karena masih memiliki data warga.');
+            return back();
+        }
+
+        $rtNumber = $rt->number;
+        $rwNumber = $rt->rw->number;
+        $rt->delete();
+
+        Swal::success('Berhasil', 'Data RT ' . $rtNumber . ' dari RW ' . $rwNumber . ' berhasil dihapus.');
+        return back();
     }
 }
