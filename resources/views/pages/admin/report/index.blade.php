@@ -4,32 +4,11 @@
 
 @push('styles')
 <style>
-    .table thead th {
-        background-color: #f8f9fc;
-        border-bottom-width: 1px;
-        font-weight: 600;
-        color: #5a5c69;
-    }
-    .table td, .table th {
-        vertical-align: middle;
-    }
-    .table tbody tr:hover {
-        background-color: #f8f9fc;
-    }
-    .avatar-in-table {
-        width: 40px;
-        height: 40px;
-        object-fit: cover;
-    }
-    .action-dropdown .dropdown-toggle::after {
-        display: none;
-    }
-    .soft-badge {
-        font-size: 0.8rem;
-        font-weight: 600;
-        padding: .4em .8em;
-        border-radius: 20px;
-    }
+    .table thead th { background-color: #f8f9fc; border-bottom-width: 1px; font-weight: 600; color: #5a5c69; }
+    .table td, .table th { vertical-align: middle; }
+    .table tbody tr:hover { background-color: #f8f9fc; }
+    .avatar-in-table { width: 40px; height: 40px; object-fit: cover; }
+    .soft-badge { font-size: 0.8rem; font-weight: 600; padding: .4em .8em; border-radius: 20px; }
     .soft-badge.badge-success { background-color: #d1fae5; color: #065f46; }
     .soft-badge.badge-warning { background-color: #fef3c7; color: #92400e; }
     .soft-badge.badge-danger { background-color: #fee2e2; color: #991b1b; }
@@ -44,37 +23,33 @@
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
             <h6 class="m-0 font-weight-bold text-primary">Daftar Semua Laporan</h6>
-            <div class="d-flex align-items-center">
-                <form action="{{ route('admin.report.index') }}" method="GET" class="d-none d-md-inline-flex form-inline mr-3">
-                    @role('super-admin')
-                    <select name="rw" id="rw_id_filter" class="form-control form-control-sm mr-2">
-                        <option value="">Semua RW</option>
-                        @foreach ($rws as $rw)
-                            <option value="{{ $rw->id }}" {{ request('rw') == $rw->id ? 'selected' : '' }}>
-                                RW {{ $rw->number }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @endrole
-                    <select name="rt" id="rt_id_filter" class="form-control form-control-sm mr-2" {{ auth()->user()->hasRole('super-admin') ? 'disabled' : '' }}>
-                        @role('super-admin')
-                            <option value="">Pilih RW</option>
-                        @else
-                            <option value="">Semua RT</option>
-                            @foreach ($rts as $rt)
-                                <option value="{{ $rt->id }}" {{ request('rt') == $rt->id ? 'selected' : '' }}>
-                                    RT {{ $rt->number }}
-                                </option>
-                            @endforeach
-                        @endif
-                    </select>
-                    <button type="submit" class="btn btn-sm btn-info">Filter</button>
-                    <a href="{{ route('admin.report.index') }}" class="btn btn-sm btn-secondary ml-1">Reset</a>
-                </form>
-                <a href="{{ route('admin.report.create') }}" class="btn btn-primary btn-sm">
-                    <i class="fas fa-plus fa-sm mr-1"></i> Tambah Laporan
-                </a>
-            </div>
+            
+            {{-- [PERBAIKAN] Tata letak form filter diubah agar tidak terlalu rapat --}}
+            <form action="{{ route('admin.report.index') }}" method="GET" class="d-flex align-items-center">
+                <label for="sort" class="small font-weight-bold text-muted mr-2 mb-0">Urutkan:</label>
+                <select name="sort" id="sort" class="form-control form-control-sm mr-3" style="width: auto;" onchange="this.form.submit()">
+                    <option value="latest_updated" {{ request('sort', 'latest_updated') == 'latest_updated' ? 'selected' : '' }}>Terakhir Diperbarui</option>
+                    <option value="latest_created" {{ request('sort') == 'latest_created' ? 'selected' : '' }}>Terbaru Dibuat</option>
+                    <option value="oldest_created" {{ request('sort') == 'oldest_created' ? 'selected' : '' }}>Terlama Dibuat</option>
+                    <option value="name_asc" {{ request('sort') == 'name_asc' ? 'selected' : '' }}>Nama Pelapor (A-Z)</option>
+                    <option value="name_desc" {{ request('sort') == 'name_desc' ? 'selected' : '' }}>Nama Pelapor (Z-A)</option>
+                </select>
+                
+                @role('super-admin')
+                <label class="small font-weight-bold text-muted mr-2 mb-0">Filter:</label>
+                <select name="rw" id="rw_id_filter" class="form-control form-control-sm mr-2" style="width: auto;">
+                    <option value="">Semua RW</option>
+                    @foreach ($rws as $rw)
+                        <option value="{{ $rw->id }}" {{ request('rw') == $rw->id ? 'selected' : '' }}>RW {{ $rw->number }}</option>
+                    @endforeach
+                </select>
+                <select name="rt" id="rt_id_filter" class="form-control form-control-sm mr-2" style="width: auto;" disabled>
+                    <option value="">Pilih RT</option>
+                </select>
+                <button type="submit" class="btn btn-sm btn-primary" title="Terapkan Filter">Filter</button>
+                <a href="{{ route('admin.report.index') }}" class="btn btn-sm btn-outline-secondary ml-1" title="Reset Filter"><i class="fas fa-sync-alt"></i></a>
+                @endrole
+            </form>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -85,30 +60,28 @@
                             <th>Pelapor</th>
                             <th>Judul Laporan</th>
                             <th class="text-center">Status</th>
-                            <th>Waktu Dibuat</th>
+                            <th>Tanggal Update</th>
                             <th class="text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($reports as $report)
                             <tr>
-                                <td>
-                                    <a href="{{ route('admin.report.show', $report->id) }}" class="font-weight-bold">{{ $report->code }}</a>
-                                </td>
+                                <td><a href="{{ route('admin.report.show', $report->id) }}" class="font-weight-bold">{{ $report->code }}</a></td>
                                 <td>
                                     <div class="d-flex align-items-center">
                                         @php
-                                            $avatarUrl = $report->resident->avatar;
+                                            $avatarUrl = optional($report->resident)->avatar;
                                             if ($avatarUrl && !Str::startsWith($avatarUrl, 'http')) {
                                                 $avatarUrl = asset('storage/' . $avatarUrl);
                                             } elseif (!$avatarUrl) {
-                                                $avatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode($report->resident->user->name) . '&background=1a202c&color=fff&size=60';
+                                                $avatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode(optional($report->resident->user)->name) . '&background=1a202c&color=fff&size=60';
                                             }
                                         @endphp
                                         <img class="img-profile rounded-circle avatar-in-table mr-3" src="{{ $avatarUrl }}">
                                         <div>
-                                            <div class="font-weight-bold text-dark">{{ $report->resident->user->name }}</div>
-                                            <div class="small text-muted">RT {{ $report->resident->rt->number }}/RW {{ $report->resident->rw->number }}</div>
+                                            <div class="font-weight-bold text-dark">{{ optional($report->resident->user)->name }}</div>
+                                            <div class="small text-muted">RT {{ optional($report->resident->rt)->number }} / RW {{ optional($report->resident->rw)->number }}</div>
                                         </div>
                                     </div>
                                 </td>
@@ -131,27 +104,16 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <div class="text-dark">{{ $report->created_at->isoFormat('D MMM YYYY') }}</div>
-                                    <div class="small text-muted">{{ $report->created_at->format('HH:mm') }} WIB</div>
+                                    @php
+                                        $displayTime = optional($report->latestStatus)->created_at ?? $report->created_at;
+                                    @endphp
+                                    <div class="text-dark">{{ $displayTime->isoFormat('D MMM YYYY') }}</div>
+                                    <div class="small text-muted">{{ $displayTime->format('H:i') }} WIB</div>
                                 </td>
                                 <td class="text-center">
-                                    <div class="dropdown no-arrow action-dropdown">
-                                        <a class="dropdown-toggle btn btn-sm btn-light" href="#" role="button" id="dropdownMenuLink{{ $report->id }}" data-toggle="dropdown">
-                                            <i class="fas fa-ellipsis-v text-gray-600"></i>
-                                        </a>
-                                        <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink{{ $report->id }}">
-                                            <a class="dropdown-item" href="{{ route('admin.report.show', $report->id) }}"><i class="fas fa-eye fa-sm fa-fw mr-2 text-gray-400"></i> Lihat Detail</a>
-                                            <a class="dropdown-item" href="{{ route('admin.report.edit', $report->id) }}"><i class="fas fa-pencil-alt fa-sm fa-fw mr-2 text-gray-400"></i> Ubah</a>
-                                            <div class="dropdown-divider"></div>
-                                            <form action="{{ route('admin.report.destroy', $report->id) }}" method="POST" class="d-inline delete-form">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="dropdown-item text-danger" data-title="Hapus Laporan?" data-text="Anda yakin ingin menghapus laporan '{{ Str::limit($report->title, 20) }}'?">
-                                                    <i class="fas fa-trash fa-sm fa-fw mr-2"></i> Hapus
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
+                                    <a href="{{ route('admin.report.show', $report->id) }}" class="btn btn-sm btn-outline-info">
+                                        Lihat
+                                    </a>
                                 </td>
                             </tr>
                         @empty
@@ -165,7 +127,6 @@
                     </tbody>
                 </table>
             </div>
-
             <div class="d-flex justify-content-center mt-3">
                 {{ $reports->links() }}
             </div>
@@ -174,7 +135,6 @@
 @endsection
 
 @section('scripts')
-{{-- Script untuk konfirmasi hapus dan filter dependent dropdown --}}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     @role('super-admin')
@@ -188,10 +148,8 @@ document.addEventListener('DOMContentLoaded', function () {
             rtSelect.disabled = true;
             return;
         }
-
         rtSelect.disabled = true;
         rtSelect.innerHTML = '<option value="">Memuat...</option>';
-
         fetch(`/api/get-rts-by-rw/${rwId}`)
             .then(response => response.json())
             .then(data => {
@@ -213,13 +171,9 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
-    rwSelect.addEventListener('change', function() {
-        fetchRts(this.value);
-    });
+    rwSelect.addEventListener('change', function() { fetchRts(this.value); });
 
-    if (rwSelect.value) {
-        fetchRts(rwSelect.value, currentRtId);
-    }
+    if (rwSelect.value) { fetchRts(rwSelect.value, currentRtId); }
     @endrole
 });
 </script>

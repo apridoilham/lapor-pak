@@ -15,7 +15,6 @@
     .resident-card .info-list li { display: flex; align-items: center; color: #5a5c69; margin-bottom: 0.5rem; }
     .resident-card .info-list i { width: 20px; text-align: center; margin-right: 0.75rem; color: #b7b9cc; }
     .resident-card .card-footer { background-color: #f8f9fc; border-top: 1px solid #e3e6f0; }
-    .action-dropdown .dropdown-toggle::after { display: none; }
 </style>
 @endpush
 
@@ -24,32 +23,33 @@
 
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-            <h6 class="m-0 font-weight-bold text-primary">Filter Data Pelapor</h6>
-            <form action="{{ route('admin.resident.index') }}" method="GET" class="d-none d-md-inline-flex form-inline">
+            <h6 class="m-0 font-weight-bold text-primary">Daftar Warga Pelapor</h6>
+            
+            {{-- [PERBAIKAN] Tata letak form filter disamakan dengan halaman Data Laporan --}}
+            <form action="{{ route('admin.resident.index') }}" method="GET" class="d-flex align-items-center">
+                <label for="sort" class="small font-weight-bold text-muted mr-2 mb-0">Urutkan:</label>
+                <select name="sort" id="sort" class="form-control form-control-sm mr-3" style="width: auto;" onchange="this.form.submit()">
+                    <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Terbaru</option>
+                    <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Terlama</option>
+                    <option value="name_asc" {{ request('sort') == 'name_asc' ? 'selected' : '' }}>Nama (A-Z)</option>
+                    <option value="name_desc" {{ request('sort') == 'name_desc' ? 'selected' : '' }}>Nama (Z-A)</option>
+                    <option value="reports_desc" {{ request('sort') == 'reports_desc' ? 'selected' : '' }}>Laporan Terbanyak</option>
+                </select>
+
                 @role('super-admin')
-                <select name="rw" id="rw_id_filter" class="form-control form-control-sm mr-2">
-                    <option value="">Semua RW</option>
-                    @foreach ($rws as $rw)
-                        <option value="{{ $rw->id }}" {{ request('rw') == $rw->id ? 'selected' : '' }}>
-                            RW {{ $rw->number }}
-                        </option>
-                    @endforeach
-                </select>
-                @endrole
-                <select name="rt" id="rt_id_filter" class="form-control form-control-sm mr-2" {{ auth()->user()->hasRole('super-admin') ? 'disabled' : '' }}>
-                    @role('super-admin')
-                        <option value="">Pilih RT</option>
-                    @else
-                        <option value="">Semua RT</option>
-                        @foreach ($rts as $rt)
-                            <option value="{{ $rt->id }}" {{ request('rt') == $rt->id ? 'selected' : '' }}>
-                                RT {{ $rt->number }}
-                            </option>
+                    <label class="small font-weight-bold text-muted mr-2 mb-0">Filter:</label>
+                    <select name="rw" id="rw_id_filter" class="form-control form-control-sm mr-2" style="width: auto;">
+                        <option value="">Semua RW</option>
+                        @foreach ($rws as $rw)
+                            <option value="{{ $rw->id }}" {{ request('rw') == $rw->id ? 'selected' : '' }}>RW {{ $rw->number }}</option>
                         @endforeach
-                    @endif
-                </select>
-                <button type="submit" class="btn btn-sm btn-info">Filter</button>
-                <a href="{{ route('admin.resident.index') }}" class="btn btn-sm btn-secondary ml-1">Reset</a>
+                    </select>
+                    <select name="rt" id="rt_id_filter" class="form-control form-control-sm mr-2" style="width: auto;" disabled>
+                        <option value="">Pilih RT</option>
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-primary" title="Terapkan Filter">Filter</button>
+                    <a href="{{ route('admin.resident.index') }}" class="btn btn-sm btn-outline-secondary ml-1" title="Reset Filter"><i class="fas fa-sync-alt"></i></a>
+                @endrole
             </form>
         </div>
         <div class="card-body bg-light">
@@ -97,7 +97,7 @@
                     </div>
                 @endforelse
             </div>
-            <div class="d-flex justify-content-center mt-3">
+             <div class="d-flex justify-content-center mt-3">
                 {{ $residents->links() }}
             </div>
         </div>
@@ -118,10 +118,8 @@ document.addEventListener('DOMContentLoaded', function () {
             rtSelect.disabled = true;
             return;
         }
-
         rtSelect.disabled = true;
         rtSelect.innerHTML = '<option value="">Memuat...</option>';
-
         fetch(`/api/get-rts-by-rw/${rwId}`)
             .then(response => response.json())
             .then(data => {
@@ -129,8 +127,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 data.forEach(rt => {
                     const option = document.createElement('option');
                     option.value = rt.id;
-                    // [PERBAIKAN] Menggunakan sintaks JavaScript (rt.number) yang benar
-                    option.textContent = `RT ${rt.number}`; 
+                    option.textContent = `RT ${rt.number}`;
                     if (selectedRtId && rt.id == selectedRtId) {
                         option.selected = true;
                     }
@@ -143,14 +140,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 rtSelect.innerHTML = '<option value="">Gagal memuat</option>';
             });
     }
-
-    rwSelect.addEventListener('change', function() {
-        fetchRts(this.value);
-    });
-
-    if (rwSelect.value) {
-        fetchRts(rwSelect.value, currentRtId);
-    }
+    rwSelect.addEventListener('change', function() { fetchRts(this.value); });
+    if (rwSelect.value) { fetchRts(rwSelect.value, currentRtId); }
     @endrole
 });
 </script>
