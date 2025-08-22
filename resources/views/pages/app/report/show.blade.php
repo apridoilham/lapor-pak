@@ -4,7 +4,6 @@
 
 @push('styles')
 <style>
-    /* Variabel Desain "Kekinian" */
     :root {
         --primary-color: #10B981;
         --primary-gradient: linear-gradient(135deg, #10B981 0%, #34D399 100%);
@@ -16,7 +15,6 @@
         --font-sans: 'Inter', 'Poppins', 'Segoe UI', sans-serif;
     }
 
-    /* Pengaturan Dasar & Font */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     html, body { background-color: var(--bg-body); }
     body {
@@ -43,43 +41,38 @@
     .icon-status { background-color: #F0FDF4; color: #10B981; } .icon-category { background-color: #EFF6FF; color: #3B82F6; } .icon-reporter { background-color: #FEF3C7; color: #D97706; } .icon-date { background-color: #F3E8FF; color: #9333EA; }
     .section { margin-bottom: 2.5rem; }
     .section-title { font-weight: 700; font-size: 1.25rem; color: var(--text-dark); margin-bottom: 1rem; }
-    .section p.description, .section p.address { color: var(--text-light); line-height: 1.7; font-size: 0.95rem; }
-    .location-text { display: flex; align-items: flex-start; gap: 0.75rem; background-color: var(--bg-body); padding: 1rem; border-radius: 12px; }
-    .location-text .icon { font-size: 1rem; color: var(--primary-color); margin-top: 4px;}
-    .location-text p { margin: 0; color: var(--text-light); line-height: 1.6; font-size: 0.9rem; }
     .timeline-block { background: var(--bg-white); border: 1px solid var(--border-color); border-radius: 18px; margin-bottom: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.04); overflow: hidden; }
     .timeline-header { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); }
-    .timeline-header .icon { font-size: 1rem; }
     .timeline-header h6 { margin: 0; font-weight: 600; font-size: 0.95rem; }
     .header-delivered { background-color: #EFF6FF; color: #3B82F6; } .header-in_process { background-color: #FFFBEB; color: #D97706; } .header-completed { background-color: #F0FDF4; color: #10B981; } .header-rejected { background-color: #FEF2F2; color: #EF4444; }
     .timeline-body { padding: 1rem; }
-    .timeline-body .proof-image { width: 100%; height: 180px; object-fit: cover; border-radius: 12px; margin-bottom: 1rem; cursor: pointer; border: 1px solid var(--border-color); }
     .timeline-body .description { font-size: 0.9rem; color: var(--text-light); line-height: 1.6; margin-bottom: 1rem; }
     .timeline-body .date { font-size: 0.8rem; font-weight: 500; color: var(--text-light); text-align: right; }
-    .lightbox-overlay { display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); z-index: 9999; backdrop-filter: blur(5px); }
-    .lightbox-overlay.show { display: flex; }
-    .lightbox-content { position: relative; max-width: 90%; max-height: 80%; }
-    .lightbox-content img { width: 100%; height: 100%; object-fit: contain; }
-    .lightbox-close-btn { position: absolute; top: -40px; right: 0; color: white; font-size: 1.5rem; border: none; background: transparent; }
+    
+    .avatar-placeholder {
+        width: 40px; height: 40px; border-radius: 50%;
+        background-color: var(--border-color);
+        display: flex; align-items: center; justify-content: center;
+        color: var(--text-light);
+        flex-shrink: 0;
+    }
     .comment-form-container { display: flex; align-items: flex-start; gap: 0.75rem; margin-top: 1.5rem; }
-    .comment-form-container .avatar { width: 40px; height: 40px; border-radius: 50%; }
+    .comment-form-container .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
     .comment-form-container .input-wrapper { flex-grow: 1; position: relative; }
     .comment-form-container textarea { width: 100%; border-radius: 20px; border: 1px solid var(--border-color); background-color: var(--bg-body); padding: 0.75rem 3.5rem 0.75rem 1rem; resize: none; transition: all 0.2s ease; }
     .comment-form-container textarea:focus { background-color: var(--bg-white); border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
     .comment-form-container .btn-send-comment { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; border-radius: 50%; border: none; background: var(--primary-color); color: white; font-size: 1rem; transition: all 0.2s ease; }
-    .comment-form-container .btn-send-comment.is-disabled { background: #d1d5db; transform: translateY(-50%) scale(0.9); opacity: 0.5; cursor: not-allowed; }
     .comment-item { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; }
-    .comment-avatar { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; }
+    .comment-avatar { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; object-fit: cover; }
     .comment-content { flex-grow: 1; }
     .comment-bubble { padding: 0.75rem 1rem; border-radius: 18px; line-height: 1.6; font-size: 0.9rem; }
     .comment-item.is-other .comment-bubble { background-color: #F3F4F6; color: var(--text-dark); border-top-left-radius: 4px; }
     .comment-item.is-owner { flex-direction: row-reverse; }
-    .comment-item.is-owner .comment-bubble { background: var(--primary-gradient); color: white; border-top-right-radius: 4px; }
+    .comment-item.is-owner .comment-bubble { background: linear-gradient(135deg, #1f2937, #374151); color: white; border-top-right-radius: 4px; }
     .comment-bubble .comment-author { font-weight: 600; font-size: 0.9rem; }
     .comment-item.is-other .comment-author { color: var(--text-dark); }
-    .comment-item.is-owner .comment-bubble .comment-author { color: white; opacity: 0.9;}
+    .comment-item.is-owner .comment-author { color: white; opacity: 0.9;}
     .comment-bubble .comment-body { margin: 0.25rem 0; white-space: pre-wrap; word-wrap: break-word; }
-    .comment-item.is-owner .comment-bubble .comment-body { color: white; }
     .comment-bubble .comment-time { font-size: 0.75rem; margin-top: 0.5rem; }
     .comment-item.is-other .comment-meta { color: var(--text-light); }
     .comment-item.is-owner .comment-meta { text-align: right; color: white; opacity: 0.7; }
@@ -98,6 +91,7 @@
         <div class="content-container">
             <h1 class="report-title">{{ $report->title }}</h1>
             <div class="info-grid">
+                <!-- PENJELASAN: Ikon ditambahkan kembali ke setiap info-card -->
                 <div class="info-card">
                     <div class="info-icon icon-status"><i class="fa-solid fa-flag"></i></div>
                     <p class="info-label">Status</p>
@@ -119,14 +113,7 @@
                     <h6 class="info-value">{{ $report->created_at->isoFormat('D MMM YYYY') }}</h6>
                 </div>
             </div>
-            <div class="section">
-                <h5 class="section-title">Detail Masalah</h5>
-                <p class="description">{{ $report->description }}</p>
-            </div>
-            <div class="section">
-                <h5 class="section-title">Lokasi Kejadian</h5>
-                <p class="address">{{ $report->address }}</p>
-            </div>
+            
             <div class="section" id="riwayat-perkembangan">
                 <h5 class="section-title">Riwayat Perkembangan</h5>
                 <div class="timeline">
@@ -134,13 +121,9 @@
                         <div class="timeline-block">
                             <div class="timeline-header header-{{$status->status->value}}">
                                 @php $icon = match($status->status) { \App\Enums\ReportStatusEnum::DELIVERED => 'fa-paper-plane', \App\Enums\ReportStatusEnum::IN_PROCESS => 'fa-spinner', \App\Enums\ReportStatusEnum::COMPLETED => 'fa-check-double', \App\Enums\ReportStatusEnum::REJECTED => 'fa-xmark' }; @endphp
-                                <i class="fa-solid {{ $icon }} icon"></i>
-                                <h6>{{ $status->status->label() }}</h6>
+                                <h6 class="m-0"><i class="fa-solid {{ $icon }} me-2"></i>{{ $status->status->label() }}</h6>
                             </div>
                             <div class="timeline-body">
-                                @if($status->image)
-                                    <img src="{{ asset('storage/' . $status->image) }}" alt="Bukti Status" class="proof-image" data-full-src="{{ asset('storage/' . $status->image) }}">
-                                @endif
                                 <p class="description">{{ $status->description }}</p>
                                 <p class="date"><i class="fa-solid fa-clock fa-xs me-1"></i> {{ $status->created_at->isoFormat('D MMMM YYYY, HH:mm') }}</p>
                             </div>
@@ -158,15 +141,7 @@
                     @can('create', [\App\Models\Comment::class, $report])
                         <form action="{{ route('report.comments.store', $report) }}" method="POST" class="comment-form-container" id="comment-form">
                             @csrf
-                            @php
-                                $userAvatar = Auth::user()->resident->avatar;
-                                if ($userAvatar && !Str::startsWith($userAvatar, 'http')) {
-                                    $userAvatar = asset('storage/' . $userAvatar);
-                                } elseif (!$userAvatar) {
-                                    $userAvatar = asset('assets/app/images/default-avatar.png');
-                                }
-                            @endphp
-                            <img src="{{ $userAvatar }}" alt="avatar" class="avatar">
+                            <img src="{{ Auth::user()->resident->avatar ? asset('storage/' . Auth::user()->resident->avatar) : asset('assets/app/images/default-avatar.png') }}" alt="avatar" class="avatar">
                             <div class="input-wrapper">
                                 <textarea name="body" id="comment-body" class="form-control" rows="1" placeholder="Tulis komentar..." required></textarea>
                                 <button type="submit" class="btn-send-comment" id="comment-send-btn"><i class="fa-solid fa-paper-plane"></i></button>
@@ -175,20 +150,22 @@
                     @endcan
 
                     <div class="comments-list mt-4" id="comments-list">
-                        @forelse($report->comments()->latest()->get() as $comment)
-                            @php $isCommentOwner = $comment->user_id === auth()->id(); @endphp
+                        @forelse($report->comments as $comment)
+                            @php $isCommentOwner = auth()->check() && auth()->id() === $comment->user_id; @endphp
                             <div class="comment-item {{ $isCommentOwner ? 'is-owner' : 'is-other' }}">
-                                <img src="{{ $comment->user->resident->avatar ? asset('storage/' . $comment->user->resident->avatar) : asset('assets/app/images/default-avatar.png') }}" alt="avatar" class="comment-avatar">
+                                
+                                @if($isCommentOwner && Auth::user()->resident->avatar)
+                                    <img src="{{ asset('storage/' . Auth::user()->resident->avatar) }}" alt="avatar" class="comment-avatar">
+                                @elseif($isCommentOwner && !Auth::user()->resident->avatar)
+                                    <div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>
+                                @else
+                                    <div class="avatar-placeholder"><i class="fa-solid fa-user-secret"></i></div>
+                                @endif
+
                                 <div class="comment-content">
                                     <div class="comment-bubble">
                                         <p class="comment-author">
-                                            @if ($isCommentOwner)
-                                                Anda
-                                            @elseif ($isReportOwner)
-                                                {{ $comment->user->name }}
-                                            @else
-                                                {{ $comment->user->censored_name }}
-                                            @endif
+                                            {{ $isCommentOwner ? 'Anda' : ($isReportOwner ? $comment->user->name : $comment->user->censored_name) }}
                                         </p>
                                         <p class="comment-body">{{ $comment->body }}</p>
                                     </div>
@@ -203,30 +180,12 @@
             @endif
         </div>
     </div>
-
-    <div class="lightbox-overlay" id="lightbox">
-        <button class="lightbox-close-btn" id="lightbox-close">&times;</button>
-        <div class="lightbox-content"><img src="" alt="Gambar Bukti" id="lightbox-image"></div>
-    </div>
 @endsection
 
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const lightbox = document.getElementById('lightbox');
-            const lightboxImage = document.getElementById('lightbox-image');
-            const lightboxClose = document.getElementById('lightbox-close');
-            document.querySelectorAll('.proof-image').forEach(image => {
-                image.addEventListener('click', function() {
-                    lightboxImage.src = this.dataset.fullSrc;
-                    lightbox.classList.add('show');
-                });
-            });
-            const closeLightbox = () => lightbox.classList.remove('show');
-            if(lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
-            if(lightbox) lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
-
             const commentForm = document.getElementById('comment-form');
             if (commentForm) {
                 const commentBody = document.getElementById('comment-body');
@@ -236,9 +195,8 @@
                 const commentCountSpan = document.getElementById('comment-count');
 
                 const checkInputValidity = () => {
-                    const isEmpty = commentBody.value.trim() === '';
-                    sendButton.disabled = isEmpty;
-                    sendButton.classList.toggle('is-disabled', isEmpty);
+                    sendButton.disabled = commentBody.value.trim() === '';
+                    sendButton.classList.toggle('is-disabled', sendButton.disabled);
                 };
                 
                 commentBody.addEventListener('input', () => {
@@ -252,21 +210,26 @@
                 const createCommentElement = (comment) => {
                     const isOwner = comment.user_id === {{ auth()->id() }};
                     const isReportOwner = {{ $isReportOwner ? 'true' : 'false' }};
-                    const avatarSrc = comment.user.resident && comment.user.resident.avatar ? `/storage/${comment.user.resident.avatar}` : '{{ asset('assets/app/images/default-avatar.png') }}';
+                    const avatarSrc = isOwner && comment.user.resident.avatar ? `/storage/${comment.user.resident.avatar}` : '{{ asset('assets/app/images/default-avatar.png') }}';
                     
-                    let authorName = '';
-                    if (isOwner) {
-                        authorName = 'Anda';
-                    } else if (isReportOwner) {
-                        authorName = comment.user.name;
-                    } else {
-                        authorName = comment.user.censored_name;
-                    }
-
                     const item = document.createElement('div');
                     item.className = `comment-item ${isOwner ? 'is-owner' : 'is-other'}`;
+
+                    let avatarHtml = '';
+                    if(isOwner) {
+                        if(comment.user.resident.avatar) {
+                            avatarHtml = `<img src="${avatarSrc}" alt="avatar" class="comment-avatar">`;
+                        } else {
+                            avatarHtml = `<div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>`;
+                        }
+                    } else {
+                        avatarHtml = `<div class="avatar-placeholder"><i class="fa-solid fa-user-secret"></i></div>`;
+                    }
+                    
+                    let authorName = isOwner ? 'Anda' : (isReportOwner ? comment.user.name : comment.user.censored_name);
+
                     item.innerHTML = `
-                        <img src="${avatarSrc}" alt="avatar" class="comment-avatar">
+                        ${avatarHtml}
                         <div class="comment-content">
                             <div class="comment-bubble">
                                 <p class="comment-author">${authorName}</p>
@@ -305,7 +268,7 @@
                         commentBody.style.height = 'auto';
                         if (noCommentMessage) { noCommentMessage.style.display = 'none'; }
                         commentCountSpan.textContent = parseInt(commentCountSpan.textContent) + 1;
-                        newCommentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        newCommentElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
                     })
                     .catch(error => {
                         let errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
