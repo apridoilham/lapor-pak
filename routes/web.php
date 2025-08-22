@@ -82,7 +82,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin|super-ad
     Route::post('/export-reports', [ReportExportController::class, 'store'])->name('report.export.store');
     Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
 
-    Route::resource('/resident', ResidentController::class)->except(['create', 'store', 'edit', 'update']);
+    // Penjelasan: Menambahkan 'destroy' ke dalam array 'except' untuk menghapus route hapus.
+    Route::resource('/resident', ResidentController::class)->except(['create', 'store', 'edit', 'update', 'destroy']);
 
     Route::middleware(['role:super-admin'])->group(function () {
         Route::resource('/report-category', ReportCategoryController::class);

@@ -3,14 +3,18 @@
 namespace App\Interfaces;
 
 use App\Enums\ReportStatusEnum;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Illuminate\Support\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 interface ReportRepositoryInterface
 {
     public function getAllReportsForAdmin(Request $request, int $rwId = null, int $rtId = null): EloquentCollection;
-    public function getAllReportsForUser(Request $request): EloquentCollection;
+    
+    // PENJELASAN: Return type diubah menjadi LengthAwarePaginator agar sesuai dengan implementasi.
+    public function getAllReportsForUser(Request $request): LengthAwarePaginator;
+
     public function getLatestReportsForUser(Request $request): EloquentCollection;
     public function getReportByResidentId(int $residentId, ?string $status): EloquentCollection;
     public function getReportById(int $id);

@@ -11,6 +11,7 @@ use App\Interfaces\ReportCategoryRepositoryInterface;
 use App\Interfaces\ReportRepositoryInterface;
 use App\Interfaces\ReportStatusRepositoryInterface;
 use App\Models\Report;
+use App\Models\Rt;
 use App\Models\Rw;
 use App\Services\ReportService;
 use Illuminate\Database\Eloquent\Builder;
@@ -46,7 +47,12 @@ class ReportController extends Controller
         $categories = $this->reportCategoryRepository->getAllReportCategories();
         $rws = Rw::orderBy('number')->get();
 
-        return view('pages.app.report.index', compact('reports', 'categories', 'rws'));
+        $rts = collect();
+        if ($request->filled('rw')) {
+            $rts = Rt::where('rw_id', $request->rw)->orderBy('number')->get();
+        }
+
+        return view('pages.app.report.index', compact('reports', 'categories', 'rws', 'rts'));
     }
 
     public function myReport(Request $request)
@@ -66,11 +72,7 @@ class ReportController extends Controller
     public function show($code)
     {
         $report = $this->reportRepository->getReportByCode($code);
-        
-        // [PERBAIKAN] Tambahkan logika untuk mengecek kepemilikan di sini
         $isReportOwner = auth()->check() && auth()->id() === $report->resident->user_id;
-
-        // [PERBAIKAN] Kirim variabel $isReportOwner ke view
         return view('pages.app.report.show', compact('report', 'isReportOwner'));
     }
 

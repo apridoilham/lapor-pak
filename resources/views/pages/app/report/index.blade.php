@@ -5,265 +5,177 @@
 @push('styles')
 <style>
     :root {
-        --primary: #16752B;
-        --secondary-text: #6c757d;
-        --light-gray-bg: #f8f9fa;
-        --border-color: #e2e8f0;
+        --primary-color: #16752B; --text-dark: #1f2937; --text-light: #6b7280;
+        --bg-body: #f3f4f6; --bg-white: #ffffff; --border-color: #e5e7eb;
     }
-
+    html { background-color: var(--bg-body); }
     body {
-        background-color: var(--light-gray-bg);
-        overflow: hidden;
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg-white);
+        max-width: 480px; margin: 0 auto;
+        min-height: 100vh; box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
     }
-
-    .main-content {
-        max-width: 480px;
-        margin: 0 auto;
-        background-color: #ffffff;
-        height: 100vh;
-        overflow-y: auto;
-        box-shadow: 0 0 25px rgba(0, 0, 0, 0.05);
-        position: relative;
-        padding: 1.5rem;
-        padding-bottom: 100px;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-    }
-
-    .main-content::-webkit-scrollbar {
-        display: none;
-    }
-
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-    }
-
-    .page-header .header-title h5 {
-        font-weight: 700;
-        font-size: 1.25rem;
-        color: #2d3748;
-        margin-bottom: 0;
-    }
-    
-    .page-header .header-title p {
-        font-size: 0.9rem;
-        color: var(--secondary-text);
-        margin-bottom: 0;
-    }
-    
+    .main-content { padding: 1.5rem; padding-bottom: 100px; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    .page-header .header-title { display: flex; align-items: center; gap: 1rem; }
+    .page-header .header-title a { font-size: 1.5rem; color: var(--text-dark); text-decoration: none; }
+    .page-header .header-title h5 { font-weight: 700; font-size: 1.25rem; margin-bottom: 0; }
     .filter-toggle-button {
-        background-color: var(--light-gray-bg);
-        border: 1px solid var(--border-color);
-        color: var(--secondary-text);
-        font-size: 0.85rem;
-        font-weight: 600;
-        padding: 0.5rem 1rem;
-        border-radius: 10px;
+        background-color: transparent; border: 1px solid var(--border-color); color: var(--text-light);
+        font-size: 0.85rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 10px;
     }
-
     .filter-container {
-        background-color: var(--light-gray-bg);
-        border-radius: 12px;
-        padding: 1rem;
-        margin-bottom: 1.5rem;
-        display: none;
+        background-color: var(--bg-body); border-radius: 16px; padding: 1.25rem;
+        margin-bottom: 1.5rem; display: none; border: 1px solid var(--border-color);
     }
-    .filter-container.show {
-        display: block;
+    .filter-container.show { display: block; }
+    .filter-group { margin-bottom: 1rem; }
+    .filter-group label { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .report-card-professional {
+        background-color: var(--bg-white); border-radius: 18px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06); text-decoration: none;
+        display: block; overflow: hidden; margin-bottom: 1.5rem;
+        border: 1px solid var(--border-color);
     }
-    .filter-active-info{background-color:#e8f5e9;color:#16752B;padding:.5rem 1rem;border-radius:8px;font-size:.8rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
-
-    .report-card{background-color:#fff;border-radius:16px;box-shadow:0 4px 25px rgba(17,24,39,.05);text-decoration:none;color:#2d3748;display:block;overflow:hidden;margin-bottom:1.5rem;border:1px solid var(--border-color)}.report-card:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(17,24,39,.08)}.report-card .card-header{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem}.report-card .card-header .avatar{width:32px;height:32px;border-radius:50%;object-fit:cover}.report-card .card-header .user-info{font-size:.85rem}.report-card .card-header .user-name{font-weight:600}.report-card .card-header .user-location{font-size:.75rem;color:var(--secondary-text)}.report-card .card-image-container{position:relative}.report-card .card-image-container img{width:100%;height:200px;object-fit:cover}.report-card .card-content{padding:1rem}.report-card .card-title{font-weight:700;line-height:1.4;margin-bottom:.25rem;font-size:1.1rem}.report-card .card-description{font-size:.9rem;color:var(--secondary-text);margin-bottom:.75rem}.report-card .card-footer{display:flex;justify-content:space-between;align-items:center;font-size:.75rem;color:var(--secondary-text);padding:.75rem 1rem;background-color:var(--light-gray-bg);border-top:1px solid var(--border-color)}.badge-status{position:absolute;bottom:10px;left:10px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;color:#fff;border:1px solid rgba(0,0,0,.1)}.badge-status.status-delivered{background-color:#3B82F6}
-    .badge-status.status-in_process{background-color:#F59E0B}
-    .badge-status.status-completed{background-color:#10B981}.badge-status.status-rejected{background-color:#EF4444}
+    .card-header-info { padding: 1rem; display: flex; align-items: center; justify-content: space-between; }
+    .user-details { display: flex; align-items: center; gap: 0.75rem; }
+    .user-details .avatar-placeholder { width: 32px; height: 32px; border-radius: 50%; background-color: var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--text-light); }
+    .user-details .avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+    .user-details .user-name { font-size: 0.9rem; font-weight: 600; color: var(--text-dark); }
+    .card-image { width: 100%; height: 220px; object-fit: cover; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); }
+    .card-body { padding: 1rem; }
+    .card-category-pill { display: inline-block; background-color: #eef2ff; color: #4338ca; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.75rem; }
+    .card-title { font-weight: 700; line-height: 1.4; margin-bottom: 1rem; font-size: 1.2rem; color: var(--text-dark); }
+    .card-meta-info { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-light); }
+    .card-meta-info:not(:last-child) { margin-bottom: 0.5rem; }
+    .card-meta-info i { width: 16px; text-align: center; color: var(--primary-color);}
+    .card-footer { padding: 0.75rem 1rem; border-top: 1px solid var(--border-color); background-color: #fafafa; }
+    .status-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0.8rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600; }
+    .status-badge.delivered { background-color: #dbeafe; color: #2563eb; }
+    .status-badge.in_process { background-color: #fef3c7; color: #b45309; }
+    .status-badge.completed { background-color: #dcfce7; color: #166534; }
+    .status-badge.rejected { background-color: #fee2e2; color: #b91c1c; }
 </style>
 @endpush
 
 @section('content')
     <div class="page-header">
         <div class="header-title">
-            <h5>Daftar Laporan</h5>
-            <p>{{ $reports->count() }} pengaduan ditemukan</p>
+            <a href="{{ route('home') }}"><i class="fa-solid fa-arrow-left"></i></a>
+            <h5>Semua Laporan</h5>
         </div>
-        <button class="filter-toggle-button" id="filter-toggle-btn">
+        <button class="filter-toggle-button" type="button" data-bs-toggle="collapse" data-bs-target="#filter-section" aria-expanded="{{ request()->except('page') ? 'true' : 'false' }}" aria-controls="filter-section">
             <i class="fa-solid fa-filter me-1"></i> Filter
         </button>
     </div>
 
-    <div class="filter-container" id="filter-section">
+    <div class="filter-container collapse @if(request()->except('page')) show @endif" id="filter-section">
         <form action="{{ route('report.index') }}" method="GET">
-            <div class="mb-3">
-                <label for="category" class="form-label small fw-bold">Kategori</label>
-                <select name="category" class="form-select form-select-sm">
+            <div class="filter-group">
+                <label for="sort">Urutkan</label>
+                <select name="sort" class="form-select">
+                    <option value="terbaru" {{ request('sort', 'terbaru') == 'terbaru' ? 'selected' : '' }}>Laporan Terbaru</option>
+                    <option value="terlama" {{ request('sort') == 'terlama' ? 'selected' : '' }}>Laporan Terlama</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="category">Kategori</label>
+                <select name="category" class="form-select">
                     <option value="">Semua Kategori</option>
                     @foreach($categories as $category)
-                        <option value="{{ $category->name }}" {{ request('category') == $category->name ? 'selected' : '' }}>
-                            {{ $category->name }}
-                        </option>
+                        <option value="{{ $category->name }}" {{ request('category') == $category->name ? 'selected' : '' }}>{{ $category->name }}</option>
                     @endforeach
                 </select>
             </div>
-            <div class="row g-2">
-                <div class="col">
-                    <label for="rw_id" class="form-label small fw-bold">RW</label>
-                    <select name="rw" id="rw_id" class="form-select form-select-sm">
-                        <option value="">Semua RW</option>
-                        @foreach($rws as $rw)
-                            <option value="{{ $rw->id }}" {{ request('rw') == $rw->id ? 'selected' : '' }}>
-                                RW {{ $rw->number }}
-                            </option>
-                        @endforeach
-                    </select>
+            <div class="row">
+                <div class="col-6">
+                    <div class="filter-group">
+                        <label for="rw_id">RW</label>
+                        <select name="rw" id="rw_id" class="form-select" onchange="this.form.submit()">
+                            <option value="">Semua</option>
+                            @foreach($rws as $rw)
+                                <option value="{{ $rw->id }}" {{ request('rw') == $rw->id ? 'selected' : '' }}>{{ $rw->number }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
-                <div class="col">
-                    <label for="rt_id" class="form-label small fw-bold">RT</label>
-                    <select name="rt" id="rt_id" class="form-select form-select-sm" disabled>
-                        <option value="">Pilih RW Dulu</option>
-                    </select>
+                <div class="col-6">
+                    <div class="filter-group">
+                        <label for="rt_id">RT</label>
+                        <select name="rt" id="rt_id" class="form-select" {{ $rts->isEmpty() && !request('rw') ? 'disabled' : '' }}>
+                            <option value="">Semua RT</option>
+                            @foreach($rts as $rt)
+                                <option value="{{ $rt->id }}" {{ request('rt') == $rt->id ? 'selected' : '' }}>RT {{ $rt->number }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
             </div>
-            <div class="d-grid mt-3">
-                <button type="submit" class="btn btn-primary btn-sm">Terapkan Filter</button>
+            <div class="d-grid mt-2">
+                <button type="submit" class="btn btn-primary">Terapkan Filter</button>
             </div>
         </form>
     </div>
 
-    @if(request()->except('page'))
-        <div class="filter-active-info">
-            <span>Filter Aktif</span>
-            <a href="{{ route('report.index') }}" class="btn-close" style="font-size: 0.6rem;"></a>
-        </div>
-    @endif
-
-    <div class="d-flex flex-column gap-4">
-        @forelse($reports as $report)
-            <a href="{{ route('report.show', ['code' => $report->code, '_ref' => request()->fullUrl()]) }}" class="report-card">
-                <div class="card-header">
-                    @php
-                        $reporterAvatar = $report->resident->avatar;
-                        if ($reporterAvatar && !Str::startsWith($reporterAvatar, 'http')) {
-                            $reporterAvatar = asset('storage/' . $reporterAvatar);
-                        } elseif (!$reporterAvatar) {
-                            $reporterAvatar = asset('assets/app/images/default-avatar.png');
-                        }
-                    @endphp
-                    <img src="{{ $reporterAvatar }}" alt="avatar pelapor" class="avatar">
-                    <div class="user-info">
-                        <div class="user-name">{{ $report->resident->user->name }}</div>
-                        <div class="user-location">RT {{ $report->resident->rt->number }}/RW {{ $report->resident->rw->number }}</div>
+    @forelse($reports as $report)
+        @php $isOwner = Auth::id() === $report->resident->user_id; @endphp
+        <a href="{{ route('report.show', ['code' => $report->code, '_ref' => request()->fullUrl()]) }}" class="report-card-professional">
+            <div class="card-header-info">
+                <div class="user-details">
+                    @if($isOwner && $report->resident->avatar)
+                        <img src="{{ asset('storage/' . $report->resident->avatar) }}" alt="Avatar Pelapor" class="avatar">
+                    @else
+                        <div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>
+                    @endif
+                    <span class="user-name">{{ $isOwner ? $report->resident->user->name : $report->resident->user->censored_name }}</span>
+                </div>
+            </div>
+            <img src="{{ asset('storage/' . $report->image) }}" alt="{{ $report->title }}" class="card-image">
+            <div class="card-body">
+                <div class="card-category-pill">{{ $report->reportCategory->name }}</div>
+                <h6 class="card-title">{{ $report->title }}</h6>
+                <div class="card-meta-grid">
+                    <div class="card-meta-item">
+                        <i class="fa-solid fa-map-marker-alt"></i>
+                        <span>{{ Str::limit($report->address, 40) }}</span>
+                    </div>
+                    <div class="card-meta-item">
+                        <i class="fa-solid fa-clock"></i>
+                        <span>Dilaporkan {{ $report->created_at->diffForHumans() }}</span>
                     </div>
                 </div>
-
-                <div class="card-image-container">
-                    <img src="{{ asset('storage/' . $report->image) }}" alt="{{ $report->title }}">
-                    @if($report->latestStatus)
-                        @php 
-                            $status = $report->latestStatus->status;
-                            $statusClass = 'status-' . $status->value;
-                            $statusIcon = match($status) {
-                                \App\Enums\ReportStatusEnum::DELIVERED => 'fa-paper-plane fa-bounce',
-                                \App\Enums\ReportStatusEnum::IN_PROCESS => 'fa-spinner fa-spin',
-                                \App\Enums\ReportStatusEnum::COMPLETED => 'fa-check-double fa-beat',
-                                \App\Enums\ReportStatusEnum::REJECTED => 'fa-xmark fa-shake',
-                                default => 'fa-question-circle',
-                            };
-                        @endphp
-                        <div class="badge-status {{ $statusClass }}"><i class="fa-solid {{ $statusIcon }}"></i><span>{{ $status->label() }}</span></div>
-                    @endif
-                </div>
-                
-                <div class="card-content">
-                    <h5 class="card-title">{{ $report->title }}</h5>
-                    <p class="card-description">{{ Str::limit($report->description, 100) }}</p>
-                </div>
-
-                <div class="card-footer">
-                    <span>
-                        <i class="fa-solid fa-map-marker-alt me-1"></i>
-                        {{ Str::limit($report->address, 35) }}
-                    </span>
-                    <span>{{ \Carbon\Carbon::parse($report->created_at)->diffForHumans() }}</span>
-                </div>
-            </a>
-        @empty
-            <div class="d-flex flex-column justify-content-center align-items-center text-center py-5">
-                <div id="lottie-empty-home" style="width: 250px; height: 250px;"></div>
-                <h5 class="mt-3 fw-bold">Laporan Tidak Ditemukan</h5>
-                <p class="text-secondary px-4">Tidak ada laporan yang cocok dengan filter yang Anda pilih.</p>
-                <a href="{{ route('report.index') }}" class="btn btn-secondary rounded-pill py-2 px-4 mt-3">
-                    Hapus Semua Filter
-                </a>
             </div>
-        @endforelse
+            <div class="card-footer">
+                @if($report->latestStatus)
+                    @php $status = $report->latestStatus->status; @endphp
+                    <div class="status-badge {{ $status->value }}">
+                        <span>{{ $status->label() }}</span>
+                    </div>
+                @endif
+            </div>
+        </a>
+    @empty
+        <div class="d-flex flex-column justify-content-center align-items-center text-center py-5">
+            <div id="lottie-empty-list" style="width: 250px; height: 250px;"></div>
+            <h5 class="mt-3 fw-bold">Laporan Tidak Ditemukan</h5>
+            <p class="text-secondary px-4">Tidak ada laporan yang cocok dengan filter yang Anda pilih.</p>
+        </div>
+    @endforelse
+
+    <div class="d-flex justify-content-center mt-4">
+        {{ $reports->links() }}
     </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
     <script>
-        var lottieContainer = document.getElementById('lottie-empty-home');
+        const lottieContainer = document.getElementById('lottie-empty-list');
         if (lottieContainer) {
-            var animation = bodymovin.loadAnimation({
-                container: lottieContainer,
-                renderer: 'svg',
-                loop: true,
-                autoplay: true,
+            bodymovin.loadAnimation({
+                container: lottieContainer, renderer: 'svg', loop: true, autoplay: true,
                 path: '{{ asset('assets/app/lottie/not-found.json') }}'
             });
         }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const filterToggleButton = document.getElementById('filter-toggle-btn');
-            const filterSection = document.getElementById('filter-section');
-            
-            if(filterToggleButton) {
-                filterToggleButton.addEventListener('click', function() {
-                    filterSection.classList.toggle('show');
-                });
-            }
-
-            const rwSelect = document.getElementById('rw_id');
-            const rtSelect = document.getElementById('rt_id');
-            const currentRtId = "{{ request('rt') }}";
-
-            function fetchRts(rwId, selectedRtId = null) {
-                if (!rwId) {
-                    rtSelect.innerHTML = '<option value="">Pilih RW Dulu</option>';
-                    rtSelect.disabled = true;
-                    return;
-                }
-
-                rtSelect.disabled = true;
-                rtSelect.innerHTML = '<option value="">Memuat...</option>';
-
-                fetch(`/api/get-rts-by-rw/${rwId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        rtSelect.innerHTML = '<option value="">Semua RT</option>';
-                        data.forEach(rt => {
-                            const option = document.createElement('option');
-                            option.value = rt.id;
-                            option.textContent = `RT ${rt.number}`;
-                            if (selectedRtId && rt.id == selectedRtId) {
-                                option.selected = true;
-                            }
-                            rtSelect.appendChild(option);
-                        });
-                        rtSelect.disabled = false;
-                    });
-            }
-
-            rwSelect.addEventListener('change', function() {
-                fetchRts(this.value);
-            });
-
-            if (rwSelect.value) {
-                fetchRts(rwSelect.value, currentRtId);
-                if (filterSection) filterSection.classList.add('show');
-            }
-        });
     </script>
-@endsection
+@endpush
