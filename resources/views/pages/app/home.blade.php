@@ -4,10 +4,9 @@
 
 @push('styles')
 <style>
-    /* Penjelasan: CSS dirombak total untuk desain final yang paling rapi, profesional, dan keren. */
     :root {
         --primary-color: #16752B;
-        --primary-gradient: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+        --header-gradient: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
         --text-dark: #1f2937;
         --text-light: #6b7280;
         --bg-body: #f3f4f6;
@@ -18,7 +17,6 @@
 
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-    /* Tata Letak Utama */
     html { background-color: var(--bg-body); }
     body {
         font-family: var(--font-sans);
@@ -30,14 +28,12 @@
     }
     .main-content { padding: 0; padding-bottom: 100px; }
 
-    /* Header Melengkung Profesional */
     .curved-header {
-        background: var(--primary-gradient);
+        background: var(--header-gradient);
         color: white;
-        padding: 1.5rem 1.5rem 4.5rem; /* Padding bawah lebih besar untuk efek lengkung */
-        border-bottom-left-radius: 32px;
-        border-bottom-right-radius: 32px;
-        position: relative;
+        padding: 1.5rem 1.5rem 2.5rem;
+        border-bottom-left-radius: 24px;
+        border-bottom-right-radius: 24px;
     }
     .user-greeting { display: flex; align-items: center; justify-content: space-between; }
     .user-greeting .greeting-left { display: flex; align-items: center; gap: 1rem; }
@@ -45,16 +41,16 @@
     .user-greeting .greeting-subtitle { font-size: 0.9rem; color: #d1d5db; margin: 0; }
     .user-greeting .greeting-title { font-weight: 700; font-size: 1.25rem; margin: 0; }
     
-    /* Konten Area */
-    .content-area { 
-        padding: 0 1.5rem; 
-        margin-top: -2.5rem; /* Menarik konten ke atas agar menimpa header */
+    .content-area { padding: 1.5rem; }
+    .search-card {
+        background: var(--bg-white);
+        padding: 0.5rem;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        margin-top: -3.5rem;
         position: relative;
         z-index: 10;
-    }
-    .search-card {
-        background: var(--bg-white); padding: 0.5rem; border-radius: 16px;
-        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); margin-bottom: 2rem;
     }
     .search-form .form-control { border-radius: 12px; padding-left: 2.75rem; border: none; height: 48px; }
     .search-form .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-light); }
@@ -71,7 +67,7 @@
     }
     .category-pills .pill-item.active { background-color: var(--primary-color); color: var(--bg-white); border-color: var(--primary-color); }
 
-    /* Desain Kartu Laporan Profesional (Final) */
+    /* Desain Kartu Laporan Profesional (Terbaru) */
     .report-card-professional {
         background-color: var(--bg-white); border-radius: 18px;
         box-shadow: 0 4px 20px rgba(0,0,0,0.06); text-decoration: none;
@@ -80,11 +76,11 @@
     }
     .card-image { width: 100%; height: 200px; object-fit: cover; }
     .card-body { padding: 1rem; }
+    .card-category-pill { display: inline-block; background-color: #eef2ff; color: #4338ca; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.75rem; }
     .card-title { font-weight: 700; line-height: 1.4; margin-bottom: 1rem; font-size: 1.2rem; color: var(--text-dark); }
     .card-meta-grid { display: grid; gap: 0.75rem; }
     .card-meta-item { display: flex; align-items: center; gap: 0.75rem; font-size: 0.85rem; color: var(--text-light); }
     .card-meta-item i { width: 16px; text-align: center; color: var(--text-light); }
-    
     .card-footer { 
         padding: 0.75rem 1rem; border-top: 1px solid var(--border-color); 
         background-color: #fafafa; display: flex; justify-content: space-between; align-items: center;
@@ -102,6 +98,16 @@
     .status-badge.in_process { background-color: #fef3c7; color: #b45309; }
     .status-badge.completed { background-color: #dcfce7; color: #166534; }
     .status-badge.rejected { background-color: #fee2e2; color: #b91c1c; }
+
+    /* Paginasi */
+    .pagination { justify-content: center; }
+    .pagination .page-item .page-link {
+        border-radius: .35rem; margin: 0 3px; border: none;
+        color: var(--text-light); background-color: var(--bg-body);
+    }
+    .pagination .page-item.active .page-link {
+        background-color: var(--primary-color); color: white;
+    }
 </style>
 @endpush
 
@@ -148,7 +154,7 @@
 
         <div class="report-feed">
             <div class="section-header d-flex justify-content-between align-items-center">
-                <h5 class="section-title">Laporan Terbaru</h5>
+                <h5 class="section-title">Laporan di Sekitar Anda</h5>
                 <a href="{{ route('report.index') }}" class="small fw-bold text-decoration-none" style="color: var(--primary-color);">Lihat Semua</a>
             </div>
 
@@ -157,15 +163,16 @@
                 <a href="{{ route('report.show', ['code' => $report->code, '_ref' => request()->fullUrl()]) }}" class="report-card-professional">
                     <img src="{{ asset('storage/' . $report->image) }}" alt="{{ $report->title }}" class="card-image">
                     <div class="card-body">
+                        <div class="card-category-pill">{{ $report->reportCategory->name }}</div>
                         <h6 class="card-title">{{ $report->title }}</h6>
                         <div class="card-meta-grid">
                             <div class="card-meta-item">
-                                <i class="fa-solid fa-tag"></i>
-                                <span>{{ $report->reportCategory->name }}</span>
-                            </div>
-                            <div class="card-meta-item">
                                 <i class="fa-solid fa-map-marker-alt"></i>
                                 <span>{{ Str::limit($report->address, 40) }}</span>
+                            </div>
+                            <div class="card-meta-item">
+                                <i class="fa-solid fa-clock"></i>
+                                <span>Dilaporkan {{ $report->created_at->diffForHumans() }}</span>
                             </div>
                         </div>
                     </div>
@@ -193,6 +200,10 @@
                     <p class="text-secondary px-4">Jadilah yang pertama membuat laporan di lingkungan Anda!</p>
                 </div>
             @endforelse
+
+            <div class="d-flex justify-content-center mt-4">
+                {{ $reports->links() }}
+            </div>
         </div>
     </div>
 @endsection

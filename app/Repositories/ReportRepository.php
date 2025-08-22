@@ -86,6 +86,23 @@ class ReportRepository implements ReportRepositoryInterface
         
         return $query->paginate(10)->withQueryString();
     }
+    
+    public function getLatestReportsForUser(Request $request): LengthAwarePaginator
+    {
+        $query = Report::with('resident.user', 'reportCategory', 'latestStatus');
+        $this->applyVisibilityFilter($query);
+        
+        if ($search = $request->input('search')) {
+            $query->where(function (Builder $q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        return $query->latest('updated_at')->paginate(10)->withQueryString();
+    }
+
+    // ... sisa metode tidak ada perubahan ...
 
     public function getAllReportsForAdmin(Request $request, int $rwId = null, int $rtId = null): EloquentCollection
     {
@@ -100,24 +117,6 @@ class ReportRepository implements ReportRepositoryInterface
         $query = Report::with('resident.user', 'reportCategory', 'latestStatus')->whereHas('resident');
         if ($rwId) { $query->whereHas('resident', fn($q) => $q->where('rw_id', $rwId)); }
         return $query->latest('created_at')->take($limit)->get();
-    }
-
-    public function getLatestReportsForUser(Request $request): EloquentCollection
-    {
-        $query = Report::with('resident.user', 'reportCategory', 'latestStatus');
-        $this->applyVisibilityFilter($query);
-        if ($search = $request->input('search')) {
-            $query->where(fn(Builder $q) => $q->where('title', 'like', "%{$search}%")->orWhere('description', 'like', "%{$search}%"));
-        }
-        $rwId = $request->input('rw');
-        $rtId = $request->input('rt');
-        if ($rwId || $rtId) {
-            $query->whereHas('resident', function ($q) use ($rwId, $rtId) {
-                if ($rtId) { $q->where('rt_id', $rtId); } 
-                elseif ($rwId) { $q->where('rw_id', $rwId); }
-            });
-        }
-        return $query->latest('updated_at')->take(5)->get();
     }
 
     public function getReportByResidentId(int $residentId, ?string $status): EloquentCollection

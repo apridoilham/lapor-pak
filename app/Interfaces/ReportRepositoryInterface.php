@@ -12,10 +12,11 @@ interface ReportRepositoryInterface
 {
     public function getAllReportsForAdmin(Request $request, int $rwId = null, int $rtId = null): EloquentCollection;
     
-    // PENJELASAN: Return type diubah menjadi LengthAwarePaginator agar sesuai dengan implementasi.
     public function getAllReportsForUser(Request $request): LengthAwarePaginator;
 
-    public function getLatestReportsForUser(Request $request): EloquentCollection;
+    // PENJELASAN: Return type di sini diubah agar bisa menangani paginasi.
+    public function getLatestReportsForUser(Request $request): LengthAwarePaginator;
+
     public function getReportByResidentId(int $residentId, ?string $status): EloquentCollection;
     public function getReportById(int $id);
     public function getReportByCode(string $code);
