@@ -4,26 +4,52 @@
 
 @push('styles')
 <style>
+    /* Penjelasan: Menggunakan basis CSS yang sama dengan Beranda untuk konsistensi */
     :root {
-        --primary-color: #16752B; --text-dark: #1f2937; --text-light: #6b7280;
-        --bg-body: #f3f4f6; --bg-white: #ffffff; --border-color: #e5e7eb;
+        --primary-color: #16752B;
+        --text-dark: #1f2937;
+        --text-light: #6b7280;
+        --bg-body: #f3f4f6;
+        --bg-white: #ffffff;
+        --border-color: #e5e7eb;
+        --font-sans: 'Inter', sans-serif;
     }
     html { background-color: var(--bg-body); }
     body {
-        font-family: 'Inter', sans-serif;
+        font-family: var(--font-sans);
         background-color: var(--bg-white);
         max-width: 480px; margin: 0 auto;
         min-height: 100vh; box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
     }
     .main-content { padding: 1.5rem; padding-bottom: 100px; }
-    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
-    .page-header .header-title { display: flex; align-items: center; gap: 1rem; }
-    .page-header .header-title a { font-size: 1.5rem; color: var(--text-dark); text-decoration: none; }
-    .page-header .header-title h5 { font-weight: 700; font-size: 1.25rem; margin-bottom: 0; }
+    
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+    }
+    .page-header .header-title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .page-header .header-title a {
+        font-size: 1.5rem;
+        color: var(--text-dark);
+        text-decoration: none;
+    }
+    .page-header .header-title h5 {
+        font-weight: 700;
+        font-size: 1.25rem;
+        margin-bottom: 0;
+    }
+    
     .filter-toggle-button {
         background-color: transparent; border: 1px solid var(--border-color); color: var(--text-light);
         font-size: 0.85rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 10px;
     }
+
     .filter-container {
         background-color: var(--bg-body); border-radius: 16px; padding: 1.25rem;
         margin-bottom: 1.5rem; display: none; border: 1px solid var(--border-color);
@@ -31,25 +57,38 @@
     .filter-container.show { display: block; }
     .filter-group { margin-bottom: 1rem; }
     .filter-group label { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem; }
+
+    /* Desain Kartu Laporan Profesional (Sama seperti Beranda) */
     .report-card-professional {
         background-color: var(--bg-white); border-radius: 18px;
         box-shadow: 0 4px 20px rgba(0,0,0,0.06); text-decoration: none;
         display: block; overflow: hidden; margin-bottom: 1.5rem;
         border: 1px solid var(--border-color);
     }
-    .card-header-info { padding: 1rem; display: flex; align-items: center; justify-content: space-between; }
-    .user-details { display: flex; align-items: center; gap: 0.75rem; }
-    .user-details .avatar-placeholder { width: 32px; height: 32px; border-radius: 50%; background-color: var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--text-light); }
-    .user-details .avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
-    .user-details .user-name { font-size: 0.9rem; font-weight: 600; color: var(--text-dark); }
-    .card-image { width: 100%; height: 220px; object-fit: cover; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); }
+    .card-image { width: 100%; height: 220px; object-fit: cover; }
     .card-body { padding: 1rem; }
-    .card-category-pill { display: inline-block; background-color: #eef2ff; color: #4338ca; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.75rem; }
+    .card-top-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .card-category-pill {
+        display: inline-block; background-color: #eef2ff; color: #4338ca;
+        padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+    }
     .card-title { font-weight: 700; line-height: 1.4; margin-bottom: 1rem; font-size: 1.2rem; color: var(--text-dark); }
-    .card-meta-info { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--text-light); }
-    .card-meta-info:not(:last-child) { margin-bottom: 0.5rem; }
-    .card-meta-info i { width: 16px; text-align: center; color: var(--primary-color);}
-    .card-footer { padding: 0.75rem 1rem; border-top: 1px solid var(--border-color); background-color: #fafafa; }
+    .card-meta-grid { display: grid; gap: 0.75rem; }
+    .card-meta-item { display: flex; align-items: center; gap: 0.75rem; font-size: 0.85rem; color: var(--text-light); }
+    .card-meta-item i { width: 16px; text-align: center; color: var(--text-light); }
+    
+    .card-footer { 
+        padding: 0.75rem 1rem; border-top: 1px solid var(--border-color); 
+        background-color: #fafafa; display: flex; justify-content: space-between; align-items: center;
+    }
+    .user-details { display: flex; align-items: center; gap: 0.75rem; }
+    .user-details .avatar-placeholder { 
+        width: 28px; height: 28px; border-radius: 50%;
+        background-color: var(--border-color); display: flex; align-items: center; justify-content: center;
+        color: var(--text-light); font-size: 0.8rem;
+    }
+    .user-details .avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+    .user-details .user-name { font-size: 0.8rem; font-weight: 500; color: var(--text-dark); }
     .status-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0.8rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600; }
     .status-badge.delivered { background-color: #dbeafe; color: #2563eb; }
     .status-badge.in_process { background-color: #fef3c7; color: #b45309; }
@@ -88,28 +127,8 @@
                 </select>
             </div>
             <div class="row">
-                <div class="col-6">
-                    <div class="filter-group">
-                        <label for="rw_id">RW</label>
-                        <select name="rw" id="rw_id" class="form-select" onchange="this.form.submit()">
-                            <option value="">Semua</option>
-                            @foreach($rws as $rw)
-                                <option value="{{ $rw->id }}" {{ request('rw') == $rw->id ? 'selected' : '' }}>{{ $rw->number }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div class="filter-group">
-                        <label for="rt_id">RT</label>
-                        <select name="rt" id="rt_id" class="form-select" {{ $rts->isEmpty() && !request('rw') ? 'disabled' : '' }}>
-                            <option value="">Semua RT</option>
-                            @foreach($rts as $rt)
-                                <option value="{{ $rt->id }}" {{ request('rt') == $rt->id ? 'selected' : '' }}>RT {{ $rt->number }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
+                <div class="col-6"><div class="filter-group"><label for="rw_id">RW</label><select name="rw" id="rw_id" class="form-select"><option value="">Semua</option>@foreach($rws as $rw)<option value="{{ $rw->id }}" {{ request('rw') == $rw->id ? 'selected' : '' }}>{{ $rw->number }}</option>@endforeach</select></div></div>
+                <div class="col-6"><div class="filter-group"><label for="rt_id">RT</label><select name="rt" id="rt_id" class="form-select" {{ $rts->isEmpty() && !request('rw') ? 'disabled' : '' }}><option value="">Semua RT</option>@foreach($rts as $rt)<option value="{{ $rt->id }}" {{ request('rt') == $rt->id ? 'selected' : '' }}>RT {{ $rt->number }}</option>@endforeach</select></div></div>
             </div>
             <div class="d-grid mt-2">
                 <button type="submit" class="btn btn-primary">Terapkan Filter</button>
@@ -120,7 +139,20 @@
     @forelse($reports as $report)
         @php $isOwner = Auth::id() === $report->resident->user_id; @endphp
         <a href="{{ route('report.show', ['code' => $report->code, '_ref' => request()->fullUrl()]) }}" class="report-card-professional">
-            <div class="card-header-info">
+            <img src="{{ asset('storage/' . $report->image) }}" alt="{{ $report->title }}" class="card-image">
+            <div class="card-body">
+                <div class="card-top-info">
+                    <span class="card-category-pill">{{ $report->reportCategory->name }}</span>
+                </div>
+                <h6 class="card-title">{{ $report->title }}</h6>
+                <div class="card-meta-grid">
+                    <div class="card-meta-item">
+                        <i class="fa-solid fa-map-marker-alt"></i>
+                        <span>{{ Str::limit($report->address, 40) }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
                 <div class="user-details">
                     @if($isOwner && $report->resident->avatar)
                         <img src="{{ asset('storage/' . $report->resident->avatar) }}" alt="Avatar Pelapor" class="avatar">
@@ -129,23 +161,6 @@
                     @endif
                     <span class="user-name">{{ $isOwner ? $report->resident->user->name : $report->resident->user->censored_name }}</span>
                 </div>
-            </div>
-            <img src="{{ asset('storage/' . $report->image) }}" alt="{{ $report->title }}" class="card-image">
-            <div class="card-body">
-                <div class="card-category-pill">{{ $report->reportCategory->name }}</div>
-                <h6 class="card-title">{{ $report->title }}</h6>
-                <div class="card-meta-grid">
-                    <div class="card-meta-item">
-                        <i class="fa-solid fa-map-marker-alt"></i>
-                        <span>{{ Str::limit($report->address, 40) }}</span>
-                    </div>
-                    <div class="card-meta-item">
-                        <i class="fa-solid fa-clock"></i>
-                        <span>Dilaporkan {{ $report->created_at->diffForHumans() }}</span>
-                    </div>
-                </div>
-            </div>
-            <div class="card-footer">
                 @if($report->latestStatus)
                     @php $status = $report->latestStatus->status; @endphp
                     <div class="status-badge {{ $status->value }}">
