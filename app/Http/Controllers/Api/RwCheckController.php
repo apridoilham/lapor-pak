@@ -17,9 +17,9 @@ class RwCheckController extends Controller
             return response()->json(['is_taken' => false]);
         }
         
-        $paddedNumber = str_pad($number, 3, '0', STR_PAD_LEFT);
+        $cleanedNumber = ltrim($number, '0');
 
-        $query = Rw::where('number', $paddedNumber);
+        $query = Rw::where('number', $cleanedNumber);
 
         if ($ignoreId) {
             $query->where('id', '!=', $ignoreId);

@@ -49,14 +49,18 @@
 
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb bg-transparent p-0 m-0">
-                    <li class="breadcrumb-item"><a href="{{ route('admin.rtrw.index') }}">Manajemen Wilayah</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Detail RW {{ $rw->number }}</li>
-                </ol>
-            </nav>
-            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Detail Wilayah RW {{ $rw->number }}</h1>
+        <div class="d-flex align-items-center">
+            <a href="{{ route('admin.rtrw.index') }}" class="btn btn-outline-primary btn-circle mr-3" title="Kembali">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb bg-transparent p-0 m-0">
+                        <li class="breadcrumb-item active" aria-current="page">Detail RW {{ $rw->number }}</li>
+                    </ol>
+                </nav>
+                <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Detail Wilayah RW {{ $rw->number }}</h1>
+            </div>
         </div>
         <div>
             <a href="{{ route('admin.rtrw.edit', $rw) }}" class="btn btn-warning shadow-sm">

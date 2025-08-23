@@ -38,6 +38,9 @@
         background-color: #f8f9fc;
         border-radius: .75rem;
     }
+    .btn-sm i {
+        margin-right: 0.25rem;
+    }
 </style>
 @endpush
 
@@ -80,19 +83,20 @@
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $category->name }}</td>
                                     <td class="text-center">
-                                        <span class="badge badge-pill badge-light badge-report-count">{{ $category->reports_count }}</span>
+                                        <span class="badge badge-pill badge-primary badge-report-count">{{ $category->reports_count }} Laporan</span>
                                     </td>
                                     <td class="text-center action-buttons">
-                                        <a href="{{ route('admin.report-category.edit', $category->id) }}" class="btn btn-warning btn-circle btn-sm" title="Edit">
-                                            <i class="fas fa-edit"></i>
+                                        {{-- PERUBAHAN DI SINI --}}
+                                        <a href="{{ route('admin.report-category.edit', $category->id) }}" class="btn btn-warning btn-sm" title="Ubah">
+                                            <i class="fas fa-edit"></i> Ubah
                                         </a>
                                         <form action="{{ route('admin.report-category.destroy', $category->id) }}" method="POST" class="d-inline delete-form">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-circle btn-sm" title="Hapus" 
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Hapus" 
                                                     data-title="Hapus Kategori?" 
                                                     data-text="Anda yakin ingin menghapus kategori {{ $category->name }}?">
-                                                <i class="fas fa-trash"></i>
+                                                <i class="fas fa-trash"></i> Hapus
                                             </button>
                                         </form>
                                     </td>

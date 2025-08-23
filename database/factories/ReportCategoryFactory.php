@@ -10,7 +10,6 @@ class ReportCategoryFactory extends Factory
     {
         return [
             'name' => fake()->sentence(3),
-            'image' => 'assets/category/image/default.png',
         ];
     }
 }

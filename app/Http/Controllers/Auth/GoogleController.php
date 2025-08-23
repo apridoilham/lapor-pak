@@ -6,8 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 use RealRashid\SweetAlert\Facades\Alert as Swal;
 
@@ -25,40 +23,28 @@ class GoogleController extends Controller
     {
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
-
             $user = User::where('email', $googleUser->getEmail())->first();
 
             if ($user) {
-                if (!$user->google_id) {
-                    $user->update(['google_id' => $googleUser->getId()]);
-                }
+                // PERUBAHAN DI SINI: tambahkan 'name' untuk selalu diupdate
+                $user->update([
+                    'name' => $googleUser->getName(),
+                    'google_id' => $googleUser->getId(),
+                    'avatar' => $googleUser->getAvatar(),
+                ]);
             } else {
                 $user = User::create([
                     'name' => $googleUser->getName(),
                     'email' => $googleUser->getEmail(),
                     'google_id' => $googleUser->getId(),
+                    'avatar' => $googleUser->getAvatar(),
                 ]);
 
-                if ($googleUser->getEmail() === 'bsblapor@gmail.com') {
+                if ($googleUser->getEmail() === config('app.super_admin_email', 'bsblapor@gmail.com')) {
                     $user->assignRole('super-admin');
                 } else {
                     $user->assignRole('resident');
-
-                    $avatarPath = null;
-                    try {
-                        $avatarUrl = $googleUser->getAvatar();
-                        if ($avatarUrl) {
-                            $avatarContents = file_get_contents($avatarUrl);
-                            $avatarName = 'assets/avatar/' . Str::random(40) . '.jpg';
-                            Storage::disk('public')->put($avatarName, $avatarContents);
-                            $avatarPath = $avatarName;
-                        }
-                    } catch (\Exception $e) {
-                        $avatarPath = null;
-                    }
-
                     $user->resident()->create([
-                        'avatar'  => $avatarPath,
                         'address' => 'Alamat belum diatur',
                     ]);
                 }
@@ -72,7 +58,6 @@ class GoogleController extends Controller
 
             if ($user->hasRole('resident')) {
                 $resident = $user->resident;
-
                 if (!$resident || !$resident->rt_id || !$resident->rw_id || $resident->address === 'Alamat belum diatur') {
                     Swal::info('Selamat Datang!', 'Silakan lengkapi data RT dan RW Anda terlebih dahulu.');
                     return redirect()->route('profile.edit');

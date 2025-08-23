@@ -18,7 +18,7 @@ class ResidentController extends Controller
             $rts = Rt::where('rw_id', $request->rw_id)->orderBy('number')->get();
         }
 
-        $query = Resident::with(['user', 'rt', 'rw'])->withCount('reports');
+        $query = Resident::complete()->with(['user', 'rt', 'rw'])->withCount('reports');
 
         if ($request->filled('rw_id')) {
             $query->where('rw_id', $request->rw_id);
@@ -34,13 +34,13 @@ class ResidentController extends Controller
                 break;
             case 'nama_asc':
                 $query->join('users', 'residents.user_id', '=', 'users.id')
-                      ->orderBy('users.name', 'asc')
-                      ->select('residents.*');
+                        ->orderBy('users.name', 'asc')
+                        ->select('residents.*');
                 break;
             case 'nama_desc':
                 $query->join('users', 'residents.user_id', '=', 'users.id')
-                      ->orderBy('users.name', 'desc')
-                      ->select('residents.*');
+                        ->orderBy('users.name', 'desc')
+                        ->select('residents.*');
                 break;
             case 'laporan_terbanyak':
                 $query->orderBy('reports_count', 'desc');

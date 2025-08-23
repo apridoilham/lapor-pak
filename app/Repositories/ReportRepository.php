@@ -61,7 +61,7 @@ class ReportRepository implements ReportRepositoryInterface
         if ($search = $request->input('search')) {
             $query->where(function (Builder $q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -95,7 +95,7 @@ class ReportRepository implements ReportRepositoryInterface
         if ($search = $request->input('search')) {
             $query->where(function (Builder $q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -199,22 +199,29 @@ class ReportRepository implements ReportRepositoryInterface
 
     public function getStatusCounts(int $rwId = null): array
     {
-        $query = Report::query()->whereHas('resident');
-        if ($rwId) { $query->whereHas('resident', fn($q) => $q->where('rw_id', $rwId)); }
-        $reports = $query->with('latestStatus')->get();
-        $counts = [
-            ReportStatusEnum::DELIVERED->value => 0, ReportStatusEnum::IN_PROCESS->value => 0,
-            ReportStatusEnum::COMPLETED->value => 0, ReportStatusEnum::REJECTED->value => 0,
-        ];
-        foreach ($reports as $report) {
-            if ($report->latestStatus) {
-                $statusValue = $report->latestStatus->status->value;
-                if (isset($counts[$statusValue])) { $counts[$statusValue]++; }
-            } else {
-                $counts[ReportStatusEnum::DELIVERED->value]++;
-            }
+        $query = Report::query()
+            ->join('report_statuses', 'reports.id', '=', 'report_statuses.report_id')
+            ->whereRaw('report_statuses.id = (SELECT MAX(id) FROM report_statuses WHERE report_id = reports.id)')
+            ->whereHas('resident');
+
+        if ($rwId) {
+            $query->whereHas('resident', fn($q) => $q->where('rw_id', $rwId));
         }
-        return $counts;
+
+        $statusCounts = $query->select('report_statuses.status', DB::raw('count(*) as count'))
+            ->groupBy('report_statuses.status')
+            ->get()
+            ->pluck('count', 'status')
+            ->toArray();
+
+        $allStatuses = [
+            ReportStatusEnum::DELIVERED->value => 0,
+            ReportStatusEnum::IN_PROCESS->value => 0,
+            ReportStatusEnum::COMPLETED->value => 0,
+            ReportStatusEnum::REJECTED->value => 0,
+        ];
+
+        return array_merge($allStatuses, $statusCounts);
     }
 
     public function getReportCountsByRt(int $rwId): EloquentCollection

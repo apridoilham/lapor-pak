@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Hash;
 
 class UpdateAdminProfileRequest extends FormRequest
 {
@@ -16,16 +15,7 @@ class UpdateAdminProfileRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'current_password' => [
-                'nullable',
-                'required_with:password',
-                function ($attribute, $value, $fail) {
-                    if ($this->filled('current_password') && !Hash::check($value, $this->user()->password)) {
-                        $fail('Password lama yang Anda masukkan salah.');
-                    }
-                },
-            ],
-            'password' => 'nullable|min:8|confirmed',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Tambahkan validasi avatar
         ];
     }
 }

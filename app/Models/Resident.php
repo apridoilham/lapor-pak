@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -37,5 +38,12 @@ class Resident extends Model
     public function rw(): BelongsTo
     {
         return $this->belongsTo(Rw::class);
+    }
+
+    public function scopeComplete(Builder $query): void
+    {
+        $query->whereNotNull('rt_id')
+              ->whereNotNull('rw_id')
+              ->where('address', '!=', 'Alamat belum diatur');
     }
 }

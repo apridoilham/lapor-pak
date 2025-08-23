@@ -4,19 +4,23 @@
 
 @push('styles')
 <style>
-    .kpi-card {
+    .stat-card-dashboard {
+        border: 1px solid #e3e6f0;
         border-radius: .75rem;
+        padding: 1.25rem;
         transition: all 0.3s ease;
-        border: 1px solid var(--card-border);
+        border-bottom-width: 4px;
     }
-    .kpi-card:hover {
+    .stat-card-dashboard:hover {
         transform: translateY(-5px);
         box-shadow: 0 1rem 3rem rgba(0,0,0,.075)!important;
     }
-    .kpi-card .card-body {
-        padding: 1.5rem;
-    }
-    .kpi-card .kpi-icon-container {
+    .stat-card-dashboard.border-bottom-primary { border-bottom-color: #4e73df; }
+    .stat-card-dashboard.border-bottom-warning { border-bottom-color: #f6c23e; }
+    .stat-card-dashboard.border-bottom-success { border-bottom-color: #1cc88a; }
+    .stat-card-dashboard.border-bottom-info { border-bottom-color: #36b9cc; }
+
+    .stat-card-dashboard .stat-icon {
         width: 50px;
         height: 50px;
         border-radius: 50%;
@@ -24,12 +28,19 @@
         align-items: center;
         justify-content: center;
         font-size: 1.5rem;
-        color: white;
+        color: #fff;
+        flex-shrink: 0;
     }
-    .kpi-card .kpi-value {
+    .stat-card-dashboard .stat-value {
         font-size: 2rem;
         font-weight: 700;
-        color: var(--text-heading);
+        color: #343a40;
+    }
+    .stat-card-dashboard .stat-label {
+        font-size: 0.85rem;
+        color: #858796;
+        text-transform: uppercase;
+        font-weight: 500;
     }
 </style>
 @endpush
@@ -44,45 +55,45 @@
 
     <div class="row">
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card kpi-card shadow-sm h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="kpi-icon-container bg-primary mr-3"><i class="fas fa-file-alt"></i></div>
+            <div class="card stat-card-dashboard h-100 shadow-sm border-bottom-primary">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-primary mr-3"><i class="fas fa-file-alt"></i></div>
                     <div>
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Laporan</div>
-                        <div class="kpi-value mb-0">{{ $totalReports }}</div>
+                        <div class="stat-value">{{ $totalReports }}</div>
+                        <div class="stat-label">Total Laporan</div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card kpi-card shadow-sm h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="kpi-icon-container bg-warning mr-3"><i class="fas fa-cogs"></i></div>
+            <div class="card stat-card-dashboard h-100 shadow-sm border-bottom-warning">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-warning mr-3"><i class="fas fa-cogs"></i></div>
                     <div>
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Laporan Diproses</div>
-                        <div class="kpi-value mb-0">{{ $inProcessCount }}</div>
+                        <div class="stat-value">{{ $inProcessCount }}</div>
+                        <div class="stat-label">Laporan Diproses</div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card kpi-card shadow-sm h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="kpi-icon-container bg-success mr-3"><i class="fas fa-check-circle"></i></div>
+            <div class="card stat-card-dashboard h-100 shadow-sm border-bottom-success">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-success mr-3"><i class="fas fa-check-circle"></i></div>
                     <div>
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Laporan Selesai</div>
-                        <div class="kpi-value mb-0">{{ $completedCount }}</div>
+                        <div class="stat-value">{{ $completedCount }}</div>
+                        <div class="stat-label">Laporan Selesai</div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card kpi-card shadow-sm h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="kpi-icon-container bg-info mr-3"><i class="fas fa-users"></i></div>
+            <div class="card stat-card-dashboard h-100 shadow-sm border-bottom-info">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-info mr-3"><i class="fas fa-users"></i></div>
                     <div>
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Total Pelapor</div>
-                        <div class="kpi-value mb-0">{{ $totalResidents }}</div>
+                        <div class="stat-value">{{ $totalResidents }}</div>
+                        <div class="stat-label">Total Pelapor</div>
                     </div>
                 </div>
             </div>

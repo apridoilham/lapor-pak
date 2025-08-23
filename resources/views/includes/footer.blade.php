@@ -1,7 +1,7 @@
 <footer class="sticky-footer bg-white">
     <div class="container my-auto">
         <div class="copyright text-center my-auto">
-            <span>Hak Cipta &copy; BSB Lapor {{ date('Y') }}</span>
+            <span>Hak Cipta &copy; KKN Depok 31 - UIN Jakarta 2025</span>
         </div>
     </div>
 </footer>
