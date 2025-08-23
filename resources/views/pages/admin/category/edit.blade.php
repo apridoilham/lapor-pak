@@ -1,102 +1,48 @@
 @extends('layouts.admin')
 
-@section('title', 'Edit Data Kategori')
+@section('title', 'Edit Kategori')
 
 @section('content')
-    <a href="{{ route('admin.report-category.index') }}" class="btn btn-danger mb-3">Kembali</a>
-
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Edit Data</h6>
-        </div>
-        <div class="card-body">
-            <form action="{{ route('admin.report-category.update', $category->id)}}" method="POST" enctype="multipart/form-data" id="edit-category-form">
-                @csrf
-                @method('PUT')
-                <div class="form-group">
-                    <label for="name">Nama</label>
-                    <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $category->name) }}" required>
-                    <div class="invalid-feedback" id="name-error">Nama kategori ini sudah ada.</div>
-                    @error('name')
-                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                    @enderror
-                </div>
-                <div class="form-group">
-                    <label>Gambar / Ikon Lama</label>
-                    <img src="{{ asset('storage/' . $category->image) }}" alt="image" width="100" class="d-block">
-                </div>
-                <div class="form-group">
-                    <label for="image">Gambar / Ikon Baru (Opsional)</label>
-                    <input type="file" class="form-control @error('image') is-invalid @enderror" id="image" name="image">
-                    @error('image')
-                        <div class="invalid-feedback">
-                            {{ $message }}
-                        </div>
-                    @enderror
-                </div>
-                <button type="submit" class="btn btn-primary" id="update-btn" disabled>Simpan Perubahan</button>
-            </form>
+    <div class="d-flex align-items-center mb-4">
+        <a href="{{ route('admin.report-category.index') }}" class="btn btn-outline-primary btn-circle mr-3">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Edit Kategori</h1>
+            <p class="mb-0 text-muted">Ubah nama kategori yang sudah ada.</p>
         </div>
     </div>
-@endsection
 
-@section('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const form = document.getElementById('edit-category-form');
-        const updateButton = document.getElementById('update-btn');
-        const nameInput = document.getElementById('name');
-        const imageInput = document.getElementById('image');
-        const nameError = document.getElementById('name-error');
-        
-        const initialName = nameInput.value;
-
-        function checkForChanges() {
-            const nameChanged = nameInput.value !== initialName;
-            const imageSelected = imageInput.files.length > 0;
-            const isNameInvalid = nameInput.classList.contains('is-invalid');
-
-            updateButton.disabled = (!nameChanged && !imageSelected) || isNameInvalid;
-        }
-
-        nameInput.addEventListener('input', checkForChanges);
-        imageInput.addEventListener('change', checkForChanges);
-
-        let debounceTimer;
-        nameInput.addEventListener('input', function() {
-            if (nameInput.value === initialName) {
-                nameInput.classList.remove('is-invalid');
-                nameError.classList.remove('d-block');
-                checkForChanges();
-                return;
-            }
-
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(function() {
-                const name = nameInput.value;
-                if (name.length > 2) {
-                    fetch('/api/check-report-category', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({ name: name })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.is_taken) {
-                            nameInput.classList.add('is-invalid');
-                            nameError.classList.add('d-block');
-                        } else {
-                            nameInput.classList.remove('is-invalid');
-                            nameError.classList.remove('d-block');
-                        }
-                        checkForChanges();
-                    });
-                }
-            }, 500);
-        });
-    });
-</script>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex align-items-center">
+                    <i class="fas fa-edit fa-fw text-primary mr-2"></i>
+                    <h6 class="m-0 font-weight-bold text-primary">Formulir Edit Kategori</h6>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('admin.report-category.update', $category->id)}}" method="POST" class="p-3">
+                        @csrf
+                        @method('PUT')
+                        <div class="form-group row">
+                            <label for="name" class="col-sm-3 col-form-label font-weight-bold">Nama Kategori</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control form-control-lg @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $category->name) }}" required>
+                                @error('name')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <hr class="my-4">
+                        <div class="d-flex justify-content-end">
+                            <a href="{{ route('admin.report-category.index') }}" class="btn btn-secondary mr-2">Batal</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save mr-1"></i> Simpan Perubahan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection

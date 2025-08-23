@@ -1,50 +1,133 @@
 @extends('layouts.admin')
 
-@section('title', 'Data Kategori')
+@section('title', 'Data Kategori Laporan')
+
+@push('styles')
+<style>
+    /* Penjelasan: CSS diperbarui untuk tampilan tabel yang lebih modern dan bersih */
+    .table thead th {
+        font-weight: 600;
+        color: #5a5c69;
+        background-color: #f8f9fc;
+        border-bottom-width: 2px;
+        border-top: none;
+    }
+    .table td, .table th {
+        vertical-align: middle;
+        padding: 1.25rem;
+    }
+    .table tbody tr {
+        border-bottom: 1px solid #e3e6f0;
+    }
+    .table tbody tr:last-child {
+        border-bottom: none;
+    }
+    .action-buttons a, .action-buttons button {
+        margin: 0 2px;
+    }
+    .badge-report-count {
+        font-size: 0.9em;
+        font-weight: 600;
+        padding: .5em .8em;
+    }
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem;
+        background-color: #f8f9fc;
+        border-radius: .75rem;
+    }
+</style>
+@endpush
 
 @section('content')
-    <a href="{{ route('admin.report-category.create') }}" class="btn btn-primary mb-3">Tambah Kategori Laporan</a>
-
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Manajemen Kategori</h1>
+        <a href="{{ route('admin.report-category.create') }}" class="btn btn-primary shadow-sm">
+            <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Kategori Baru
+        </a>
+    </div>
 
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">Daftar Kategori Laporan</h6>
         </div>
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Nama</th>
-                            <th>Logo</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($categories as $category)
+            @if($categories->isEmpty())
+                <div class="empty-state">
+                    <i class="fas fa-tags fa-4x text-gray-300 mb-3"></i>
+                    <h5 class="font-weight-bold">Belum Ada Kategori</h5>
+                    <p class="text-muted">Silakan tambahkan kategori laporan pertama Anda.</p>
+                    <a href="{{ route('admin.report-category.create') }}" class="btn btn-primary mt-2">
+                        <i class="fas fa-plus mr-1"></i> Buat Kategori Baru
+                    </a>
+                </div>
+            @else
+                <div class="table-responsive">
+                    <table class="table table-hover" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
                             <tr>
-                                <td>{{ $loop->iteration }}</td>
-                                <td>{{ $category->name }}</td>
-                                <td>
-                                    <img src="{{ asset('storage/' . $category->image) }}" alt="image" width="100">
-                                </td>
-                                <td>
-                                    <a href="{{ route('admin.report-category.edit', $category->id) }}" class="btn btn-warning">Ubah</a>
-
-                                    <a href="{{ route('admin.report-category.show', $category->id) }}" class="btn btn-info">Lihat</a>
-
-                                    <form action="{{ route('admin.report-category.destroy', $category->id) }}" method="POST" class="d-inline delete-form">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger" data-title="Hapus Kategori?" data-text="Anda yakin ingin menghapus kategori {{ $category->name }}?">Hapus</button>
-                                    </form>
-                                </td>
+                                <th>No</th>
+                                <th>Nama Kategori</th>
+                                <th class="text-center">Jumlah Laporan</th>
+                                <th class="text-center">Aksi</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            @foreach ($categories as $category)
+                                <tr>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $category->name }}</td>
+                                    <td class="text-center">
+                                        <span class="badge badge-pill badge-light badge-report-count">{{ $category->reports_count }}</span>
+                                    </td>
+                                    <td class="text-center action-buttons">
+                                        <a href="{{ route('admin.report-category.edit', $category->id) }}" class="btn btn-warning btn-circle btn-sm" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form action="{{ route('admin.report-category.destroy', $category->id) }}" method="POST" class="d-inline delete-form">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-circle btn-sm" title="Hapus" 
+                                                    data-title="Hapus Kategori?" 
+                                                    data-text="Anda yakin ingin menghapus kategori {{ $category->name }}?">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.querySelectorAll('.delete-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const button = this.querySelector('button[type="submit"]');
+            Swal.fire({
+                title: button.dataset.title || 'Anda yakin?',
+                text: button.dataset.text || 'Tindakan ini tidak dapat dibatalkan!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e74a3b',
+                cancelButtonColor: '#858796',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.submit();
+                }
+            });
+        });
+    });
+</script>
+@endpush

@@ -1,100 +1,48 @@
 @extends('layouts.admin')
 
-@section('title', 'Tambah Data Kategori')
+@section('title', 'Tambah Kategori Baru')
 
 @section('content')
-    <a href="{{ route('admin.report-category.index') }}" class="btn btn-danger mb-3">Kembali</a>
-
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Tambah Data</h6>
-        </div>
-        <div class="card-body">
-            <form action="{{ route('admin.report-category.store')}}" method="POST" enctype="multipart/form-data" id="create-category-form">
-                @csrf
-                <div class="form-group">
-                    <label for="name">Nama</label>
-                    <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" required>
-                    <div class="invalid-feedback" id="name-error">Nama kategori ini sudah ada.</div>
-                    @error('name')
-                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                    @enderror
-                </div>
-                <div class="form-group">
-                    <label for="image">Gambar / Ikon</label>
-                    <input type="file" class="form-control @error('image') is-invalid @enderror" id="image" name="image" required>
-                    @error('image')
-                        <div class="invalid-feedback">
-                            {{ $message }}
-                        </div>
-                    @enderror
-                </div>
-                <button type="submit" class="btn btn-primary" id="submit-btn" disabled>Submit</button>
-            </form>
+    <div class="d-flex align-items-center mb-4">
+        <a href="{{ route('admin.report-category.index') }}" class="btn btn-outline-primary btn-circle mr-3">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Tambah Kategori Baru</h1>
+            <p class="mb-0 text-muted">Buat kategori baru untuk laporan warga.</p>
         </div>
     </div>
-@endsection
 
-@section('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('create-category-form');
-        const submitButton = document.getElementById('submit-btn');
-        const requiredInputs = form.querySelectorAll('[required]');
-        const nameInput = document.getElementById('name');
-        const nameError = document.getElementById('name-error');
-
-        function checkFormValidity() {
-            let allFieldsFilled = true;
-            requiredInputs.forEach(input => {
-                if (input.type === 'file') {
-                    if (input.files.length === 0) {
-                        allFieldsFilled = false;
-                    }
-                } else if (input.value.trim() === '') {
-                    allFieldsFilled = false;
-                }
-            });
-            
-            const isNameInvalid = nameInput.classList.contains('is-invalid');
-            submitButton.disabled = !allFieldsFilled || isNameInvalid;
-        }
-
-        requiredInputs.forEach(input => {
-            input.addEventListener('input', checkFormValidity);
-            input.addEventListener('change', checkFormValidity);
-        });
-
-        let debounceTimer;
-        nameInput.addEventListener('input', function() {
-            checkFormValidity();
-            clearTimeout(debounceTimer);
-
-            nameInput.classList.remove('is-invalid');
-            nameError.classList.remove('d-block');
-
-            debounceTimer = setTimeout(function() {
-                const name = nameInput.value;
-                if (name.length > 2) {
-                    fetch('/api/check-report-category', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({ name: name })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.is_taken) {
-                            nameInput.classList.add('is-invalid');
-                            nameError.classList.add('d-block');
-                        }
-                        checkFormValidity();
-                    });
-                }
-            }, 500);
-        });
-    });
-</script>
+    <!-- Penjelasan: Menggunakan col-lg-12 untuk efek full-screen di layar besar -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex align-items-center">
+                    <i class="fas fa-plus-circle fa-fw text-primary mr-2"></i>
+                    <h6 class="m-0 font-weight-bold text-primary">Formulir Kategori</h6>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('admin.report-category.store')}}" method="POST" class="p-3">
+                        @csrf
+                        <div class="form-group row">
+                            <label for="name" class="col-sm-3 col-form-label font-weight-bold">Nama Kategori</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control form-control-lg @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" required placeholder="Contoh: Fasilitas Umum Rusak">
+                                @error('name')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <hr class="my-4">
+                        <div class="d-flex justify-content-end">
+                            <a href="{{ route('admin.report-category.index') }}" class="btn btn-secondary mr-2">Batal</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save mr-1"></i> Simpan Kategori
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
