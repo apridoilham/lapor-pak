@@ -115,11 +115,12 @@
     <div class="neumorphic-card">
         <div class="profile-info-main">
             @php
-                $avatarUrl = $resident->avatar;
-                if ($avatarUrl && !Str::startsWith($avatarUrl, 'http')) {
+                // PERBAIKAN DI SINI: Menggunakan logika avatar yang sudah disempurnakan
+                $avatarUrl = Auth::user()->avatar ?? optional(Auth::user()->resident)->avatar;
+                if ($avatarUrl && !filter_var($avatarUrl, FILTER_VALIDATE_URL)) {
                     $avatarUrl = asset('storage/' . $avatarUrl);
-                } elseif (!$avatarUrl) {
-                    $avatarUrl = asset('assets/app/images/default-avatar.png');
+                } elseif (empty($avatarUrl)) {
+                    $avatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=10B981&color=fff&size=128';
                 }
             @endphp
             <img src="{{ $avatarUrl }}" alt="avatar" class="avatar">

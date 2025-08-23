@@ -8,21 +8,13 @@
         font-weight: 600;
         color: #5a5c69;
         background-color: #f8f9fc;
-        border-bottom-width: 2px;
-        border-top: none;
+        border-bottom-width: 1px;
     }
     .table td, .table th {
         vertical-align: middle;
-        padding: 1.25rem;
     }
-    .table tbody tr {
-        border-bottom: 1px solid #e3e6f0;
-    }
-    .table tbody tr:last-child {
-        border-bottom: none;
-    }
-    .action-buttons a, .action-buttons button {
-        margin: 0 2px;
+    .table tbody tr:hover {
+        background-color: #f8f9fc;
     }
     .badge-report-count {
         font-size: 0.9em;
@@ -38,15 +30,15 @@
         background-color: #f8f9fc;
         border-radius: .75rem;
     }
-    .btn-sm i {
-        margin-right: 0.25rem;
-    }
 </style>
 @endpush
 
 @section('content')
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Manajemen Kategori</h1>
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Manajemen Kategori</h1>
+            <p class="mb-0 text-muted">Buat, ubah, atau hapus kategori untuk pelaporan warga.</p>
+        </div>
         <a href="{{ route('admin.report-category.create') }}" class="btn btn-primary shadow-sm">
             <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Kategori Baru
         </a>
@@ -68,7 +60,7 @@
                 </div>
             @else
                 <div class="table-responsive">
-                    <table class="table table-hover" id="dataTable" width="100%" cellspacing="0">
+                    <table class="table" width="100%" cellspacing="0">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -85,18 +77,17 @@
                                     <td class="text-center">
                                         <span class="badge badge-pill badge-primary badge-report-count">{{ $category->reports_count }} Laporan</span>
                                     </td>
-                                    <td class="text-center action-buttons">
-                                        {{-- PERUBAHAN DI SINI --}}
-                                        <a href="{{ route('admin.report-category.edit', $category->id) }}" class="btn btn-warning btn-sm" title="Ubah">
-                                            <i class="fas fa-edit"></i> Ubah
+                                    <td class="text-center">
+                                        <a href="{{ route('admin.report-category.edit', $category->id) }}" class="btn btn-sm btn-outline-warning" title="Ubah">
+                                            <i class="fas fa-edit fa-sm mr-1"></i> Ubah
                                         </a>
                                         <form action="{{ route('admin.report-category.destroy', $category->id) }}" method="POST" class="d-inline delete-form">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm" title="Hapus" 
+                                            <button type="submit" class="btn btn-sm btn-outline-danger ml-1" title="Hapus" 
                                                     data-title="Hapus Kategori?" 
                                                     data-text="Anda yakin ingin menghapus kategori {{ $category->name }}?">
-                                                <i class="fas fa-trash"></i> Hapus
+                                                <i class="fas fa-trash fa-sm mr-1"></i> Hapus
                                             </button>
                                         </form>
                                     </td>

@@ -38,7 +38,7 @@
     .form-control, .form-select { border-radius: 12px; border: 1px solid var(--border-color); background-color: #F9FAFB; padding: 0.8rem 1rem; transition: all 0.2s ease; width: 100%; }
     .form-control:focus, .form-select:focus { background-color: var(--bg-white); border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); outline: none; }
     .form-control:disabled { background-color: #e9ecef; }
-    #map { height: 200px; border-radius: 12px; }
+    #map { height: 200px; border-radius: 12px; z-index: 1; }
     .location-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
     .btn-detect-location { border: 1px solid var(--border-color); font-size: 0.8rem; font-weight: 600; }
     .action-buttons-container { display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; margin-top: 2rem; }
@@ -46,21 +46,15 @@
     .action-buttons-container .btn-cancel { background-color: #e5e7eb; color: var(--text-light); text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
     .action-buttons-container .btn-save { background: var(--primary-gradient); color: white; box-shadow: 0 8px 20px -5px rgba(16, 185, 129, 0.5); }
     .action-buttons-container .btn-save:disabled { background: #d1d5db; box-shadow: none; cursor: not-allowed; }
-    .leaflet-pane, .leaflet-control, .leaflet-top, .leaflet-bottom {
-        z-index: 1 !important;
-    }
-    .leaflet-tooltip {
-        z-index: 10 !important;
-    }
 </style>
 @endpush
 
 @section('content')
     @php
         $isProfileIncomplete = !$user->resident->rw_id 
-                            || !$user->resident->rt_id 
-                            || $user->resident->address === 'Alamat belum diatur'
-                            || !$user->resident->phone;
+                               || !$user->resident->rt_id 
+                               || $user->resident->address === 'Alamat belum diatur'
+                               || !$user->resident->phone;
 
         $originalDataForJs = [
             'name' => $user->name,
@@ -91,9 +85,12 @@
 
         <div class="avatar-upload-container">
             @php
-                $avatarUrl = $user->resident->avatar;
-                if ($avatarUrl && !Str::startsWith($avatarUrl, 'http')) { $avatarUrl = asset('storage/' . $avatarUrl); } 
-                elseif (!$avatarUrl) { $avatarUrl = asset('assets/app/images/default-avatar.png'); }
+                $avatarUrl = !empty(Auth::user()->avatar) ? Auth::user()->avatar : optional(Auth::user()->resident)->avatar;
+                if ($avatarUrl && !filter_var($avatarUrl, FILTER_VALIDATE_URL)) {
+                    $avatarUrl = asset('storage/' . $avatarUrl);
+                } elseif (empty($avatarUrl)) {
+                    $avatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=10B981&color=fff&size=128';
+                }
             @endphp
             <img src="{{ $avatarUrl }}" alt="avatar" class="avatar-preview" id="avatar-preview">
             <label for="avatar-input" class="avatar-edit-button"><i class="fa-solid fa-camera"></i></label>
@@ -112,7 +109,7 @@
             <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
                 <input type="email" class="form-control" id="email" value="{{ $user->email }}" readonly disabled>
-                <small class="form-text text-muted">Email tidak dapat diubah karena terhubung dengan akun Google.</small>
+                <small class="form-text text-muted">Email tidak dapat diubah.</small>
             </div>
 
             <div class="mb-3">
@@ -187,14 +184,16 @@
             const saveButton = document.getElementById('save-btn');
             const isProfileIncomplete = {{ $isProfileIncomplete ? 'true' : 'false' }};
             const originalData = @json($originalDataForJs);
+            
             const normalize = (value) => (value || '').toString().trim();
+
             const checkFormForChanges = () => {
                 let hasChanged = false;
                 if (normalize(form.elements['name'].value) !== normalize(originalData.name)) hasChanged = true;
                 if (normalize(form.elements['phone'].value) !== normalize(originalData.phone)) hasChanged = true;
-                if (normalize(form.elements['rw_id'].value) !== normalize(originalData.rw_id)) hasChanged = true;
-                if (normalize(form.elements['rt_id'].value) !== normalize(originalData.rt_id)) hasChanged = true;
-                if (normalize(form.elements['address'].value) !== normalize(originalData.address)) hasChanged = true;
+                if (form.elements['rw_id'] && normalize(form.elements['rw_id'].value) !== normalize(originalData.rw_id)) hasChanged = true;
+                if (form.elements['rt_id'] && normalize(form.elements['rt_id'].value) !== normalize(originalData.rt_id)) hasChanged = true;
+                if (form.elements['address'] && normalize(form.elements['address'].value) !== normalize(originalData.address)) hasChanged = true;
                 if (document.getElementById('avatar-input').files.length > 0) hasChanged = true;
                 
                 saveButton.disabled = !hasChanged;
@@ -316,4 +315,5 @@
             }
         });
     </script>
+
 @endsection

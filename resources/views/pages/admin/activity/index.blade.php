@@ -63,7 +63,7 @@
     <div class="card shadow-sm border-0 card-activity-log mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">
-                <i class="fas fa-history mr-2"></i>Riwayat Aktivitas Login Admin
+                <i class="fas fa-history mr-2"></i>Riwayat Aktivitas Login
             </h6>
         </div>
         <div class="card-body">
@@ -71,9 +71,7 @@
                 <table class="table" width="100%" cellspacing="0">
                     <thead>
                         <tr>
-                            @role('super-admin')
-                                <th>Pengguna</th>
-                            @endrole
+                            <th>Pengguna</th>
                             <th>Alamat IP</th>
                             <th>Perangkat (User Agent)</th>
                             <th class="text-right">Waktu Login</th>
@@ -82,18 +80,23 @@
                     <tbody>
                         @forelse ($activities as $activity)
                             <tr>
-                                @role('super-admin')
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img class="img-profile rounded-circle avatar-in-table mr-3"
-                                                 src="{{ optional($activity->user)->avatar ? optional($activity->user)->avatar : 'https://ui-avatars.com/api/?name=' . urlencode(optional($activity->user)->name ?? 'N/A') . '&background=1a202c&color=fff&size=60' }}">
-                                            <div class="user-info">
-                                                <div class="font-weight-bold">{{ optional($activity->user)->name ?? 'Pengguna Dihapus' }}</div>
-                                                <div class="small">{{ optional($activity->user)->email ?? '-' }}</div>
-                                            </div>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        @php
+                                            $logAvatar = optional($activity->user)->avatar;
+                                            if ($logAvatar && !filter_var($logAvatar, FILTER_VALIDATE_URL)) {
+                                                $logAvatar = asset('storage/' . $logAvatar);
+                                            } elseif (empty($logAvatar)) {
+                                                $logAvatar = 'https://ui-avatars.com/api/?name=' . urlencode(optional($activity->user)->name ?? 'N/A') . '&background=1a202c&color=fff&size=60';
+                                            }
+                                        @endphp
+                                        <img class="img-profile rounded-circle avatar-in-table mr-3" src="{{ $logAvatar }}">
+                                        <div class="user-info">
+                                            <div class="font-weight-bold">{{ optional($activity->user)->name ?? 'Pengguna Dihapus' }}</div>
+                                            <div class="small">{{ optional($activity->user)->email ?? '-' }}</div>
                                         </div>
-                                    </td>
-                                @endrole
+                                    </div>
+                                </td>
                                 <td>
                                     <span class="badge badge-secondary badge-ip">{{ $activity->ip_address }}</span>
                                 </td>
@@ -107,7 +110,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="{{ auth()->user()->hasRole('super-admin') ? '4' : '3' }}" class="text-center py-5">
+                                <td colspan="4" class="text-center py-5">
                                     <i class="fas fa-history fa-3x text-gray-300 mb-3"></i>
                                     <p class="text-muted">Belum ada aktivitas login yang tercatat.</p>
                                 </td>

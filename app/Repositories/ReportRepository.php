@@ -92,6 +92,13 @@ class ReportRepository implements ReportRepositoryInterface
         $query = Report::with('resident.user', 'reportCategory', 'latestStatus');
         $this->applyVisibilityFilter($query);
         
+        // PERBAIKAN DI SINI: Menambahkan filter kategori yang hilang
+        if ($categoryName = $request->input('category')) {
+            $query->whereHas('reportCategory', function (Builder $q) use ($categoryName) {
+                $q->where('name', 'like', '%' . $categoryName . '%');
+            });
+        }
+
         if ($search = $request->input('search')) {
             $query->where(function (Builder $q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
@@ -109,6 +116,8 @@ class ReportRepository implements ReportRepositoryInterface
         elseif ($rwId) { $query->whereHas('resident', fn($q) => $q->where('rw_id', $rwId)); }
         return $query->latest()->get();
     }
+
+    // ... (sisa method tidak perlu diubah) ...
 
     public function getLatestReportsForAdmin(?int $rwId = null, int $limit = 5): EloquentCollection
     {

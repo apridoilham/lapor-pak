@@ -9,14 +9,16 @@
     .table td, .table th { vertical-align: middle; }
     .table tbody tr:hover { background-color: #f8f9fc; }
     .avatar-in-table { width: 40px; height: 40px; object-fit: cover; }
-    .action-buttons a, .action-buttons button { margin: 0 2px; }
     .badge-report-count { font-size: 0.9em; padding: .5em .8em; }
 </style>
 @endpush
 
 @section('content')
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Data Pelapor (Warga)</h1>
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Data Pelapor (Warga)</h1>
+            <p class="mb-0 text-muted">Lihat dan kelola semua data warga yang terdaftar sebagai pelapor.</p>
+        </div>
     </div>
 
     <div class="card shadow mb-4">
@@ -71,7 +73,7 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-hover" id="dataTable" width="100%" cellspacing="0">
+                <table class="table" width="100%" cellspacing="0">
                     <thead>
                         <tr>
                             <th>Pelapor</th>
@@ -86,7 +88,12 @@
                                 <td>
                                     <div class="d-flex align-items-center">
                                         @php
-                                            $avatarUrl = optional($resident)->avatar ? asset('storage/' . $resident->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode(optional($resident->user)->name) . '&background=1a202c&color=fff&size=60';
+                                            $avatarUrl = optional($resident->user)->avatar ?? $resident->avatar;
+                                            if ($avatarUrl && !filter_var($avatarUrl, FILTER_VALIDATE_URL)) {
+                                                $avatarUrl = asset('storage/' . $avatarUrl);
+                                            } elseif (empty($avatarUrl)) {
+                                                $avatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode(optional($resident->user)->name) . '&background=1a202c&color=fff&size=60';
+                                            }
                                         @endphp
                                         <img class="img-profile rounded-circle avatar-in-table mr-3" src="{{ $avatarUrl }}">
                                         <div>
@@ -99,8 +106,8 @@
                                 <td class="text-center">
                                     <span class="badge badge-pill badge-primary badge-report-count">{{ $resident->reports_count }} Laporan</span>
                                 </td>
-                                <td class="text-center action-buttons">
-                                    <a href="{{ route('admin.resident.show', $resident->id) }}" class="btn btn-info btn-sm">
+                                <td class="text-center">
+                                    <a href="{{ route('admin.resident.show', $resident->id) }}" class="btn btn-sm btn-outline-info">
                                         <i class="fas fa-eye fa-sm mr-1"></i> Detail
                                     </a>
                                 </td>

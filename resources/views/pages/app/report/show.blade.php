@@ -41,6 +41,8 @@
     .icon-status { background-color: #F0FDF4; color: #10B981; } .icon-category { background-color: #EFF6FF; color: #3B82F6; } .icon-reporter { background-color: #FEF3C7; color: #D97706; } .icon-date { background-color: #F3E8FF; color: #9333EA; }
     .section { margin-bottom: 2.5rem; }
     .section-title { font-weight: 700; font-size: 1.25rem; color: var(--text-dark); margin-bottom: 1rem; }
+    .report-description-text { color: var(--text-light); line-height: 1.7; font-size: 0.95rem; white-space: pre-wrap; }
+    
     .timeline-block { background: var(--bg-white); border: 1px solid var(--border-color); border-radius: 18px; margin-bottom: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.04); overflow: hidden; }
     .timeline-header { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); }
     .timeline-header h6 { margin: 0; font-weight: 600; font-size: 0.95rem; }
@@ -48,14 +50,7 @@
     .timeline-body { padding: 1rem; }
     .timeline-body .description { font-size: 0.9rem; color: var(--text-light); line-height: 1.6; margin-bottom: 1rem; }
     .timeline-body .date { font-size: 0.8rem; font-weight: 500; color: var(--text-light); text-align: right; }
-    
-    .avatar-placeholder {
-        width: 40px; height: 40px; border-radius: 50%;
-        background-color: var(--border-color);
-        display: flex; align-items: center; justify-content: center;
-        color: var(--text-light);
-        flex-shrink: 0;
-    }
+    .avatar-placeholder { width: 40px; height: 40px; border-radius: 50%; background-color: var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--text-light); flex-shrink: 0; }
     .comment-form-container { display: flex; align-items: flex-start; gap: 0.75rem; margin-top: 1.5rem; }
     .comment-form-container .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
     .comment-form-container .input-wrapper { flex-grow: 1; position: relative; }
@@ -76,6 +71,10 @@
     .comment-bubble .comment-time { font-size: 0.75rem; margin-top: 0.5rem; }
     .comment-item.is-other .comment-meta { color: var(--text-light); }
     .comment-item.is-owner .comment-meta { text-align: right; color: white; opacity: 0.7; }
+    .lightbox-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; backdrop-filter: blur(5px); }
+    .lightbox-overlay.show { opacity: 1; visibility: visible; }
+    .lightbox-content img { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 8px; }
+    .lightbox-close-btn { position: absolute; top: 20px; right: 30px; color: white; font-size: 2.5rem; border: none; background: transparent; cursor: pointer; }
 </style>
 @endpush
 
@@ -84,6 +83,9 @@
         <div class="hero-container">
             <div class="hero-overlay-header">
                 <a href="{{ request()->query('_ref', route('home')) }}" class="overlay-button"><i class="fa-solid fa-arrow-left"></i></a>
+                <button class="overlay-button" id="view-image-btn" title="Lihat Gambar Penuh">
+                    <i class="fa-solid fa-expand"></i>
+                </button>
             </div>
             <img src="{{ asset('storage/' . $report->image) }}" alt="{{ $report->title }}" class="hero-image">
             <div class="hero-gradient-overlay"></div>
@@ -91,7 +93,6 @@
         <div class="content-container">
             <h1 class="report-title">{{ $report->title }}</h1>
             <div class="info-grid">
-                <!-- PENJELASAN: Ikon ditambahkan kembali ke setiap info-card -->
                 <div class="info-card">
                     <div class="info-icon icon-status"><i class="fa-solid fa-flag"></i></div>
                     <p class="info-label">Status</p>
@@ -114,6 +115,11 @@
                 </div>
             </div>
             
+            <div class="section">
+                <h5 class="section-title">Detail Laporan</h5>
+                <p class="report-description-text">{{ $report->description }}</p>
+            </div>
+
             <div class="section" id="riwayat-perkembangan">
                 <h5 class="section-title">Riwayat Perkembangan</h5>
                 <div class="timeline">
@@ -137,31 +143,39 @@
             @if ($report->visibility !== \App\Enums\ReportVisibilityEnum::PRIVATE)
                 <div class="section" id="komentar">
                     <h5 class="section-title">Diskusi & Komentar (<span id="comment-count">{{ $report->comments->count() }}</span>)</h5>
-
                     @can('create', [\App\Models\Comment::class, $report])
                         <form action="{{ route('report.comments.store', $report) }}" method="POST" class="comment-form-container" id="comment-form">
                             @csrf
-                            <img src="{{ Auth::user()->resident->avatar ? asset('storage/' . Auth::user()->resident->avatar) : asset('assets/app/images/default-avatar.png') }}" alt="avatar" class="avatar">
+                            @php
+                                $currentUserAvatar = Auth::user()->avatar ?? optional(Auth::user()->resident)->avatar;
+                                if ($currentUserAvatar && !filter_var($currentUserAvatar, FILTER_VALIDATE_URL)) {
+                                    $currentUserAvatar = asset('storage/' . $currentUserAvatar);
+                                } elseif (!$currentUserAvatar) {
+                                    $currentUserAvatar = 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=10B981&color=fff';
+                                }
+                            @endphp
+                            <img src="{{ $currentUserAvatar }}" alt="avatar" class="avatar">
                             <div class="input-wrapper">
                                 <textarea name="body" id="comment-body" class="form-control" rows="1" placeholder="Tulis komentar..." required></textarea>
                                 <button type="submit" class="btn-send-comment" id="comment-send-btn"><i class="fa-solid fa-paper-plane"></i></button>
                             </div>
                         </form>
                     @endcan
-
                     <div class="comments-list mt-4" id="comments-list">
                         @forelse($report->comments as $comment)
-                            @php $isCommentOwner = auth()->check() && auth()->id() === $comment->user_id; @endphp
+                            @php 
+                                $isCommentOwner = auth()->check() && auth()->id() === $comment->user_id;
+                                $commenterAvatar = $comment->user->avatar ?? optional($comment->user->resident)->avatar;
+                                if ($commenterAvatar && !filter_var($commenterAvatar, FILTER_VALIDATE_URL)) {
+                                    $commenterAvatar = asset('storage/' . $commenterAvatar);
+                                }
+                            @endphp
                             <div class="comment-item {{ $isCommentOwner ? 'is-owner' : 'is-other' }}">
-                                
-                                @if($isCommentOwner && Auth::user()->resident->avatar)
-                                    <img src="{{ asset('storage/' . Auth::user()->resident->avatar) }}" alt="avatar" class="comment-avatar">
-                                @elseif($isCommentOwner && !Auth::user()->resident->avatar)
-                                    <div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>
+                                @if($commenterAvatar)
+                                    <img src="{{ $commenterAvatar }}" alt="avatar" class="comment-avatar">
                                 @else
-                                    <div class="avatar-placeholder"><i class="fa-solid fa-user-secret"></i></div>
+                                    <div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>
                                 @endif
-
                                 <div class="comment-content">
                                     <div class="comment-bubble">
                                         <p class="comment-author">
@@ -180,12 +194,35 @@
             @endif
         </div>
     </div>
+
+    <div class="lightbox-overlay" id="lightbox">
+        <button class="lightbox-close-btn" id="lightbox-close">&times;</button>
+        <div class="lightbox-content"><img src="" alt="Gambar Laporan" id="lightbox-image"></div>
+    </div>
 @endsection
 
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const lightbox = document.getElementById('lightbox');
+            if(lightbox) {
+                const viewImageBtn = document.getElementById('view-image-btn');
+                const heroImage = document.querySelector('.hero-image');
+                const lightboxImage = document.getElementById('lightbox-image');
+                const lightboxClose = document.getElementById('lightbox-close');
+
+                viewImageBtn.addEventListener('click', function() {
+                    lightboxImage.src = heroImage.src;
+                    lightbox.classList.add('show');
+                });
+
+                const closeLightbox = () => lightbox.classList.remove('show');
+                lightboxClose.addEventListener('click', closeLightbox);
+                lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+                document.addEventListener('keydown', (e) => { if (e.key === "Escape" && lightbox.classList.contains('show')) closeLightbox(); });
+            }
+
             const commentForm = document.getElementById('comment-form');
             if (commentForm) {
                 const commentBody = document.getElementById('comment-body');
@@ -210,24 +247,22 @@
                 const createCommentElement = (comment) => {
                     const isOwner = comment.user_id === {{ auth()->id() }};
                     const isReportOwner = {{ $isReportOwner ? 'true' : 'false' }};
-                    const avatarSrc = isOwner && comment.user.resident.avatar ? `/storage/${comment.user.resident.avatar}` : '{{ asset('assets/app/images/default-avatar.png') }}';
                     
-                    const item = document.createElement('div');
-                    item.className = `comment-item ${isOwner ? 'is-owner' : 'is-other'}`;
-
                     let avatarHtml = '';
-                    if(isOwner) {
-                        if(comment.user.resident.avatar) {
-                            avatarHtml = `<img src="${avatarSrc}" alt="avatar" class="comment-avatar">`;
-                        } else {
-                            avatarHtml = `<div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>`;
-                        }
+                    const userAvatar = comment.user.avatar || (comment.user.resident ? comment.user.resident.avatar : null);
+                    const isAvatarUrl = userAvatar && userAvatar.startsWith('http');
+                    
+                    if (userAvatar) {
+                        const finalAvatarSrc = isAvatarUrl ? userAvatar : `/storage/${userAvatar}`;
+                        avatarHtml = `<img src="${finalAvatarSrc}" alt="avatar" class="comment-avatar">`;
                     } else {
-                        avatarHtml = `<div class="avatar-placeholder"><i class="fa-solid fa-user-secret"></i></div>`;
+                        avatarHtml = `<div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>`;
                     }
                     
                     let authorName = isOwner ? 'Anda' : (isReportOwner ? comment.user.name : comment.user.censored_name);
 
+                    const item = document.createElement('div');
+                    item.className = `comment-item ${isOwner ? 'is-owner' : 'is-other'}`;
                     item.innerHTML = `
                         ${avatarHtml}
                         <div class="comment-content">

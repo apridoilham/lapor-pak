@@ -4,14 +4,13 @@
 @push('styles')
 <style>
     .table thead th {
-        font-weight: 700;
+        font-weight: 600;
         color: #5a5c69;
         background-color: #f8f9fc;
         border-bottom-width: 1px;
     }
     .table td, .table th {
         vertical-align: middle;
-        padding: 1rem;
     }
     .table tbody tr:hover {
         background-color: #f8f9fc;
@@ -25,12 +24,15 @@
             <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Manajemen Wilayah RW & RT</h1>
             <p class="mb-0 text-muted">Atur data wilayah untuk pendaftaran warga dan admin.</p>
         </div>
-        <button type="button" class="btn btn-primary shadow-sm rounded-pill py-2 px-3" data-toggle="modal" data-target="#addRwModal">
+        <button type="button" class="btn btn-primary shadow-sm" data-toggle="modal" data-target="#addRwModal">
             <i class="fas fa-plus fa-sm mr-2"></i>Tambah Wilayah RW
         </button>
     </div>
 
-    <div class="card shadow border-0">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Daftar Wilayah RW</h6>
+        </div>
         <div class="card-body">
             @if($rws->isEmpty())
                 <div class="text-center py-5">
@@ -42,7 +44,7 @@
                 </div>
             @else
                 <div class="table-responsive">
-                    <table class="table table-borderless table-hover" width="100%" cellspacing="0">
+                    <table class="table" width="100%" cellspacing="0">
                         <thead>
                             <tr>
                                 <th>Nomor RW</th>
@@ -55,18 +57,15 @@
                             @foreach ($rws as $rw)
                                 <tr>
                                     <td>
-                                        <a href="{{ route('admin.rtrw.show', $rw) }}" class="font-weight-bold h5 text-primary text-decoration-none">
+                                        <a href="{{ route('admin.rtrw.show', $rw) }}" class="font-weight-bold text-primary text-decoration-none">
                                             RW {{ $rw->number }}
                                         </a>
                                     </td>
                                     <td>{{ $rw->rts->count() }} RT</td>
                                     <td>{{ $rw->residents_count }} Warga</td>
                                     <td class="text-center">
-                                        <a href="{{ route('admin.rtrw.show', $rw) }}" class="btn btn-info btn-sm" title="Lihat Detail">
-                                            <i class="fa fa-eye"></i> Detail
-                                        </a>
-                                        <a href="{{ route('admin.rtrw.edit', $rw) }}" class="btn btn-warning btn-sm" title="Ubah Data RW">
-                                            <i class="fa fa-edit"></i> Ubah
+                                        <a href="{{ route('admin.rtrw.show', $rw) }}" class="btn btn-sm btn-outline-info" title="Lihat Detail">
+                                            <i class="fas fa-eye fa-sm mr-1"></i>Detail
                                         </a>
                                     </td>
                                 </tr>
@@ -78,6 +77,7 @@
         </div>
     </div>
 
+    {{-- Modal tidak berubah --}}
     <div class="modal fade" id="addRwModal" tabindex="-1" role="dialog" aria-labelledby="addRwModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -92,7 +92,7 @@
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="number_modal" class="font-weight-bold small">Nomor RW Baru</label>
-                            <input type="text" name="number" id="rw_number_input_modal" class="form-control @error('number', 'store') is-invalid @enderror" placeholder="Contoh: 005" required maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="{{ old('number') }}">
+                            <input type="text" name="number" id="rw_number_input_modal" class="form-control @error('number', 'store') is-invalid @enderror" placeholder="Contoh: 5" required maxlength="2" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="{{ old('number') }}">
                             <div class="invalid-feedback" id="rw-error-modal">Nomor RW ini sudah ada.</div>
                             @error('number', 'store')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
@@ -115,6 +115,7 @@
 @endsection
 
 @section('scripts')
+{{-- Script tidak berubah --}}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const rwNumberInputModal = document.getElementById('rw_number_input_modal');
@@ -156,7 +157,14 @@
         });
 
         rwNumberInputModal.addEventListener('blur', function() {
-            if (this.value) this.value = this.value.padStart(3, '0');
+            if (this.value) {
+                this.value = this.value.padStart(2, '0');
+            }
+        });
+        rtCountInput.addEventListener('blur', function() {
+            if (this.value) {
+                this.value = this.value.padStart(2, '0');
+            }
         });
 
         @if ($errors->store->any())

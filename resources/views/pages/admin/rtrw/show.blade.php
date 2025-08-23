@@ -11,13 +11,11 @@
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 1rem;
     }
-
     .rt-card {
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        
         background-color: #f8f9fc;
         border: 1px solid #e3e6f0;
         border-radius: .5rem;
@@ -26,19 +24,16 @@
         transition: all .2s ease-in-out;
         aspect-ratio: 3 / 4;
     }
-
     .rt-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
     }
-
     .rt-card .rt-number {
         font-size: 2.25rem;
         font-weight: 700;
         color: #4e73df;
         line-height: 1.2;
     }
-
     .rt-card .rt-label {
         font-size: 0.9rem;
         color: #858796;
@@ -54,24 +49,20 @@
                 <i class="fas fa-arrow-left"></i>
             </a>
             <div>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb bg-transparent p-0 m-0">
-                        <li class="breadcrumb-item active" aria-current="page">Detail RW {{ $rw->number }}</li>
-                    </ol>
-                </nav>
                 <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Detail Wilayah RW {{ $rw->number }}</h1>
             </div>
         </div>
         <div>
-            <a href="{{ route('admin.rtrw.edit', $rw) }}" class="btn btn-warning shadow-sm">
+            {{-- PERUBAHAN GAYA TOMBOL DI SINI --}}
+            <a href="{{ route('admin.rtrw.edit', $rw) }}" class="btn btn-sm btn-outline-warning shadow-sm">
                 <i class="fas fa-edit fa-sm mr-2"></i>Ubah Data
             </a>
             <form action="{{ route('admin.rtrw.destroy', $rw) }}" method="POST" class="d-inline delete-form">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="btn btn-danger shadow-sm"
+                <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm"
                         data-title="Hapus RW {{ $rw->number }}?" 
-                        data-text="RW hanya dapat dihapus jika tidak ada lagi data Admin atau Warga yang terikat padanya. Lanjutkan?">
+                        data-text="RW hanya dapat dihapus jika tidak ada lagi data warga yang terikat padanya. Lanjutkan?">
                     <i class="fas fa-trash fa-sm mr-2"></i>Hapus RW
                 </button>
             </form>
@@ -127,3 +118,28 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.querySelectorAll('.delete-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const button = this.querySelector('button[type="submit"]');
+            Swal.fire({
+                title: button.dataset.title || 'Anda yakin?',
+                text: button.dataset.text || 'Tindakan ini tidak dapat dibatalkan!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e74a3b',
+                cancelButtonColor: '#858796',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.submit();
+                }
+            });
+        });
+    });
+</script>
+@endpush

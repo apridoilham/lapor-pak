@@ -68,6 +68,9 @@ class ResidentController extends Controller
 
         $stats = [
             'total' => $reports->count(),
+            'delivered' => $reports->filter(function ($report) {
+                return optional($report->latestStatus)->status === \App\Enums\ReportStatusEnum::DELIVERED;
+            })->count(),
             'in_process' => $reports->filter(function ($report) {
                 return optional($report->latestStatus)->status === \App\Enums\ReportStatusEnum::IN_PROCESS;
             })->count(),

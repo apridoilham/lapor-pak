@@ -15,11 +15,9 @@ class UpdateRtRwRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         if ($this->has('number')) {
-            $cleanedNumber = ltrim($this->number, '0');
-            $this->merge(['number' => empty($cleanedNumber) && $this->number === '0' ? '0' : $cleanedNumber]);
-        }
-        if ($this->has('rt_count')) {
-            $this->merge(['rt_count' => ltrim($this->rt_count, '0')]);
+            $this->merge([
+                'number' => str_pad($this->number, 2, '0', STR_PAD_LEFT)
+            ]);
         }
     }
 
@@ -31,10 +29,11 @@ class UpdateRtRwRequest extends FormRequest
             'number' => [
                 'required',
                 'string',
-                'numeric',
+                'digits:2',
                 Rule::unique('rws', 'number')->ignore($rwId),
             ],
-            'rt_count' => 'required|integer|min:1|max:99',
+            // PERUBAHAN DI SINI: integer -> numeric
+            'rt_count' => 'required|numeric|min:1|max:99',
         ];
     }
 }

@@ -44,8 +44,10 @@ class DashboardController extends Controller
         return view('pages.admin.dashboard', [
             'totalReports' => $totalReports,
             'totalResidents' => $totalResidents,
+            'deliveredCount' => $reportCounts[ReportStatusEnum::DELIVERED->value] ?? 0,
             'inProcessCount' => $reportCounts[ReportStatusEnum::IN_PROCESS->value] ?? 0,
             'completedCount' => $reportCounts[ReportStatusEnum::COMPLETED->value] ?? 0,
+            'rejectedCount' => $reportCounts[ReportStatusEnum::REJECTED->value] ?? 0,
 
             'dailyLabels' => $dailyReports['labels'],
             'dailyData' => $dailyReports['counts'],

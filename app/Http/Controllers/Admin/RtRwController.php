@@ -13,6 +13,7 @@ use RealRashid\SweetAlert\Facades\Alert as Swal;
 
 class RtRwController extends Controller
 {
+    // ... (method index dan show tidak berubah) ...
     public function index()
     {
         $rws = Rw::withCount('residents')->orderBy('number')->get();
@@ -32,24 +33,22 @@ class RtRwController extends Controller
     public function store(Request $request)
     {
         if ($request->has('number')) {
-            $cleanedNumber = ltrim($request->number, '0');
-            $request->merge(['number' => empty($cleanedNumber) && $request->number === '0' ? '0' : $cleanedNumber]);
-        }
-        
-        // PERBAIKAN DI SINI: Membersihkan input rt_count
-        if ($request->has('rt_count')) {
-            $request->merge(['rt_count' => ltrim($request->rt_count, '0')]);
+            $request->merge([
+                'number' => str_pad($request->number, 2, '0', STR_PAD_LEFT),
+            ]);
         }
 
         $validator = Validator::make($request->all(), [
-            'number' => 'required|string|numeric|unique:rws,number',
-            'rt_count' => 'required|integer|min:1|max:99',
+            'number' => 'required|string|digits:2|unique:rws,number',
+            // PERUBAHAN DI SINI: integer -> numeric
+            'rt_count' => 'required|numeric|min:1|max:99',
         ], [
+            'number.digits' => 'Nomor RW harus terdiri dari 2 digit.',
             'number.unique' => 'Nomor RW ini sudah ada.',
             'rt_count.max' => 'Jumlah RT tidak boleh lebih dari 99.',
             'rt_count.min' => 'Jumlah RT minimal harus 1.',
         ]);
-        
+
         if ($validator->fails()) {
             return redirect()->route('admin.rtrw.index')
                 ->withErrors($validator, 'store')
@@ -61,7 +60,7 @@ class RtRwController extends Controller
             for ($i = 1; $i <= $request->rt_count; $i++) {
                 Rt::create([
                     'rw_id' => $rw->id,
-                    'number' => $i,
+                    'number' => str_pad($i, 2, '0', STR_PAD_LEFT),
                 ]);
             }
         });
@@ -69,7 +68,8 @@ class RtRwController extends Controller
         Swal::success('Berhasil', 'Data RW ' . $request->number . ' berhasil ditambahkan.');
         return redirect()->route('admin.rtrw.index');
     }
-    
+
+    // ... (sisa method tidak berubah) ...
     public function edit(Rw $rtrw)
     {
         $rtCount = $rtrw->rts()->count();
@@ -79,38 +79,29 @@ class RtRwController extends Controller
     public function update(UpdateRtRwRequest $request, Rw $rtrw)
     {
         $validated = $request->validated();
-        
         DB::transaction(function () use ($validated, $rtrw) {
-            $newRwNumber = ltrim($validated['number'], '0');
-            if (empty($newRwNumber) && $validated['number'] === '0') {
-                $newRwNumber = '0';
-            }
+            $newRwNumber = str_pad($validated['number'], 2, '0', STR_PAD_LEFT);
             $newRtCount = (int) $validated['rt_count'];
             $oldRtCount = $rtrw->rts()->count();
-
             $rtrw->update(['number' => $newRwNumber]);
-
             if ($newRtCount < $oldRtCount) {
                 $rtsToDelete = Rt::where('rw_id', $rtrw->id)
-                    ->where('number', '>', $newRtCount)
+                    ->where('number', '>', str_pad($newRtCount, 2, '0', STR_PAD_LEFT))
                     ->withCount('residents')
                     ->get();
-                
                 foreach ($rtsToDelete as $rt) {
                     if ($rt->residents_count > 0) {
                         throw new \Exception('Gagal mengurangi jumlah RT karena RT ' . $rt->number . ' masih memiliki data warga.');
                     }
                 }
                 $rtsToDelete->each->delete();
-
             } elseif ($newRtCount > $oldRtCount) {
                 for ($i = $oldRtCount + 1; $i <= $newRtCount; $i++) {
-                    Rt::create(['rw_id' => $rtrw->id, 'number' => $i]);
+                    Rt::create(['rw_id' => $rtrw->id, 'number' => str_pad($i, 2, '0', STR_PAD_LEFT)]);
                 }
             }
         });
-
-        Swal::success('Berhasil', 'Data RW ' . ltrim($validated['number'], '0') . ' berhasil diperbarui.');
+        Swal::success('Berhasil', 'Data RW ' . str_pad($validated['number'], 2, '0', STR_PAD_LEFT) . ' berhasil diperbarui.');
         return redirect()->route('admin.rtrw.index');
     }
 

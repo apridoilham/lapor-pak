@@ -18,4 +18,14 @@ enum ReportStatusEnum: string
             self::REJECTED => 'Ditolak',
         };
     }
+
+    public function colorClass(): string
+    {
+        return match ($this) {
+            self::DELIVERED => 'primary',
+            self::IN_PROCESS => 'warning',
+            self::COMPLETED => 'success',
+            self::REJECTED => 'danger',
+        };
+    }
 }

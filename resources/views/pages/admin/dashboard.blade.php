@@ -15,29 +15,31 @@
         transform: translateY(-5px);
         box-shadow: 0 1rem 3rem rgba(0,0,0,.075)!important;
     }
+    .stat-card-dashboard.border-bottom-dark { border-bottom-color: #5a5c69; }
     .stat-card-dashboard.border-bottom-primary { border-bottom-color: #4e73df; }
     .stat-card-dashboard.border-bottom-warning { border-bottom-color: #f6c23e; }
     .stat-card-dashboard.border-bottom-success { border-bottom-color: #1cc88a; }
+    .stat-card-dashboard.border-bottom-danger { border-bottom-color: #e74a3b; }
     .stat-card-dashboard.border-bottom-info { border-bottom-color: #36b9cc; }
 
     .stat-card-dashboard .stat-icon {
-        width: 50px;
-        height: 50px;
+        width: 45px;
+        height: 45px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.5rem;
+        font-size: 1.25rem;
         color: #fff;
         flex-shrink: 0;
     }
     .stat-card-dashboard .stat-value {
-        font-size: 2rem;
+        font-size: 1.75rem;
         font-weight: 700;
         color: #343a40;
     }
     .stat-card-dashboard .stat-label {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         color: #858796;
         text-transform: uppercase;
         font-weight: 500;
@@ -53,11 +55,12 @@
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card stat-card-dashboard h-100 shadow-sm border-bottom-primary">
+    {{-- Menggunakan grid 6 kolom di layar besar, dan 2 di layar kecil --}}
+    <div class="row row-cols-2 row-cols-md-3 row-cols-xl-6">
+        <div class="col mb-4">
+            <div class="card stat-card-dashboard h-100 shadow-sm border-bottom-dark">
                 <div class="d-flex align-items-center">
-                    <div class="stat-icon bg-primary mr-3"><i class="fas fa-file-alt"></i></div>
+                    <div class="stat-icon bg-dark mr-3"><i class="fas fa-file-alt"></i></div>
                     <div>
                         <div class="stat-value">{{ $totalReports }}</div>
                         <div class="stat-label">Total Laporan</div>
@@ -65,29 +68,51 @@
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6 mb-4">
+        <div class="col mb-4">
+            <div class="card stat-card-dashboard h-100 shadow-sm border-bottom-primary">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-primary mr-3"><i class="fas fa-paper-plane"></i></div>
+                    <div>
+                        <div class="stat-value">{{ $deliveredCount }}</div>
+                        <div class="stat-label">Terkirim</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col mb-4">
             <div class="card stat-card-dashboard h-100 shadow-sm border-bottom-warning">
                 <div class="d-flex align-items-center">
                     <div class="stat-icon bg-warning mr-3"><i class="fas fa-cogs"></i></div>
                     <div>
                         <div class="stat-value">{{ $inProcessCount }}</div>
-                        <div class="stat-label">Laporan Diproses</div>
+                        <div class="stat-label">Diproses</div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6 mb-4">
+        <div class="col mb-4">
             <div class="card stat-card-dashboard h-100 shadow-sm border-bottom-success">
                 <div class="d-flex align-items-center">
                     <div class="stat-icon bg-success mr-3"><i class="fas fa-check-circle"></i></div>
                     <div>
                         <div class="stat-value">{{ $completedCount }}</div>
-                        <div class="stat-label">Laporan Selesai</div>
+                        <div class="stat-label">Selesai</div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6 mb-4">
+        <div class="col mb-4">
+            <div class="card stat-card-dashboard h-100 shadow-sm border-bottom-danger">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-danger mr-3"><i class="fas fa-times-circle"></i></div>
+                    <div>
+                        <div class="stat-value">{{ $rejectedCount }}</div>
+                        <div class="stat-label">Ditolak</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col mb-4">
             <div class="card stat-card-dashboard h-100 shadow-sm border-bottom-info">
                 <div class="d-flex align-items-center">
                     <div class="stat-icon bg-info mr-3"><i class="fas fa-users"></i></div>
@@ -99,7 +124,7 @@
             </div>
         </div>
     </div>
-
+    
     <div class="row">
         <div class="col-lg-7">
             <div class="card shadow mb-4">

@@ -101,7 +101,6 @@
                 <div class="col-6">
                     <div class="filter-group">
                         <label for="rt_id">RT</label>
-                        <!-- PENJELASAN: Logika 'disabled' disederhanakan. Jika tidak ada request('rw'), maka disabled. -->
                         <select name="rt" id="rt_id" class="form-select" {{ !request('rw') ? 'disabled' : '' }}>
                             <option value="">Semua RT</option>
                             @foreach($rts as $rt)
@@ -118,7 +117,7 @@
     </div>
 
     @forelse($reports as $report)
-        @php $isOwner = Auth::id() === $report->resident->user_id; @endphp
+        @php $isOwner = Auth::check() && Auth::id() === $report->resident->user_id; @endphp
         <a href="{{ route('report.show', ['code' => $report->code, '_ref' => request()->fullUrl()]) }}" class="report-card-professional">
             <img src="{{ asset('storage/' . $report->image) }}" alt="{{ $report->title }}" class="card-image">
             <div class="card-body">
@@ -135,8 +134,17 @@
             </div>
             <div class="card-footer">
                 <div class="user-details">
-                    @if($isOwner && $report->resident->avatar)
-                        <img src="{{ asset('storage/' . $report->resident->avatar) }}" alt="Avatar Pelapor" class="avatar">
+                    {{-- PERBAIKAN LOGIKA AVATAR DI SINI --}}
+                    @php
+                        $reporter = $report->resident->user;
+                        $avatarUrl = $reporter->avatar ?? optional($reporter->resident)->avatar;
+
+                        if ($avatarUrl && !filter_var($avatarUrl, FILTER_VALIDATE_URL)) {
+                            $avatarUrl = asset('storage/' . $avatarUrl);
+                        }
+                    @endphp
+                    @if($avatarUrl)
+                        <img src="{{ $avatarUrl }}" alt="Avatar Pelapor" class="avatar">
                     @else
                         <div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>
                     @endif
@@ -151,7 +159,7 @@
             </div>
         </a>
     @empty
-        <div class="d-flex flex-column justify-content-center align-items-center text-center py-5">
+        <div class="d-flex flex-column justify-content-center align-items:center text-center py-5">
             <div id="lottie-empty-list" style="width: 250px; height: 250px;"></div>
             <h5 class="mt-3 fw-bold">Laporan Tidak Ditemukan</h5>
             <p class="text-secondary px-4">Tidak ada laporan yang cocok dengan filter yang Anda pilih.</p>

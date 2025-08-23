@@ -64,8 +64,16 @@
             <div class="card shadow-sm profile-card mb-4 text-center">
                 <div class="card-body">
                     <div class="profile-avatar-wrapper">
+                        @php
+                            $avatarUrl = Auth::user()->avatar;
+                            if ($avatarUrl && !filter_var($avatarUrl, FILTER_VALIDATE_URL)) {
+                                $avatarUrl = asset('storage/' . $avatarUrl);
+                            } elseif (empty($avatarUrl)) {
+                                $avatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=4e73df&color=fff&size=130&font-size=0.4';
+                            }
+                        @endphp
                         <img class="profile-avatar"
-                             src="{{ Auth::user()->avatar ? Auth::user()->avatar : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=4e73df&color=fff&size=130&font-size=0.4' }}"
+                             src="{{ $avatarUrl }}"
                              alt="Foto Profil {{ Auth::user()->name }}">
                     </div>
                     <h4 class="font-weight-bold text-gray-800 mt-3 mb-1">{{ $user->name }}</h4>

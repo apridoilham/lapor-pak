@@ -1,52 +1,150 @@
 @extends('layouts.no-nav')
 
-@section('title', 'Masuk')
+@section('title', 'Selamat Datang di BSB Lapor')
 
 @push('styles')
 <style>
-    .login-container {
-        max-width: 400px;
-        width: 100%;
-        padding: 2rem;
+    :root {
+        --bsb-primary: #16752B;
+        --bsb-text-dark: #1a202c;
+        --bsb-text-light: #4a5568;
+        --bsb-bg: #f7fafc;
+        --bsb-white: #ffffff;
+        --bsb-border: #e2e8f0;
     }
+
+    /* Menggunakan font Plus Jakarta Sans */
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
+
+    html, body {
+        height: 100%; /* Penting untuk layout flex full-height */
+        margin: 0;
+        padding: 0;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background-color: var(--bsb-bg);
+    }
+
+    .login-screen {
+        display: flex;
+        flex-direction: column; /* Mengatur item secara vertikal */
+        min-height: 100vh; /* Tinggi minimal seukuran layar */
+    }
+
+    .login-main {
+        flex-grow: 1; /* Membuat area ini memanjang untuk mendorong footer ke bawah */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem 1.5rem;
+    }
+
+    .login-card {
+        background-color: var(--bsb-white);
+        max-width: 480px;
+        width: 100%;
+        padding: 3rem 2.5rem;
+        border-radius: 24px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+        text-align: center;
+        border: 1px solid var(--bsb-border);
+    }
+
+    .logo-container {
+        margin-bottom: 2rem;
+    }
+
+    .logo-container img {
+        height: 90px;
+        width: auto;
+    }
+
+    .login-card h1 {
+        font-weight: 800;
+        font-size: 2.5rem;
+        color: var(--bsb-text-dark);
+        margin-bottom: 0.75rem;
+        letter-spacing: -0.03em;
+    }
+
+    .login-card p.subtitle {
+        color: var(--bsb-text-light);
+        font-size: 1.1rem;
+        margin-bottom: 3rem;
+        line-height: 1.6;
+        max-width: 380px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
     .btn-google {
-        color: #495057;
-        background-color: #fff;
-        border-color: #ced4da;
-        font-weight: 500;
+        font-size: 1rem;
+        color: var(--bsb-text-dark);
+        background-color: var(--bsb-white);
+        border: 1px solid var(--bsb-border);
+        font-weight: 700;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 0.75rem;
+        gap: 0.8rem;
+        padding: 1rem;
+        border-radius: 12px;
         transition: all 0.2s ease-in-out;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
+
     .btn-google:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        box-shadow: 0 7px 20px -5px rgba(0,0,0,0.08);
+        border-color: #cbd5e0;
+    }
+
+    .login-footer {
+        flex-shrink: 0; /* Mencegah footer menyusut */
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .login-footer p {
+        font-size: 0.9rem;
+        color: #a0aec0;
+    }
+
+    .login-footer strong {
+        color: #718096;
     }
 </style>
 @endpush
 
 @section('content')
-    <div class="d-flex flex-column justify-content-center align-items-center vh-100 px-3">
-        <div class="login-container">
-            <div class="text-center mb-5">
-                <h1 class="fw-bolder" style="font-size: 2.5rem;">Selamat Datang</h1>
-                <p class="text-secondary">Satu klik untuk masuk dan mulai melaporkan masalah di sekitar Anda.</p>
+<div class="login-screen">
+    
+    <main class="login-main">
+        <div class="login-card">
+            <div class="logo-container">
+                <img src="{{ asset('assets/app/images/logo.jpg') }}" alt="Logo BSB Lapor">
             </div>
+
+            <h1>Selamat Datang</h1>
+            <p class="subtitle">Satu klik untuk masuk dan mulai melaporkan masalah di sekitar Anda.</p>
             
             @if($errors->any())
-                <div class="alert alert-danger">
+                <div class="alert alert-danger mb-4">
                     {{ $errors->first() }}
                 </div>
             @endif
 
-            <div class="d-grid my-4">
+            <div class="d-grid">
                 <a href="{{ route('google.redirect') }}" class="btn btn-google btn-lg">
-                    <img src="https://www.google.com/favicon.ico" alt="Google" width="20">
-                    Masuk dengan Google
+                    <img src="https://www.google.com/favicon.ico" alt="Google" width="24">
+                    Masuk dengan Akun Google
                 </a>
             </div>
         </div>
-    </div>
+    </main>
+    
+    <footer class="login-footer">
+        <p>Sebuah Inisiatif oleh <strong>KKN Kelompok 31 Depok - UIN Syarif Hidayatullah Jakarta 2025</strong></p>
+    </footer>
+
+</div>
 @endsection

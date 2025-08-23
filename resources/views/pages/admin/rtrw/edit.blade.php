@@ -21,13 +21,13 @@
                         @method('PUT')
                         <div class="form-group">
                             <label for="number" class="font-weight-bold">Nomor RW</label>
-                            <input type="text" name="number" id="rw_number_input" class="form-control @error('number') is-invalid @enderror" value="{{ old('number', $rw->number) }}" required maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                            <input type="text" name="number" id="rw_number_input" class="form-control @error('number') is-invalid @enderror" value="{{ old('number', $rw->number) }}" required maxlength="2" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                             <div class="invalid-feedback" id="rw-error" style="display: none;">Nomor RW ini sudah ada.</div>
                             @error('number')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div class="form-group">
                             <label for="rt_count" class="font-weight-bold">Jumlah RT</label>
-                            <input type="text" name="rt_count" class="form-control @error('rt_count') is-invalid @enderror" value="{{ old('rt_count', $rtCount) }}" required maxlength="2" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                            <input type="text" name="rt_count" id="rt_count_input" class="form-control @error('rt_count') is-invalid @enderror" value="{{ old('rt_count', $rtCount) }}" required maxlength="2" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                             @error('rt_count')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         
@@ -49,21 +49,26 @@
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const rwInputPadding = document.getElementById('rw_number_input');
-        rwInputPadding.addEventListener('blur', function() {
-            let value = this.value;
-            if (value && !isNaN(value)) {
-                this.value = value.padStart(3, '0');
-            }
-        });
-
-        const updateButton = document.getElementById('update-btn');
         const rwInput = document.getElementById('rw_number_input');
+        const rtCountInput = document.getElementById('rt_count_input');
+        const updateButton = document.getElementById('update-btn');
         const rwError = document.getElementById('rw-error');
         const initialRwNumber = '{{ $rw->number }}';
         const rwIdToIgnore = {{ $rw->id }};
         let debounceTimer;
 
+        // Menambahkan padding otomatis saat fokus berpindah
+        rwInput.addEventListener('blur', function() {
+            if (this.value) {
+                this.value = this.value.padStart(2, '0');
+            }
+        });
+        rtCountInput.addEventListener('blur', function() {
+            if (this.value) {
+                this.value = this.value.padStart(2, '0');
+            }
+        });
+        
         function checkFormValidity() {
             const isRwInvalid = rwInput.classList.contains('is-invalid');
             updateButton.disabled = isRwInvalid;
@@ -75,8 +80,8 @@
             rwError.style.display = 'none';
             checkFormValidity();
 
-            const currentRwNumber = this.value.padStart(3, '0');
-            if (currentRwNumber === initialRwNumber) {
+            const currentRwNumberPadded = this.value.padStart(2, '0');
+            if (currentRwNumberPadded === initialRwNumber) {
                 return;
             }
 

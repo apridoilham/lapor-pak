@@ -3,6 +3,7 @@
 @section('title', 'Buat Laporan Baru')
 
 @push('styles')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
     :root {
         --primary-color: #0ea5e9; /* Sky Blue */
@@ -63,7 +64,7 @@
     }
     .form-control:focus, .form-select:focus {
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px var(--primary-light);
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
     }
 
     #image-preview-container {
@@ -85,18 +86,8 @@
     #map {
         height: 250px;
         border: 1px solid var(--border-color);
-    }
-
-    .form-check {
-        padding: 1rem;
-        border: 1px solid var(--border-color);
         border-radius: 12px;
-        margin-bottom: 0.5rem;
-        transition: all 0.2s ease-in-out;
-    }
-    .form-check:has(input:checked) {
-        background-color: #f0f9ff;
-        border-color: var(--primary-color);
+        z-index: 1;
     }
 
     .d-grid .btn-primary {
@@ -133,7 +124,6 @@
         <div class="mb-3">
             <label for="image" class="form-label fw-bold">Bukti Laporan</label>
             <input type="file" class="form-control @error('image') is-invalid @enderror" id="image" name="image" style="display: none" required>
-
             <div id="image-preview-container">
                 <div id="image-placeholder" class="image-placeholder-box">
                     <i class="fa-solid fa-image fa-2x text-secondary"></i>
@@ -141,7 +131,6 @@
                 </div>
                 <img alt="Pratinjau Laporan" id="image-preview" class="img-fluid rounded-3 mb-3 border" style="display: none; width: 100%; height: 200px; object-fit: cover;">
             </div>
-
             @error('image')
                 <div class="invalid-feedback d-block">{{ $message }}</div>
             @enderror
@@ -155,12 +144,15 @@
 
         <div class="mb-3">
             <label for="report_category_id" class="form-label fw-bold">Kategori Laporan</label>
-            <select name="report_category_id" class="form-select @error('report_category_id') is-invalid @enderror" required>
+            <select name="report_category_id" class="form-select @error('report_category_id') is-invalid @enderror" required @if($categories->isEmpty()) disabled @endif>
                 <option value="" selected disabled>Pilih Kategori</option>
                 @foreach ($categories as $category)
                     <option value="{{ $category->id }}" @if (old('report_category_id') == $category->id) selected @endif> {{ $category->name }}</option>
                 @endforeach
             </select>
+            @if($categories->isEmpty())
+                <small class="form-text text-danger mt-1">Saat ini belum ada kategori laporan yang tersedia. Harap hubungi admin.</small>
+            @endif
             @error('report_category_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
 
@@ -187,15 +179,16 @@
         </div>
 
         <div class="mb-3">
-            <label class="form-label fw-bold">Tampilkan Laporan Kepada</label>
-            @foreach(\App\Enums\ReportVisibilityEnum::cases() as $visibility)
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="visibility" id="visibility-{{ $visibility->value }}" value="{{ $visibility->value }}" {{ old('visibility', 'public') == $visibility->value ? 'checked' : '' }}>
-                    <label class="form-check-label" for="visibility-{{ $visibility->value }}">
+            <label for="visibility" class="form-label fw-bold">Tampilkan Laporan Kepada</label>
+            <select name="visibility" id="visibility" class="form-select @error('visibility') is-invalid @enderror" required>
+                {{-- PERUBAHAN 1: Menambahkan placeholder --}}
+                <option value="" selected disabled>Pilih visibilitas laporan</option>
+                @foreach(\App\Enums\ReportVisibilityEnum::cases() as $visibility)
+                    <option value="{{ $visibility->value }}" {{ old('visibility') == $visibility->value ? 'selected' : '' }}>
                         {{ $visibility->label(Auth::user()) }}
-                    </label>
-                </div>
-            @endforeach
+                    </option>
+                @endforeach
+            </select>
             @error('visibility')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
         </div>
 
@@ -208,18 +201,42 @@
 @endsection
 
 @section('scripts')
+    {{-- PERUBAHAN 2: Menambahkan SweetAlert2 --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="{{ asset('assets/app/js/report.js') }}"></script>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('create-report-form');
+            
+            // ... (Kode Javascript lain yang sudah ada tidak perlu diubah) ...
+            
+            // PERUBAHAN 3: Menambahkan event listener untuk alert konfirmasi
+            form.addEventListener('submit', function(event) {
+                event.preventDefault(); // Mencegah form dikirim secara langsung
+
+                Swal.fire({
+                    title: 'Konfirmasi Laporan',
+                    html: "Anda dapat mengubah atau menghapus laporan ini **hanya sebelum** diproses oleh admin. Pastikan semua data sudah benar.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#0ea5e9',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, Lanjutkan & Laporkan!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit(); // Jika dikonfirmasi, kirim form
+                    }
+                });
+            });
+
             const reportButton = document.getElementById('report-btn');
             const requiredInputs = form.querySelectorAll('[required]');
 
             function checkFormValidity() {
                 let allFieldsFilled = true;
                 requiredInputs.forEach(input => {
+                    if (input.disabled) return;
                     if (input.type === 'file') {
                         if (input.files.length === 0) {
                             allFieldsFilled = false;
@@ -251,25 +268,17 @@
                     }
                     return new Blob([ab], { type: mime });
                 }
-
                 const blob = base64ToBlob(imageBase64, 'image/jpeg');
                 const file = new File([blob], 'captured_image.jpg', { type: 'image/jpeg' });
-
                 const dataTransfer = new DataTransfer();
                 dataTransfer.items.add(file);
                 imageInput.files = dataTransfer.files;
-
                 imagePreview.src = URL.createObjectURL(file);
                 imagePreview.style.display = 'block';
-                if(imagePlaceholder) {
-                    imagePlaceholder.style.display = 'none';
-                }
-
+                if(imagePlaceholder) { imagePlaceholder.style.display = 'none'; }
                 checkFormValidity();
             } else {
-                if(imagePlaceholder) {
-                    imagePlaceholder.style.display = 'flex';
-                }
+                if(imagePlaceholder) { imagePlaceholder.style.display = 'flex'; }
             }
 
             const latitudeInput = document.getElementById('latitude');
@@ -277,10 +286,8 @@
             const addressInput = document.getElementById('address');
             const detectButton = document.getElementById('detect-location-btn');
             const defaultLocation = [-6.3816, 106.7420]; 
-
             const map = L.map('map').setView(defaultLocation, 13);
             let marker = L.marker(defaultLocation, { draggable: true }).addTo(map);
-
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
             }).addTo(map);
@@ -305,10 +312,7 @@
                 updateAddress(latlng.lat, latlng.lng);
             }
 
-            marker.on('dragend', function(e) {
-                updateInputs(e.target.getLatLng());
-            });
-
+            marker.on('dragend', function(e) { updateInputs(e.target.getLatLng()); });
             function detectLocation() {
                 if ('geolocation' in navigator) {
                     navigator.geolocation.getCurrentPosition(function(position) {
@@ -326,9 +330,7 @@
                     alert('Geolocation tidak didukung oleh browser Anda.');
                 }
             }
-
             detectButton.addEventListener('click', detectLocation);
-
             detectLocation();
         });
     </script>

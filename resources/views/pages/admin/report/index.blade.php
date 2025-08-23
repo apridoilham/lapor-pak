@@ -18,7 +18,12 @@
 @endpush
 
 @section('content')
-    <h1 class="h3 mb-4 text-gray-900 font-weight-bold">Data Laporan</h1>
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Data Laporan (Warga)</h1>
+            <p class="mb-0 text-muted">Kelola dan lihat semua laporan yang masuk dari warga.</p>
+        </div>
+    </div>
 
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
@@ -34,20 +39,20 @@
                     <option value="name_desc" {{ request('sort') == 'name_desc' ? 'selected' : '' }}>Nama Pelapor (Z-A)</option>
                 </select>
                 
-                @role('super-admin')
-                <label class="small font-weight-bold text-muted mr-2 mb-0">Filter:</label>
-                <select name="rw" id="rw_id_filter" class="form-control form-control-sm mr-2" style="width: auto;">
-                    <option value="">Semua RW</option>
-                    @foreach ($rws as $rw)
-                        <option value="{{ $rw->id }}" {{ request('rw') == $rw->id ? 'selected' : '' }}>RW {{ $rw->number }}</option>
-                    @endforeach
-                </select>
-                <select name="rt" id="rt_id_filter" class="form-control form-control-sm mr-2" style="width: auto;" disabled>
-                    <option value="">Pilih RT</option>
-                </select>
-                <button type="submit" class="btn btn-sm btn-primary" title="Terapkan Filter">Filter</button>
-                <a href="{{ route('admin.report.index') }}" class="btn btn-sm btn-outline-secondary ml-1" title="Reset Filter"><i class="fas fa-sync-alt"></i></a>
-                @endrole
+                @if(Auth::user()->hasRole('super-admin'))
+                    <label class="small font-weight-bold text-muted mr-2 mb-0">Filter:</label>
+                    <select name="rw" id="rw_id_filter" class="form-control form-control-sm mr-2" style="width: auto;">
+                        <option value="">Semua RW</option>
+                        @foreach ($rws as $rw)
+                            <option value="{{ $rw->id }}" {{ request('rw') == $rw->id ? 'selected' : '' }}>RW {{ $rw->number }}</option>
+                        @endforeach
+                    </select>
+                    <select name="rt" id="rt_id_filter" class="form-control form-control-sm mr-2" style="width: auto;" disabled>
+                        <option value="">Pilih RT</option>
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-primary" title="Terapkan Filter">Filter</button>
+                    <a href="{{ route('admin.report.index') }}" class="btn btn-sm btn-outline-secondary ml-1" title="Reset Filter"><i class="fas fa-sync-alt"></i></a>
+                @endif
             </form>
         </div>
         <div class="card-body">
@@ -70,10 +75,10 @@
                                 <td>
                                     <div class="d-flex align-items-center">
                                         @php
-                                            $avatarUrl = optional($report->resident)->avatar;
-                                            if ($avatarUrl && !Str::startsWith($avatarUrl, 'http')) {
+                                            $avatarUrl = optional($report->resident->user)->avatar ?? $report->resident->avatar;
+                                            if ($avatarUrl && !filter_var($avatarUrl, FILTER_VALIDATE_URL)) {
                                                 $avatarUrl = asset('storage/' . $avatarUrl);
-                                            } elseif (!$avatarUrl) {
+                                            } elseif (empty($avatarUrl)) {
                                                 $avatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode(optional($report->resident->user)->name) . '&background=1a202c&color=fff&size=60';
                                             }
                                         @endphp
@@ -87,19 +92,10 @@
                                 <td>{{ Str::limit($report->title, 40) }}</td>
                                 <td class="text-center">
                                      @if ($report->latestStatus)
-                                        @php
-                                            $status = $report->latestStatus->status;
-                                            $badgeClass = match($status) {
-                                                \App\Enums\ReportStatusEnum::DELIVERED => 'badge-primary',
-                                                \App\Enums\ReportStatusEnum::IN_PROCESS => 'badge-warning',
-                                                \App\Enums\ReportStatusEnum::COMPLETED => 'badge-success',
-                                                \App\Enums\ReportStatusEnum::REJECTED => 'badge-danger',
-                                                default => 'badge-secondary',
-                                            };
-                                        @endphp
-                                        <span class="soft-badge {{ $badgeClass }}">{{ $status->label() }}</span>
+                                        @php $status = $report->latestStatus->status; @endphp
+                                        <span class="soft-badge badge-{{ $status->colorClass() }}">{{ $status->label() }}</span>
                                     @else
-                                        <span class="soft-badge badge-secondary">Baru</span>
+                                        <span class="soft-badge badge-primary">Baru</span>
                                     @endif
                                 </td>
                                 <td>
@@ -111,7 +107,7 @@
                                 </td>
                                 <td class="text-center">
                                     <a href="{{ route('admin.report.show', $report->id) }}" class="btn btn-sm btn-outline-info">
-                                        Lihat
+                                        <i class="fas fa-eye fa-sm mr-1"></i>Detail
                                     </a>
                                 </td>
                             </tr>
@@ -136,7 +132,7 @@
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    @role('super-admin')
+    @if(Auth::user()->hasRole('super-admin'))
     const rwSelect = document.getElementById('rw_id_filter');
     const rtSelect = document.getElementById('rt_id_filter');
     const currentRtId = "{{ request('rt') }}";
@@ -173,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function () {
     rwSelect.addEventListener('change', function() { fetchRts(this.value); });
 
     if (rwSelect.value) { fetchRts(rwSelect.value, currentRtId); }
-    @endrole
+    @endif
 });
 </script>
 @endsection

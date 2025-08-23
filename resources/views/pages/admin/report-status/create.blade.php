@@ -4,21 +4,40 @@
 
 @push('styles')
 <style>
-    .report-summary-card img {
-        width: 100%;
-        height: 150px;
+    .report-summary-box {
+        background-color: #f8f9fc;
+        border: 1px solid #e3e6f0;
+        border-radius: .5rem;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .report-summary-box img {
+        width: 80px;
+        height: 80px;
         object-fit: cover;
         border-radius: .35rem;
+        flex-shrink: 0;
     }
+    .report-summary-box .summary-details h6 {
+        font-weight: 700;
+        margin-bottom: .25rem;
+    }
+    .report-summary-box .summary-details p {
+        font-size: 0.85rem;
+        color: #858796;
+        margin-bottom: 0;
+    }
+
     .file-input-wrapper {
         position: relative;
         overflow: hidden;
-        display: inline-block;
         width: 100%;
-        height: 150px;
+        height: 180px;
         background-color: #f8f9fc;
         border: 2px dashed #e3e6f0;
-        border-radius: .35rem;
+        border-radius: .5rem;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -36,6 +55,8 @@
         top: 0;
         opacity: 0;
         cursor: pointer;
+        width: 100%;
+        height: 100%;
     }
     #image-preview {
         width: 100%;
@@ -44,7 +65,7 @@
         position: absolute;
         top: 0;
         left: 0;
-        border-radius: .35rem;
+        border-radius: .5rem;
     }
 </style>
 @endpush
@@ -61,34 +82,19 @@
     </div>
 
     <div class="row">
-        <div class="col-lg-5">
+        <div class="col-lg-10 mx-auto">
             <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-file-alt mr-2"></i> Ringkasan Laporan
-                    </h6>
-                </div>
-                <div class="card-body report-summary-card">
-                    <img src="{{ asset('storage/' . $report->image) }}" alt="Foto Laporan" class="mb-3">
-                    <h5 class="font-weight-bold">{{ $report->title }}</h5>
-                    <p class="small text-muted mb-2">
-                        <i class="fas fa-user mr-2"></i>{{ $report->resident->user->name }}
-                    </p>
-                    <p class="small text-muted">
-                        <i class="far fa-clock mr-2"></i>{{ $report->created_at->isoFormat('D MMMM YYYY, HH:mm') }}
-                    </p>
-                </div>
-            </div>
-        </div>
+                <div class="card-body p-4">
+                    <div class="report-summary-box mb-4">
+                        <img src="{{ asset('storage/' . $report->image) }}" alt="Foto Laporan">
+                        <div class="summary-details">
+                            <h6>{{ $report->title }}</h6>
+                            <p>Oleh: {{ $report->resident->user->name }}</p>
+                        </div>
+                    </div>
 
-        <div class="col-lg-7">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-pencil-alt mr-2"></i> Form Tambah Progress
-                    </h6>
-                </div>
-                <div class="card-body">
+                    <hr class="my-4">
+                    
                     <form action="{{ route('admin.report-status.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="report_id" value="{{ $report->id }}">
@@ -97,7 +103,7 @@
                             <label for="image" class="font-weight-bold">Bukti Progress (Opsional)</label>
                             <div class="file-input-wrapper">
                                 <input type="file" name="image" id="image" class="@error('image') is-invalid @enderror" onchange="previewImage(event)">
-                                <div id="image-placeholder">
+                                <div id="image-placeholder" style="display: flex; flex-direction: column; align-items: center;">
                                     <i class="fas fa-camera fa-2x text-gray-400"></i>
                                     <p class="text-gray-500 mt-2">Klik untuk memilih gambar</p>
                                 </div>
@@ -126,9 +132,12 @@
                             @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save mr-2"></i>Simpan Progress
-                        </button>
+                        <div class="text-right">
+                            <a href="{{ route('admin.report.show', $report->id) }}" class="btn btn-secondary">Batal</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save mr-2"></i>Simpan Progress
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>

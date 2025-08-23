@@ -67,7 +67,6 @@
     }
     .category-pills .pill-item.active { background-color: var(--primary-color); color: var(--bg-white); border-color: var(--primary-color); }
 
-    /* Desain Kartu Laporan Profesional (Terbaru) */
     .report-card-professional {
         background-color: var(--bg-white); border-radius: 18px;
         box-shadow: 0 4px 20px rgba(0,0,0,0.06); text-decoration: none;
@@ -99,7 +98,6 @@
     .status-badge.completed { background-color: #dcfce7; color: #166534; }
     .status-badge.rejected { background-color: #fee2e2; color: #b91c1c; }
 
-    /* Paginasi */
     .pagination { justify-content: center; }
     .pagination .page-item .page-link {
         border-radius: .35rem; margin: 0 3px; border: none;
@@ -117,16 +115,27 @@
             <div class="greeting-left">
                 @php
                     $user = Auth::user();
-                    $avatarUrl = $user->resident->avatar ? asset('storage/' . $user->resident->avatar) : null;
+                    $avatarUrl = $user->avatar ?? optional($user->resident)->avatar;
+                    if ($avatarUrl && !filter_var($avatarUrl, FILTER_VALIDATE_URL)) {
+                        $avatarUrl = asset('storage/' . $avatarUrl);
+                    }
                 @endphp
+                
                 @if($avatarUrl)
                     <img src="{{ $avatarUrl }}" alt="avatar" class="avatar">
                 @else
-                    <div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=22c55e&color=fff&size=96" alt="avatar" class="avatar">
                 @endif
+
                 <div>
                     <h6 class="greeting-title">{{ $user->name }}</h6>
-                    <p class="greeting-subtitle">Warga RT {{ optional($user->resident->rt)->number }} / RW {{ optional($user->resident->rw)->number }}</p>
+                    <p class="greeting-subtitle">
+                        @if(optional($user->resident)->rt && optional($user->resident)->rw)
+                            Warga RT {{ optional($user->resident->rt)->number }} / RW {{ optional($user->resident->rw)->number }}
+                        @else
+                            Profil belum lengkap
+                        @endif
+                    </p>
                 </div>
             </div>
         </div>
@@ -159,7 +168,7 @@
             </div>
 
             @forelse($reports as $report)
-                @php $isOwner = Auth::id() === $report->resident->user_id; @endphp
+                @php $isOwner = Auth::check() && Auth::id() === $report->resident->user_id; @endphp
                 <a href="{{ route('report.show', ['code' => $report->code, '_ref' => request()->fullUrl()]) }}" class="report-card-professional">
                     <img src="{{ asset('storage/' . $report->image) }}" alt="{{ $report->title }}" class="card-image">
                     <div class="card-body">
@@ -178,8 +187,14 @@
                     </div>
                     <div class="card-footer">
                         <div class="user-details">
-                            @if($isOwner && $report->resident->avatar)
-                                <img src="{{ asset('storage/' . $report->resident->avatar) }}" alt="Avatar Pelapor" class="avatar">
+                            @php
+                                $reporterAvatar = $report->resident->user->avatar;
+                                if ($reporterAvatar && !filter_var($reporterAvatar, FILTER_VALIDATE_URL)) {
+                                    $reporterAvatar = asset('storage/' . $reporterAvatar);
+                                }
+                            @endphp
+                            @if($isOwner && $reporterAvatar)
+                                <img src="{{ $reporterAvatar }}" alt="Avatar Pelapor" class="avatar">
                             @else
                                 <div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>
                             @endif

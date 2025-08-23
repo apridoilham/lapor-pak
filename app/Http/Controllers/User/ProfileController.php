@@ -62,10 +62,14 @@ class ProfileController extends Controller
     public function update(UpdateProfileRequest $request)
     {
         $validatedData = $request->validated();
-        $resident = $request->user()->resident;
+        $user = $request->user();
+        $resident = $user->resident;
 
         if ($path = $this->handleFileUpload($request, 'avatar', 'assets/avatar', $resident->avatar)) {
             $validatedData['avatar'] = $path;
+            
+            // PERBAIKAN DI SINI: Simpan juga path avatar baru ke tabel user
+            $user->update(['avatar' => $path]);
         }
 
         $this->residentRepository->updateResident($validatedData, $resident->id);

@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 use RealRashid\SweetAlert\Facades\Alert as Swal;
 
@@ -25,19 +27,44 @@ class GoogleController extends Controller
             $googleUser = Socialite::driver('google')->stateless()->user();
             $user = User::where('email', $googleUser->getEmail())->first();
 
+            $rawAvatarUrl = $googleUser->getAvatar();
+            $localAvatarPath = null;
+
+            if (!empty($rawAvatarUrl) && strpos($rawAvatarUrl, '/picture/0') === false) {
+                try {
+                    $avatarContents = file_get_contents($rawAvatarUrl);
+                    $avatarName = 'assets/avatar/' . Str::random(40) . '.jpg';
+                    Storage::disk('public')->put($avatarName, $avatarContents);
+                    $localAvatarPath = $avatarName;
+                } catch (\Exception $e) {
+                    $localAvatarPath = null;
+                }
+            }
+
             if ($user) {
-                // PERUBAHAN DI SINI: tambahkan 'name' untuk selalu diupdate
-                $user->update([
+                // Hapus avatar lama jika ada DAN BUKAN URL (path lokal)
+                if ($user->avatar && !filter_var($user->avatar, FILTER_VALIDATE_URL)) {
+                    Storage::disk('public')->delete($user->avatar);
+                }
+                
+                $updateData = [
                     'name' => $googleUser->getName(),
                     'google_id' => $googleUser->getId(),
-                    'avatar' => $googleUser->getAvatar(),
-                ]);
+                ];
+
+                // Hanya update avatar jika berhasil diunduh
+                if ($localAvatarPath) {
+                    $updateData['avatar'] = $localAvatarPath;
+                }
+
+                $user->update($updateData);
+
             } else {
                 $user = User::create([
                     'name' => $googleUser->getName(),
                     'email' => $googleUser->getEmail(),
                     'google_id' => $googleUser->getId(),
-                    'avatar' => $googleUser->getAvatar(),
+                    'avatar' => $localAvatarPath,
                 ]);
 
                 if ($googleUser->getEmail() === config('app.super_admin_email', 'bsblapor@gmail.com')) {
@@ -45,6 +72,7 @@ class GoogleController extends Controller
                 } else {
                     $user->assignRole('resident');
                     $user->resident()->create([
+                        'avatar' => $user->avatar,
                         'address' => 'Alamat belum diatur',
                     ]);
                 }
@@ -74,11 +102,8 @@ class GoogleController extends Controller
     public function logout(Request $request)
     {
         Auth::logout();
-        
         $request->session()->invalidate();
-        
         $request->session()->regenerateToken();
-
         return redirect()->route('login');
     }
 }
