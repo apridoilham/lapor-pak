@@ -111,15 +111,14 @@ class RtRwController extends Controller
     {
         $residentCount = $rtrw->rts()->withCount('residents')->get()->sum('residents_count');
 
-        if ($rtrw->admins()->count() > 0 || $residentCount > 0) {
-            Swal::error('Gagal', 'RW ini tidak dapat dihapus karena masih terikat dengan data Admin atau Warga.');
+        if ($residentCount > 0) {
+            Swal::error('Gagal', 'RW ini tidak dapat dihapus karena masih terikat dengan data Warga.');
             return back();
         }
 
         $rwNumber = $rtrw->number;
 
         DB::transaction(function () use ($rtrw) {
-            // Kita tidak perlu lagi menghapus laporan secara terpisah, karena jika warga sudah 0, laporan pasti juga sudah 0
             $rtrw->rts()->delete();
             $rtrw->delete();
         });

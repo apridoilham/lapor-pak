@@ -24,7 +24,6 @@
         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
             <h6 class="m-0 font-weight-bold text-primary">Daftar Semua Laporan</h6>
             
-            {{-- [PERBAIKAN] Tata letak form filter diubah agar tidak terlalu rapat --}}
             <form action="{{ route('admin.report.index') }}" method="GET" class="d-flex align-items-center">
                 <label for="sort" class="small font-weight-bold text-muted mr-2 mb-0">Urutkan:</label>
                 <select name="sort" id="sort" class="form-control form-control-sm mr-3" style="width: auto;" onchange="this.form.submit()">

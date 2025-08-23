@@ -8,22 +8,17 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Create or update super-admin
         $superAdmin = User::updateOrCreate(
             ['email' => 'bsblapor@gmail.com'],
             [
                 'name' => 'Super Admin Haeritage 31',
-                'google_id' => null, // Akan diisi saat login dengan Google
-                'password' => Hash::make('password'), // Password backup jika perlu
+                'google_id' => null,
+                'password' => Hash::make('password'),
             ]
         );
         
-        // Assign role super-admin
         if (!$superAdmin->hasRole('super-admin')) {
             $superAdmin->assignRole('super-admin');
         }

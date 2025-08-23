@@ -9,7 +9,6 @@ class LoginActivity extends Model
 {
     use HasFactory;
 
-    // Menonaktifkan timestamps default (created_at, updated_at)
     public const CREATED_AT = 'login_at';
     public const UPDATED_AT = null;
 

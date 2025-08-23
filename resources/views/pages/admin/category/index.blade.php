@@ -4,7 +4,6 @@
 
 @push('styles')
 <style>
-    /* Penjelasan: CSS diperbarui untuk tampilan tabel yang lebih modern dan bersih */
     .table thead th {
         font-weight: 600;
         color: #5a5c69;

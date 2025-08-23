@@ -23,7 +23,6 @@ class UpdateReportCategoryRequest extends FormRequest
                 'max:255',
                 Rule::unique('report_categories')->ignore($categoryId),
             ],
-            // 'image' dihapus dari sini
         ];
     }
 

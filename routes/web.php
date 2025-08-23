@@ -16,10 +16,8 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReportCategoryController;
 use App\Http\Controllers\Admin\ReportStatusController;
 use App\Http\Controllers\Admin\ReportExportController;
-use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\RtRwController;
-use App\Http\Controllers\Api\AdminUserCheckController;
 use App\Http\Controllers\Api\DependentDropdownController;
 use App\Http\Controllers\Api\EmailCheckController;
 use App\Http\Controllers\Api\ReportCategoryCheckController;
@@ -37,7 +35,6 @@ Route::middleware('guest')->group(function () {
 Route::post('logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
 Route::prefix('api')->group(function () {
-    Route::post('/check-admin-email', [AdminUserCheckController::class, 'checkEmail']);
     Route::get('/get-rts-by-rw/{rwId}', [DependentDropdownController::class, 'getRtsByRw']);
     Route::post('/check-rw', [RwCheckController::class, 'checkRw']);
     Route::post('/check-report-category', [ReportCategoryCheckController::class, 'checkName']);
@@ -82,12 +79,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin|super-ad
     Route::post('/export-reports', [ReportExportController::class, 'store'])->name('report.export.store');
     Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
 
-    // Penjelasan: Menambahkan 'destroy' ke dalam array 'except' untuk menghapus route hapus.
     Route::resource('/resident', ResidentController::class)->except(['create', 'store', 'edit', 'update', 'destroy']);
 
     Route::middleware(['role:super-admin'])->group(function () {
         Route::resource('/report-category', ReportCategoryController::class);
-        Route::resource('/admin-user', AdminUserController::class);
         Route::resource('/rtrw', RtRwController::class);
         Route::delete('/rt/{rt}', [RtRwController::class, 'destroyRt'])->name('rt.destroy');
     });

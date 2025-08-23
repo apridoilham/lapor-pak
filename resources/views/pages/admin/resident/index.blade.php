@@ -126,7 +126,6 @@
 
 @push('scripts')
 <script>
-    // Tidak ada perubahan pada skrip, karena sudah berfungsi dengan benar
     document.addEventListener('DOMContentLoaded', function() {
         const rwSelect = document.getElementById('rw_id');
         const rtSelect = document.getElementById('rt_id');

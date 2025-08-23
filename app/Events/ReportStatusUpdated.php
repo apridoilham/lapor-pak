@@ -14,22 +14,14 @@ class ReportStatusUpdated implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public Report $report;
-    public ?int $actorId; // TAMBAHKAN properti ini
+    public ?int $actorId;
 
-    /**
-     * Create a new event instance.
-     */
-    public function __construct(Report $report, ?int $actorId) // TAMBAHKAN parameter ini
+    public function __construct(Report $report, ?int $actorId)
     {
         $this->report = $report;
-        $this->actorId = $actorId; // Simpan nilainya
+        $this->actorId = $actorId;
     }
 
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
-     */
     public function broadcastOn(): array
     {
         return [

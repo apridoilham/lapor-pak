@@ -15,13 +15,12 @@
     <link href="{{ asset('assets/admin/css/sb-admin-2.min.css') }}" rel="stylesheet">
     
     <style>
-        /* Palet Warna & Konfigurasi Tema "Fokus Pro" */
         :root {
             --primary-blue: #0d6efd;
-            --sidebar-bg: #1a202c;      /* Warna latar sidebar (sangat gelap) */
-            --sidebar-text: #a0aec0;   /* Warna teks sidebar (abu-abu terang) */
+            --sidebar-bg: #1a202c;
+            --sidebar-text: #a0aec0;
             --sidebar-active-text: #ffffff;
-            --content-bg: #f7f9fc;      /* Warna latar konten (putih keabuan) */
+            --content-bg: #f7f9fc;
             --card-bg: #ffffff;
             --card-border: #e2e8f0;
             --text-heading: #1a202c;

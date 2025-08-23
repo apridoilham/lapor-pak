@@ -15,7 +15,6 @@ class StoreReportRequest extends FormRequest
 
     public function rules(): array
     {
-        // [PERBAIKAN] Disederhanakan, hanya untuk user/resident
         return [
             'report_category_id' => 'required|exists:report_categories,id',
             'title' => 'required|string|max:255',

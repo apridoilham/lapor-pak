@@ -32,9 +32,7 @@ class ProfileController extends Controller
     {
         $user = Auth::user()->load('resident.rt', 'resident.rw');
         
-        // Pastikan user memiliki data resident sebelum menghitung statistik
         if (!$user->resident) {
-            // Ini adalah kasus darurat jika data resident tidak ada, arahkan ke edit
             Swal::error('Data Tidak Lengkap', 'Data kependudukan Anda tidak ditemukan, harap lengkapi profil.');
             return redirect()->route('profile.edit');
         }
@@ -42,7 +40,7 @@ class ProfileController extends Controller
         $stats = $this->reportRepository->countStatusesByResidentId($user->resident->id);
 
         return view('pages.app.profile', [
-            'user' => $user, // Kirim variabel $user ke view
+            'user' => $user,
             'activeReportsCount' => $stats['active'],
             'completedReportsCount' => $stats['completed'],
             'rejectedReportsCount' => $stats['rejected'],

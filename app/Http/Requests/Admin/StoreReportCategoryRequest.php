@@ -15,7 +15,6 @@ class StoreReportCategoryRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255|unique:report_categories,name',
-            // 'image' dihapus dari sini
         ];
     }
 

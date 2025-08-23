@@ -4,18 +4,16 @@
 
 @push('styles')
 <style>
-    /* Variabel Desain "Neumorphic" */
     :root {
         --primary-color: #10B981;
         --text-dark: #1f2937;
         --text-light: #6b7280;
-        --bg-body: #f1f5f9; /* Latar belakang sedikit lebih gelap untuk efek 3D */
+        --bg-body: #f1f5f9;
         --bg-white: #ffffff;
         --border-color: #e5e7eb;
         --font-sans: 'Inter', 'Poppins', 'Segoe UI', sans-serif;
     }
 
-    /* Pengaturan Dasar & Font */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     body {
         font-family: var(--font-sans);
@@ -26,7 +24,6 @@
     }
     .main-content { padding: 1.5rem; padding-bottom: 100px; }
 
-    /* Header Halaman */
     .page-header {
         text-align: center;
         margin-bottom: 2rem;
@@ -37,7 +34,6 @@
         color: var(--text-dark);
     }
 
-    /* Kartu Utama dengan Efek Neumorphism */
     .neumorphic-card {
         background-color: var(--bg-body);
         border-radius: 24px;
@@ -46,7 +42,6 @@
         box-shadow: 8px 8px 16px #d1d9e6, -8px -8px 16px #ffffff;
     }
 
-    /* Info Profil Utama */
     .profile-info-main {
         text-align: center;
         border-bottom: 1px solid var(--border-color);
@@ -62,7 +57,6 @@
     }
     .profile-info-main .name { font-weight: 700; font-size: 1.75rem; color: var(--text-dark); }
     
-    /* Daftar Info Detail (Email, Telepon, Alamat) */
     .info-list .info-item {
         display: flex; align-items: flex-start; gap: 1rem;
     }
@@ -78,7 +72,6 @@
     .info-list .info-text .label { font-size: 0.8rem; color: var(--text-light); }
     .info-list .info-text .value { font-weight: 600; color: var(--text-dark); }
 
-    /* Kartu Statistik Terpadu */
     .stats-summary-card {
         display: flex;
         justify-content: space-around;
@@ -87,7 +80,6 @@
     .stats-summary-card .stat-item .stat-count { font-size: 1.75rem; font-weight: 700; color: var(--text-dark); }
     .stats-summary-card .stat-item .stat-label { font-size: 0.8rem; color: var(--text-light); margin-top: 0.25rem; }
 
-    /* Menu Aksi */
     .action-menu .action-card {
         display: flex; align-items: center; gap: 1rem; padding: 1rem;
         border-radius: 16px; margin-bottom: 1rem;
@@ -197,7 +189,6 @@
 @section('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Animasi Hitung Angka Statistik
             const counters = document.querySelectorAll('.stat-count');
             counters.forEach(counter => {
                 const updateCount = () => {

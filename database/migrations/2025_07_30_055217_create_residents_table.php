@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('avatar')->nullable();
-            $table->string('phone')->nullable(); // <-- Kolom ini sudah ada di sini
+            $table->string('phone')->nullable();
             $table->timestamps();
         });
     }

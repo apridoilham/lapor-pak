@@ -5,7 +5,6 @@
 @push('styles')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
-    /* ... CSS Anda yang sudah ada di sini, tidak perlu diubah ... */
     :root {
         --primary-color: #10B981;
         --primary-gradient: linear-gradient(135deg, #10B981 0%, #34D399 100%);
@@ -187,14 +186,8 @@
             const form = document.getElementById('profile-form');
             const saveButton = document.getElementById('save-btn');
             const isProfileIncomplete = {{ $isProfileIncomplete ? 'true' : 'false' }};
-
-            // Menyimpan data asli dari server
             const originalData = @json($originalDataForJs);
-
-            // Fungsi normalisasi data untuk perbandingan yang akurat
             const normalize = (value) => (value || '').toString().trim();
-
-            // Fungsi untuk pengguna LAMA (mengecek perubahan dari data original)
             const checkFormForChanges = () => {
                 let hasChanged = false;
                 if (normalize(form.elements['name'].value) !== normalize(originalData.name)) hasChanged = true;
@@ -207,7 +200,6 @@
                 saveButton.disabled = !hasChanged;
             };
 
-            // Fungsi untuk pengguna BARU (mengecek kelengkapan)
             const checkFormForCompletion = () => {
                 let allFieldsFilled = true;
                 const requiredInputs = form.querySelectorAll('[required]');
@@ -219,7 +211,6 @@
                 saveButton.disabled = !allFieldsFilled;
             };
 
-            // Fungsi utama yang memilih logika mana yang akan dijalankan
             const updateButtonState = () => {
                 if (isProfileIncomplete) {
                     checkFormForCompletion();
@@ -228,11 +219,9 @@
                 }
             };
 
-            // Pasang event listener ke form
             form.addEventListener('input', updateButtonState);
             form.addEventListener('change', updateButtonState);
 
-            // Pratinjau Avatar
             const avatarInput = document.getElementById('avatar-input');
             const avatarPreview = document.getElementById('avatar-preview');
             avatarInput.addEventListener('change', (event) => {
@@ -246,7 +235,6 @@
                 }
             });
             
-            // Cek jika elemen peta ada
             if (document.getElementById('map')) {
                 const rwSelect = document.getElementById('rw_id');
                 const rtSelect = document.getElementById('rt_id');
@@ -289,12 +277,11 @@
                     );
                 });
                 
-                // PERBAIKAN: Fungsi fetchRts sekarang menerima callback
                 const fetchRts = (rwId, selectedRtId = null, callback = null) => {
                     if (!rwId) { 
                         rtSelect.innerHTML = '<option value="">Pilih RW</option>'; 
                         rtSelect.disabled = true; 
-                        if (callback) callback(); // Jalankan callback jika ada
+                        if (callback) callback();
                         return; 
                     }
                     fetch(`/api/get-rts-by-rw/${rwId}`)
@@ -313,22 +300,18 @@
                             } else {
                                 rtSelect.innerHTML = '<option value="" disabled selected>Tidak ada RT</option>';
                             }
-                            if (callback) callback(); // Jalankan callback setelah selesai
+                            if (callback) callback();
                         });
                 };
 
                 rwSelect.addEventListener('change', function() { fetchRts(this.value, null, updateButtonState); });
                 
-                // PERBAIKAN: Logika pemanggilan awal yang menunggu RT selesai dimuat
                 if (rwSelect.value) {
-                    // Panggil fetchRts dan teruskan updateButtonState sebagai callback
                     fetchRts(rwSelect.value, activeRtId, updateButtonState);
                 } else {
-                    // Jika tidak ada RW yang dipilih, langsung jalankan pengecekan
                     updateButtonState();
                 }
             } else {
-                // Jika tidak ada peta, jalankan pengecekan langsung
                 updateButtonState();
             }
         });

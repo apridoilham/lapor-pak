@@ -54,10 +54,8 @@ class ResidentController extends Controller
                 break;
         }
 
-        // Penjelasan: Mengambil nilai 'per_page' dari request, dengan default 10.
         $perPage = $request->input('per_page', 10);
 
-        // Penjelasan: Menggunakan variabel $perPage pada fungsi paginate.
         $residents = $query->paginate($perPage)->withQueryString();
 
         return view('pages.admin.resident.index', compact('residents', 'rws', 'rts', 'perPage'));

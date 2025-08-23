@@ -12,13 +12,11 @@
     gap: 1rem;
     }
 
-    /* PERBAIKAN UTAMA ADA DI SINI */
     .rt-card {
-        /* Gunakan Flexbox untuk layout */
         display: flex;
-        flex-direction: column; /* Susun item dari atas ke bawah */
-        justify-content: center; /* Posisikan di tengah secara vertikal */
-        align-items: center;    /* Posisikan di tengah secara horizontal */
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
         
         background-color: #f8f9fc;
         border: 1px solid #e3e6f0;
@@ -26,7 +24,7 @@
         padding: 1.5rem;
         text-align: center;
         transition: all .2s ease-in-out;
-        aspect-ratio: 3 / 4; /* Opsional: membuat kartu sedikit lebih tinggi */
+        aspect-ratio: 3 / 4;
     }
 
     .rt-card:hover {
@@ -35,7 +33,7 @@
     }
 
     .rt-card .rt-number {
-        font-size: 2.25rem; /* Sedikit diperbesar agar lebih menonjol */
+        font-size: 2.25rem;
         font-weight: 700;
         color: #4e73df;
         line-height: 1.2;
@@ -44,7 +42,7 @@
     .rt-card .rt-label {
         font-size: 0.9rem;
         color: #858796;
-        margin-top: 0.25rem; /* Beri sedikit jarak dari nomor */
+        margin-top: 0.25rem;
     }
 </style>
 @endpush

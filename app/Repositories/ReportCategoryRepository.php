@@ -10,8 +10,6 @@ class ReportCategoryRepository implements ReportCategoryRepositoryInterface
 {
     public function getAllReportCategories()
     {
-        // PENJELASAN: Menambahkan withCount('reports') untuk menghitung jumlah laporan
-        // di setiap kategori secara efisien.
         return ReportCategory::withCount('reports')->latest()->get();
     }
 

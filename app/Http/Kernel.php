@@ -6,34 +6,14 @@ use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
 {
-    /**
-     * The application's global HTTP middleware stack.
-     * ...
-     */
-    protected $middleware = [
-        // ...
-    ];
 
-    /**
-     * The application's route middleware groups.
-     * ...
-     */
+    protected $middleware = [];
+
     protected $middlewareGroups = [
-        'web' => [
-            // ...
-        ],
-        'api' => [
-            // ...
-        ],
+        'web' => [],
+        'api' => [],
     ];
 
-    /**
-     * The application's route middleware.
-     *
-     * These middleware may be assigned to groups or used individually.
-     *
-     * @var array<string, class-string|string>
-     */
     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
@@ -45,6 +25,5 @@ class Kernel extends HttpKernel
         'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
         'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
         'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
-        // HAPUS BARIS 'profile.completed' DARI SINI
     ];
 }

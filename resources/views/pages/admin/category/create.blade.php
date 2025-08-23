@@ -13,7 +13,6 @@
         </div>
     </div>
 
-    <!-- Penjelasan: Menggunakan col-lg-12 untuk efek full-screen di layar besar -->
     <div class="row">
         <div class="col-lg-12">
             <div class="card shadow mb-4">

@@ -8,7 +8,6 @@
         <span>Laporanmu</span>
     </a>
     
-    {{-- Container untuk tombol kamera yang sekarang menjadi bagian dari navigasi --}}
     <div class="nav-fab-container">
         <div class="floating-button-container" onclick="window.location.href = '{{ route('report.take') }}'">
             <button class="floating-button">

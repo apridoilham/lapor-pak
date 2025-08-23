@@ -33,7 +33,6 @@
         if (image) {
             imagePreview.src = image;
         } else {
-            // Jika tidak ada gambar, kembali ke halaman ambil foto
             window.location.href = '{{ route('report.take') }}';
         }
     </script>

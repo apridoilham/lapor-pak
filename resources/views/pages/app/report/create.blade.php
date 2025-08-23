@@ -2,7 +2,6 @@
 
 @section('title', 'Buat Laporan Baru')
 
-{{-- PERUBAHAN HANYA ADA DI DALAM BLOK STYLE INI --}}
 @push('styles')
 <style>
     :root {
@@ -26,7 +25,6 @@
         padding-bottom: 100px;
     }
 
-    /* Header */
     .header-nav {
         display: flex;
         align-items: center;
@@ -46,7 +44,6 @@
         color: var(--text-light);
     }
 
-    /* Form Styling */
     form .mb-3 {
         padding: 1.25rem;
         background: var(--bg-white);
@@ -69,7 +66,6 @@
         box-shadow: 0 0 0 3px var(--primary-light);
     }
 
-    /* Image Preview */
     #image-preview-container {
         width: 100%;
         border-radius: 12px;
@@ -86,13 +82,11 @@
         border-radius: 12px;
     }
     
-    /* Map Container Fix */
     #map {
         height: 250px;
         border: 1px solid var(--border-color);
     }
 
-    /* Visibility Radio Buttons */
     .form-check {
         padding: 1rem;
         border: 1px solid var(--border-color);
@@ -105,7 +99,6 @@
         border-color: var(--primary-color);
     }
 
-    /* Button */
     .d-grid .btn-primary {
         padding: 0.9rem !important;
         border-radius: 12px !important;
@@ -120,7 +113,6 @@
 </style>
 @endpush
 
-{{-- STRUKTUR HTML DAN JAVASCRIPT DI BAWAH INI SAMA PERSIS SEPERTI YANG ANDA BERIKAN --}}
 @section('content')
     <div class="header-nav mb-4">
         <a href="{{ route('report.take') }}" class="text-decoration-none">
@@ -275,13 +267,11 @@
 
                 checkFormValidity();
             } else {
-                // Jika tidak ada gambar, jangan redirect, biarkan placeholder terlihat
                 if(imagePlaceholder) {
                     imagePlaceholder.style.display = 'flex';
                 }
             }
 
-            // Map Script Integration
             const latitudeInput = document.getElementById('latitude');
             const longitudeInput = document.getElementById('longitude');
             const addressInput = document.getElementById('address');
@@ -339,7 +329,6 @@
 
             detectButton.addEventListener('click', detectLocation);
 
-            // Auto-detect location on page load
             detectLocation();
         });
     </script>

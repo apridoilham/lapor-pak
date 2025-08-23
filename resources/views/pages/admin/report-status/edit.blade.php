@@ -61,7 +61,6 @@
     </div>
 
     <div class="row">
-        {{-- Kolom Kiri: Ringkasan Laporan --}}
         <div class="col-lg-5">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
@@ -82,7 +81,6 @@
             </div>
         </div>
 
-        {{-- Kolom Kanan: Form Input --}}
         <div class="col-lg-7">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">

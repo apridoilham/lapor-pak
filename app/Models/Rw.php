@@ -24,8 +24,4 @@ class Rw extends Model
         return $this->hasMany(Resident::class);
     }
 
-    public function admins(): HasMany
-    {
-        return $this->hasMany(User::class)->role('admin');
-    }
 }

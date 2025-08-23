@@ -166,7 +166,6 @@
 @push('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
     <script>
-        // PENJELASAN: Seluruh skrip JavaScript untuk filter dinamis telah DIHAPUS.
         const lottieContainer = document.getElementById('lottie-empty-list');
         if (lottieContainer) {
             bodymovin.loadAnimation({

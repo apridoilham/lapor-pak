@@ -70,12 +70,10 @@ class ResidentRepository implements ResidentRepositoryInterface
                 ]);
             }
 
-            // [PENJELASAN] Array ini akan diupdate ke tabel 'residents'
             $residentData = [
                 'rt_id' => $data['rt_id'],
                 'rw_id' => $data['rw_id'],
                 'address' => $data['address'],
-                // [PERBAIKAN] Tambahkan baris ini untuk menyimpan nomor telepon
                 'phone' => $data['phone'] ?? $resident->phone,
             ];
 

@@ -14,7 +14,6 @@
 </head>
 
 <body>
-    {{-- Menggunakan struktur yang sama dengan layout utama --}}
     <div class="main-content">
         @yield('content')
     </div>
@@ -24,8 +23,6 @@
         crossorigin="anonymous">
     </script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
-    {{-- Hapus script lama dari sini, akan kita pindahkan ke view masing-masing --}}
 
     @yield('scripts')
 </body>

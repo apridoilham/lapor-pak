@@ -17,7 +17,6 @@ class ReportController extends Controller
         
         $query = Report::with(['resident.user', 'resident.rt', 'resident.rw', 'reportCategory', 'latestStatus']);
 
-        // Filter logic
         if ($user->hasRole('super-admin')) {
             $rwId = $request->query('rw');
             $rtId = $request->query('rt');
@@ -29,7 +28,6 @@ class ReportController extends Controller
             if ($rtId) { $query->whereHas('resident', fn($q) => $q->where('rt_id', $rtId)); }
         }
 
-        // Sorting logic
         $sortBy = $request->query('sort', 'latest_updated');
         switch ($sortBy) {
             case 'name_asc':

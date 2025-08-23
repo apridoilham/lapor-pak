@@ -5,7 +5,6 @@
 @push('styles')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
-    /* === FONT & PALET WARNA BARU === */
     :root {
         --primary-color: #4e73df;
         --success-color: #1cc88a;
@@ -21,7 +20,6 @@
     #content-wrapper, #content { background-color: var(--bg-main) !important; }
     body { font-family: var(--font-sans); }
 
-    /* === HEADER HALAMAN === */
     .page-header-v6 {
         background-color: var(--bg-card);
         padding: 1.5rem 2rem;
@@ -163,7 +161,6 @@
         </div>
     </div>
     
-    {{-- KONTEN UTAMA DENGAN TAB --}}
     <div class="main-content-card">
         <ul class="nav nav-tabs nav-tabs-custom" id="reportTab" role="tablist">
             <li class="nav-item">
@@ -177,7 +174,6 @@
             </li>
         </ul>
         <div class="tab-content" id="reportTabContent">
-            {{-- TAB 1: DETAIL LAPORAN --}}
             <div class="tab-pane fade show active" id="detail" role="tabpanel" aria-labelledby="detail-tab">
                 <div class="row">
                     <div class="col-md-6">
@@ -195,7 +191,6 @@
                 </div>
             </div>
 
-            {{-- TAB 2: RIWAYAT AKTIVITAS --}}
             <div class="tab-pane fade" id="timeline" role="tabpanel" aria-labelledby="timeline-tab">
                  <div class="timeline-v6">
                     @forelse ($report->reportStatuses->sortBy('created_at') as $status)
@@ -242,7 +237,6 @@
                 </div>
             </div>
 
-            {{-- TAB 3: INFO PELAPOR --}}
             <div class="tab-pane fade" id="reporter" role="tabpanel" aria-labelledby="reporter-tab">
                 <div class="reporter-profile-card">
                      <div class="d-flex align-items-center mb-4">
@@ -263,7 +257,6 @@
         </div>
     </div>
     
-    {{-- LIGHTBOX ELEMENT --}}
     <div class="lightbox-overlay" id="lightbox">
         <button class="lightbox-close-btn" id="lightbox-close">&times;</button>
         <div class="lightbox-content"><img src="" alt="Gambar Bukti Laporan" id="lightbox-image"></div>
@@ -291,7 +284,6 @@
             setTimeout(() => map.invalidateSize(), 10);
         }
         
-        // Inisialisasi peta saat tab detail pertama kali ditampilkan
         if ($('#detail-tab').hasClass('active')) {
             initializeMap();
         }
@@ -302,7 +294,6 @@
             }
         });
 
-        // Konfirmasi Hapus
         document.querySelectorAll('.delete-form').forEach(form => {
             form.addEventListener('submit', function(event) {
                 event.preventDefault();
@@ -317,7 +308,6 @@
             });
         });
 
-        // Lightbox
         const lightbox = document.getElementById('lightbox');
         if(lightbox) {
             const allImages = document.querySelectorAll('.report-main-image, .proof-image');

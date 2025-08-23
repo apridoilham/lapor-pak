@@ -13,7 +13,6 @@ class ActivityLogController extends Controller
     {
         $user = Auth::user();
 
-        // Super Admin melihat semua log, Admin biasa hanya melihat log miliknya
         if ($user->hasRole('super-admin')) {
             $activities = LoginActivity::with('user')->latest('login_at')->paginate(20);
         } else {

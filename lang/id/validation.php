@@ -1,18 +1,6 @@
 <?php
 
 return [
-
-    /*
-    |--------------------------------------------------------------------------
-    | Pesan-Pesan Validasi
-    |--------------------------------------------------------------------------
-    |
-    | Baris-baris bahasa berikut berisi pesan-pesan kesalahan default yang digunakan oleh
-    | kelas validator. Beberapa aturan ini memiliki beberapa versi seperti
-    | aturan ukuran. Silakan sesuaikan setiap pesan di sini.
-    |
-    */
-
     'accepted' => ':attribute harus diterima.',
     'active_url' => ':attribute bukan URL yang valid.',
     'after' => ':attribute harus berupa tanggal setelah :date.',
@@ -118,17 +106,6 @@ return [
     'url' => 'Format :attribute tidak valid.',
     'uuid' => ':attribute harus berupa UUID yang valid.',
 
-    /*
-    |--------------------------------------------------------------------------
-    | Atribut Validasi Kustom
-    |--------------------------------------------------------------------------
-    |
-    | Baris berikut digunakan untuk menukar placeholder atribut kita
-    | dengan sesuatu yang lebih mudah dibaca seperti "Alamat E-Mail"
-    | daripada "email". Ini hanya membantu kita membuat pesan lebih ekspresif.
-    |
-    */
-
     'attributes' => [
         'name' => 'Nama',
         'email' => 'Email',
@@ -144,5 +121,4 @@ return [
         'report_category_id' => 'Kategori Laporan',
         'resident_id' => 'Pelapor',
     ],
-
 ];

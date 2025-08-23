@@ -2,11 +2,9 @@
 
 namespace App\Providers;
 
-use App\Interfaces\AdminRepositoryInterface; // <-- DITAMBAHKAN
 use App\Interfaces\AuthRepositoryInterface;
 use App\Interfaces\ResidentRepositoryInterface;
 use App\Interfaces\ReportCategoryRepositoryInterface;
-use App\Repositories\AdminRepository; // <-- DITAMBAHKAN
 use App\Repositories\AuthRepository;
 use App\Repositories\ResidentRepository;
 use App\Repositories\ReportCategoryRepository;
@@ -25,11 +23,10 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(ReportCategoryRepositoryInterface::class, ReportCategoryRepository::class);
         $this->app->bind(ReportRepositoryInterface::class, ReportRepository::class);
         $this->app->bind(ReportStatusRepositoryInterface::class, ReportStatusRepository::class);
-        $this->app->bind(AdminRepositoryInterface::class, AdminRepository::class); // <-- DITAMBAHKAN
     }
 
     public function boot(): void
     {
-        //
+
     }
 }

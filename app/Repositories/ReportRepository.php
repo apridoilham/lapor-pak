@@ -102,8 +102,6 @@ class ReportRepository implements ReportRepositoryInterface
         return $query->latest('updated_at')->paginate(10)->withQueryString();
     }
 
-    // ... sisa metode tidak ada perubahan ...
-
     public function getAllReportsForAdmin(Request $request, int $rwId = null, int $rtId = null): EloquentCollection
     {
         $query = Report::with('resident.user', 'reportCategory', 'latestStatus')->whereHas('resident');

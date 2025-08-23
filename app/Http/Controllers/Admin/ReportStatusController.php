@@ -47,7 +47,6 @@ class ReportStatusController extends Controller
         }
         $data['created_by_role'] = 'admin';
 
-        // [PERBAIKAN] Kirim Auth::id() sebagai argumen kedua ke repository
         $this->reportStatusRepository->createReportStatus($data, Auth::id());
 
         Swal::success('Success', 'Data Progress laporan berhasil ditambahkan!')->timerProgressBar();
@@ -72,7 +71,6 @@ class ReportStatusController extends Controller
             $data['image'] = $path;
         }
 
-        // [PERBAIKAN] Kirim Auth::id() sebagai argumen ketiga ke repository
         $this->reportStatusRepository->updateReportStatus($data, $id, Auth::id());
 
         Swal::success('Success', 'Data progress laporan berhasil diubah!')->timerProgressBar();

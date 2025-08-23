@@ -3,7 +3,6 @@
 @section('title', 'Notifikasi')
 
 @push('styles')
-{{-- (CSS tetap sama persis, tidak ada perubahan) --}}
 <style>
     :root {
         --primary-color: #10B981;
@@ -51,7 +50,6 @@
 @endpush
 
 @section('content')
-    {{-- (Konten HTML tetap sama, tidak ada perubahan) --}}
     @php
         $filter = request('filter');
         $notificationsForView = $notifications;
@@ -174,7 +172,6 @@
                 });
             }
 
-            // ▼▼▼ FUNGSI INI TELAH DIPERBAIKI TOTAL ▼▼▼
             const performBulkAction = (url, successMessage) => {
                 const selectedIds = Array.from(document.querySelectorAll('.notification-checkbox:checked')).map(cb => cb.value);
                 if (selectedIds.length === 0) return;
@@ -196,19 +193,15 @@
                             body: JSON.stringify({ ids: selectedIds })
                         })
                         .then(response => {
-                            // Cek apakah response dari server adalah sukses (status 2xx)
                             if (!response.ok) {
-                                // Jika tidak, lempar error untuk ditangkap oleh .catch()
                                 throw new Error('Server merespons dengan error!');
                             }
                             return response.json();
                         })
                         .then(data => {
-                            // Ini hanya akan berjalan jika response.ok
                             Swal.fire('Berhasil!', data.message, 'success').then(() => window.location.reload());
                         })
                         .catch(error => {
-                            // Menangkap semua jenis error (network, server error, dll)
                             console.error('Error:', error);
                             Swal.fire('Gagal!', 'Terjadi kesalahan saat memproses permintaan Anda.', 'error');
                         });

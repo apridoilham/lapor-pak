@@ -18,13 +18,8 @@ class User extends Authenticatable
         'rw_id',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
-        'password', // Tambahkan ini
+        'password',
         'remember_token',
     ];
 
@@ -35,25 +30,16 @@ class User extends Authenticatable
         ];
     }
 
-    // [PERBAIKAN] Tambahkan metode accessor di bawah ini
-    /**
-     * Accessor untuk mendapatkan nama yang disensor.
-     *
-     * @return string
-     */
     public function getCensoredNameAttribute(): string
     {
         $name = $this->attributes['name'];
 
-        // Menangani nama yang sangat pendek agar tidak error
         if (mb_strlen($name) <= 3) {
             return mb_substr($name, 0, 1) . '***';
         }
 
-        // Ambil 3 huruf pertama, sisanya diganti dengan bintang
         return mb_substr($name, 0, 3) . '***';
     }
-    // [AKHIR PERBAIKAN]
 
     public function resident()
     {

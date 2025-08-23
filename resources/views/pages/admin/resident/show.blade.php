@@ -1,6 +1,5 @@
 @extends('layouts.admin')
-
-@section('title', 'Detail Pelapor')
+@section('title', 'Detail Pelapor: ' . $resident->user->name)
 
 @push('styles')
 <style>
@@ -139,7 +138,6 @@
                         <li><i class="fas fa-phone fa-fw"></i> {{ $resident->phone ?? 'Belum diisi' }}</li>
                         <li><i class="fas fa-calendar-alt fa-fw"></i> Terdaftar {{ $resident->created_at->diffForHumans() }}</li>
                     </ul>
-                    {{-- [PENAMBAHAN] Menampilkan alamat lengkap pelapor --}}
                     <ul class="profile-meta-list mt-2">
                         <li><i class="fas fa-home fa-fw"></i> <span>{{ $resident->address }}</span></li>
                     </ul>
@@ -236,7 +234,7 @@
                                         <span class="soft-badge badge-secondary">Baru</span>
                                     @endif
                                 </td>
-                                <td>{{ optional($report->latestStatus)->updated_at->isoFormat('D MMM Y, HH:mm') ?? $report->created_at->isoFormat('D MMM Y, HH:mm') }}</td>
+                                <td>{{ ($report->latestStatus ? $report->latestStatus->updated_at : $report->created_at)->isoFormat('D MMM Y, HH:mm') }}</td>
                                 <td class="text-right">
                                     <a href="{{ route('admin.report.show', $report->id) }}" class="btn btn-sm btn-light btn-circle" title="Lihat Detail Laporan">
                                         <i class="fas fa-eye"></i>

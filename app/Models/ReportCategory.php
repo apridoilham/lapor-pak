@@ -11,7 +11,6 @@ class ReportCategory extends Model
 
     protected $fillable = [
         'name',
-        // 'image' dihapus dari sini
     ];
 
     public function reports()

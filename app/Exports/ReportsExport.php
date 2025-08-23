@@ -17,21 +17,13 @@ class ReportsExport implements FromCollection, WithHeadings, WithMapping, Should
         $this->filters = $filters;
     }
 
-    /**
-    * @return \Illuminate\Support\Collection
-    */
     public function collection()
     {
-        // Gunakan App::make() untuk memanggil repository dari dalam kelas ini
         $repository = app(ReportRepositoryInterface::class);
         
-        // Ambil data yang sudah difilter
         return $repository->getFilteredReports($this->filters);
     }
 
-    /**
-     * Mendefinisikan judul untuk setiap kolom di file Excel.
-     */
     public function headings(): array
     {
         return [
@@ -41,9 +33,6 @@ class ReportsExport implements FromCollection, WithHeadings, WithMapping, Should
         ];
     }
 
-    /**
-     * Memetakan data dari setiap baris laporan ke kolom yang sesuai.
-     */
     public function map($report): array
     {
         return [

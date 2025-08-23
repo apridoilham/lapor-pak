@@ -4,9 +4,8 @@
 
 @push('styles')
 <style>
-    /* Variabel Desain "Fresh & Precise" */
     :root {
-        --primary-color: #10B981; /* Emerald Green */
+        --primary-color: #10B981;
         --primary-dark: #059669;
         --text-dark: #111827;
         --text-light: #6B7280;
@@ -32,7 +31,6 @@
         padding-bottom: 120px;
     }
 
-    /* Header Halaman */
     .page-header h3 {
         font-weight: 800;
         font-size: 2rem;
@@ -40,7 +38,6 @@
         margin-bottom: 1.5rem;
     }
 
-    /* Kartu Filter Statistik Interaktif */
     .stat-filter-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -96,7 +93,6 @@
     }
     .stat-card.active .card-count { color: var(--white); }
 
-    /* Judul Konten Dinamis */
     .content-title-header {
         font-weight: 700;
         font-size: 1.25rem;
@@ -106,7 +102,6 @@
         border-bottom: 1px solid #e5e7eb;
     }
 
-    /* Desain List Item Laporan */
     .report-list-item {
         display: flex;
         align-items: center;
@@ -142,17 +137,15 @@
     .report-list-item .item-actions .dropdown-toggle { color: var(--text-light); }
     .report-list-item .item-actions .dropdown-toggle::after { display: none; }
 
-    /* ▼▼▼ CSS BARU UNTUK MEMBUAT KOTAK BISA DI-KLIK ▼▼▼ */
     .report-link-wrapper {
         display: flex;
         align-items: center;
         gap: 1rem;
-        flex-grow: 1; /* Membuat link memenuhi ruang yang tersedia */
-        text-decoration: none; /* Menghilangkan garis bawah default */
-        color: inherit; /* Mewarisi warna teks dari parent */
+        flex-grow: 1;
+        text-decoration: none;
+        color: inherit;
     }
 
-    /* Empty State */
     .empty-state-container { text-align: center; padding: 2rem 1rem; }
     .empty-state-container h5 { font-weight: 700; color: var(--text-dark); margin-top: 1rem; }
     .empty-state-container p { color: var(--text-light); max-width: 300px; margin: 0.5rem auto 1.5rem; }
@@ -269,7 +262,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Animasi Lottie
             var lottieContainer = document.getElementById('lottie-empty');
             if (lottieContainer) {
                 bodymovin.loadAnimation({
@@ -281,7 +273,6 @@
                 });
             }
 
-            // Konfirmasi Hapus dengan SweetAlert
             document.querySelectorAll('.delete-form-myreport').forEach(form => {
                 form.addEventListener('submit', function(event) {
                     event.preventDefault();

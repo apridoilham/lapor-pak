@@ -27,13 +27,11 @@ class DeleteReportTest extends TestCase
 
         $this->superAdminUser = User::where('email', 'bsblapor@gmail.com')->first();
 
-        // Buat data relasi yang diperlukan
         $residentUser = User::factory()->create();
         $residentUser->assignRole('resident');
         $resident = Resident::factory()->for($residentUser)->create();
         $category = ReportCategory::factory()->create();
 
-        // Kaitkan relasi saat membuat report
         $this->report = Report::factory()->create([
             'resident_id' => $resident->id,
             'report_category_id' => $category->id,

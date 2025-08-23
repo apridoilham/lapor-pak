@@ -3,14 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Rw; // <-- Pastikan baris ini ada
+use App\Models\Rw;
 use Illuminate\Http\Request;
 
 class DependentDropdownController extends Controller
 {
     public function getRtsByRw($rwId)
     {
-        // Cari RW berdasarkan ID dan ambil semua RT yang berelasi
         $rw = Rw::with('rts')->find($rwId);
 
         if (!$rw) {

@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-use App\Models\User; // Import model User
+use App\Models\User;
 
 enum ReportVisibilityEnum: string
 {
@@ -11,7 +11,6 @@ enum ReportVisibilityEnum: string
     case RT = 'rt';
     case PRIVATE = 'private';
 
-    // Metode label sekarang menerima user sebagai parameter
     public function label(User $user = null): string
     {
         return match ($this) {

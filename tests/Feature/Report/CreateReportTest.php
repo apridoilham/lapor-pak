@@ -3,7 +3,7 @@
 namespace Tests\Feature\Report;
 
 use App\Enums\ReportVisibilityEnum;
-use App\Models\Report; // Pastikan ini di-import
+use App\Models\Report;
 use App\Models\ReportCategory;
 use App\Models\Resident;
 use App\Models\User;
@@ -50,14 +50,8 @@ class CreateReportTest extends TestCase
         ];
 
         $response = $this->actingAs($this->residentUser)->post(route('report.store'), $reportData);
-
-        // --- BAGIAN INI DIPERBAIKI ---
-        // 1. Ambil laporan yang baru saja dibuat
         $report = Report::latest('id')->first();
-
-        // 2. Pastikan redirect mengarah ke halaman summary dari laporan tersebut
         $response->assertRedirect(route('report.summary', $report));
-        // --- AKHIR PERBAIKAN ---
 
         $this->assertDatabaseHas('reports', [
             'title' => 'Jalan Berlubang di Depan Rumah',
@@ -65,7 +59,7 @@ class CreateReportTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('report_statuses', [
-            'report_id' => $report->id, // Gunakan ID dari laporan yang baru dibuat
+            'report_id' => $report->id,
             'status' => 'delivered',
         ]);
 
@@ -76,7 +70,7 @@ class CreateReportTest extends TestCase
     public function report_creation_fails_if_title_is_missing(): void
     {
         $response = $this->actingAs($this->residentUser)->post(route('report.store'), [
-            'title' => '', // Data tidak valid
+            'title' => '',
             'report_category_id' => $this->category->id,
             'description' => 'Deskripsi valid.',
             'image' => UploadedFile::fake()->image('laporan.jpg'),

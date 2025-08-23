@@ -13,12 +13,12 @@ class ReportStatusUpdatedNotification extends Notification implements ShouldQueu
     use Queueable;
 
     public Report $report;
-    public ?int $actorId; // TAMBAHKAN properti ini
+    public ?int $actorId;
 
-    public function __construct(Report $report, ?int $actorId) // TAMBAHKAN parameter ini
+    public function __construct(Report $report, ?int $actorId)
     {
         $this->report = $report;
-        $this->actorId = $actorId; // Simpan nilainya
+        $this->actorId = $actorId;
     }
 
     public function via(object $notifiable): array
@@ -47,7 +47,6 @@ class ReportStatusUpdatedNotification extends Notification implements ShouldQueu
             'report_id' => $this->report->id,
             'report_code' => $this->report->code,
             'status_message' => $this->report->latestStatus->status->value,
-            // PERBAIKAN: Gunakan actorId, bukan Auth::id()
             'action_by_user_id' => $this->actorId,
         ];
     }

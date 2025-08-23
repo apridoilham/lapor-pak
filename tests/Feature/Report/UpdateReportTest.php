@@ -18,7 +18,7 @@ class UpdateReportTest extends TestCase
     use RefreshDatabase;
 
     private User $superAdminUser;
-    private User $residentUser; // PROPERTI BARU
+    private User $residentUser;
     private Report $report;
 
     protected function setUp(): void
@@ -40,8 +40,6 @@ class UpdateReportTest extends TestCase
             'report_category_id' => $category->id,
         ]);
 
-        // [PERBAIKAN] Tambahkan status awal 'delivered' untuk laporan
-        // agar bisa lolos dari policy otorisasi saat update.
         $this->report->reportStatuses()->create([
             'status' => ReportStatusEnum::DELIVERED,
             'description' => 'Laporan dibuat untuk pengujian.',
@@ -49,10 +47,6 @@ class UpdateReportTest extends TestCase
         ]);
     }
 
-    /**
-     * Memastikan warga (resident) dapat mengubah laporannya sendiri.
-     */
-    #[Test] // UBAH @test di komentar menjadi attribute seperti ini
     public function test_a_resident_can_update_their_own_report(): void
     {
         $newCategory = ReportCategory::factory()->create();
@@ -77,10 +71,6 @@ class UpdateReportTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
-     * Memastikan seorang warga tidak dapat mengubah laporan milik warga lain.
-     */
     public function test_a_user_cannot_update_other_users_report(): void
     {
         // Buat user lain
@@ -95,25 +85,18 @@ class UpdateReportTest extends TestCase
             'visibility' => 'public',
         ];
 
-        // Lakukan request sebagai user lain
         $response = $this
             ->actingAs($otherUser)
             ->put(route('report.update', $this->report->id), $updatedData);
 
-        // Harusnya gagal karena policy (Authorization Exception)
         $response->assertStatus(403);
 
-        // Pastikan judul laporan tidak berubah di database
         $this->assertDatabaseMissing('reports', [
             'id' => $this->report->id,
             'title' => 'Mencoba Mengubah Judul Orang Lain',
         ]);
     }
 
-    /**
-     * @test
-     * Memastikan admin dapat mengubah laporan.
-     */
     public function test_an_admin_can_update_a_report(): void
     {
         $updatedData = [
@@ -137,10 +120,6 @@ class UpdateReportTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
-     * Memastikan pengguna non-admin (warga) tidak bisa mengakses route update admin.
-     */
     public function test_a_non_admin_user_cannot_update_a_report_via_admin_route(): void
     {
         $otherUser = User::factory()->create();

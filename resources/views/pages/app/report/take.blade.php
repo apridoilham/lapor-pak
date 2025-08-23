@@ -4,7 +4,6 @@
 
 @push('styles')
 <style>
-    /* Menggunakan variabel dari theme.css jika ada, atau fallback */
     :root {
         --primary-color: #0ea5e9;
         --text-dark: #1e293b;
@@ -15,13 +14,13 @@
     
     body {
         background-color: var(--bg-body);
-        overflow: hidden; /* Mencegah scroll */
+        overflow: hidden;
     }
 
     .main-content {
         padding: 0;
         height: 100vh;
-        max-height: 100svh; /* Menggunakan unit dinamis untuk mobile */
+        max-height: 100svh;
         display: flex;
         flex-direction: column;
     }
@@ -36,7 +35,6 @@
         justify-content: space-between;
     }
 
-    /* Header di atas video */
     .camera-header {
         position: absolute;
         top: 0;
@@ -53,15 +51,13 @@
         text-decoration: none;
     }
 
-    /* Video preview */
     #video-webcam {
         width: 100%;
         height: 100%;
-        object-fit: cover; /* Memastikan video memenuhi container tanpa distorsi */
+        object-fit: cover;
         display: block;
     }
 
-    /* Footer/kontrol di bawah video */
     .camera-footer {
         position: absolute;
         bottom: 0;
@@ -109,7 +105,6 @@
         border-radius: 50%;
     }
 
-    /* Hidden file input */
     #gallery-input {
         display: none;
     }
@@ -157,18 +152,16 @@
         const galleryInput = document.getElementById('gallery-input');
         
         let stream;
-        let currentFacingMode = 'environment'; // 'environment' untuk kamera belakang, 'user' untuk depan
+        let currentFacingMode = 'environment';
 
-        // Fungsi untuk menghentikan stream kamera yang sedang aktif
         function stopStream() {
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
             }
         }
 
-        // Fungsi untuk memulai kamera
         async function startCamera(facingMode) {
-            stopStream(); // Hentikan stream lama sebelum memulai yang baru
+            stopStream();
 
             const constraints = {
                 video: {
@@ -188,7 +181,6 @@
             }
         }
 
-        // Fungsi untuk mengambil gambar
         function takeSnapshot() {
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
@@ -201,23 +193,17 @@
             window.location.href = '{{ route('report.preview') }}';
         }
 
-        // --- Event Listeners ---
-
-        // Tombol Ambil Foto
         snapButton.addEventListener('click', takeSnapshot);
 
-        // Tombol Ganti Kamera
         flipCameraButton.addEventListener('click', () => {
             currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
             startCamera(currentFacingMode);
         });
 
-        // Tombol Pilih dari Galeri
         galleryButton.addEventListener('click', () => {
             galleryInput.click();
         });
 
-        // Ketika file dipilih dari galeri
         galleryInput.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (file) {
@@ -230,7 +216,6 @@
             }
         });
 
-        // Mulai kamera belakang saat halaman dimuat
         startCamera(currentFacingMode);
     });
 </script>

@@ -13,7 +13,6 @@ class NotificationController extends Controller
     public function index()
     {
         $user = Auth::user();
-        // Ambil semua notifikasi, jangan di-paginate agar bisa di-filter di view
         $notifications = $user->notifications()->latest()->get(); 
         
         return view('pages.app.notifications.index', compact('notifications'));
@@ -37,7 +36,6 @@ class NotificationController extends Controller
         return redirect($baseUrl . $fragment);
     }
 
-    // ▼▼▼ METHOD BARU YANG MEMPERBAIKI ERROR ▼▼▼
     public function markSelectedAsRead(Request $request)
     {
         $request->validate([
@@ -52,7 +50,6 @@ class NotificationController extends Controller
         return response()->json(['message' => 'Notifikasi berhasil ditandai sebagai sudah dibaca.']);
     }
 
-    // ▼▼▼ METHOD BARU YANG MEMPERBAIKI ERROR ▼▼▼
     public function deleteSelected(Request $request)
     {
         $request->validate([

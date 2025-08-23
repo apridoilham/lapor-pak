@@ -13,7 +13,6 @@
 </head>
 
 <body>
-    {{-- Kita ganti div pembungkus utama dengan class 'main-content' --}}
     <div class="main-content">
         @yield('content')
     </div>

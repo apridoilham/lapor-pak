@@ -24,31 +24,23 @@
             <span>Data Laporan</span></a>
     </li>
     @role('super-admin')
-    <li class="nav-item {{ request()->routeIs('admin.rtrw.*') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('admin.rtrw.index') }}">
-            <i class="fas fa-fw fa-map-signs"></i>
-            <span>Data RW/RT</span></a>
-    </li>
-    <li class="nav-item {{ request()->routeIs('admin.report-category.*') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('admin.report-category.index') }}">
-            <i class="fas fa-fw fa-tags"></i>
-            <span>Data Kategori</span></a>
-    </li>
-    @endrole
-    <hr class="sidebar-divider">
+        <li class="nav-item {{ request()->routeIs('admin.rtrw.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.rtrw.index') }}">
+                <i class="fas fa-fw fa-map-signs"></i>
+                <span>Data RW/RT</span></a>
+        </li>
+        <li class="nav-item {{ request()->routeIs('admin.report-category.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.report-category.index') }}">
+                <i class="fas fa-fw fa-tags"></i>
+                <span>Data Kategori</span></a>
+        </li>
+    @endrole <hr class="sidebar-divider">
     <div class="sidebar-heading">Lainnya</div>
     <li class="nav-item {{ request()->routeIs('admin.report.export.*') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('admin.report.export.create') }}">
             <i class="fas fa-fw fa-download"></i>
             <span>Ekspor Laporan</span></a>
     </li>
-    @role('super-admin')
-    <li class="nav-item {{ request()->routeIs('admin.admin-user.*') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('admin.admin-user.index') }}">
-            <i class="fas fa-fw fa-user-shield"></i>
-            <span>Manajemen Admin</span></a>
-    </li>
-    @endrole
     <hr class="sidebar-divider d-none d-md-block">
     <div class="text-center d-none d-md-inline">
         <button class="rounded-circle border-0" id="sidebarToggle"></button>

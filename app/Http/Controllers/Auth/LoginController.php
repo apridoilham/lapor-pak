@@ -37,7 +37,6 @@ class LoginController extends Controller
             if ($user->hasRole('resident')) {
                 $resident = $user->resident;
 
-                // Cek kelengkapan profil
                 if (!$resident || !$resident->rt_id || !$resident->rw_id || $resident->address === 'Alamat belum diatur') {
                     Swal::info('Selamat Datang!', 'Harap lengkapi data diri Anda terlebih dahulu untuk melanjutkan.');
                     return redirect()->route('profile.edit');
