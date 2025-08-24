@@ -69,6 +69,13 @@ class ResidentRepository implements ResidentRepositoryInterface
                     'name' => $data['name']
                 ]);
             }
+            
+            // Perbarui juga avatar di tabel user jika ada
+            if (isset($data['avatar'])) {
+                 $resident->user()->update([
+                    'avatar' => $data['avatar']
+                ]);
+            }
 
             $residentData = [
                 'rt_id' => $data['rt_id'],
@@ -101,9 +108,11 @@ class ResidentRepository implements ResidentRepositoryInterface
 
     public function countResidents(int $rwId = null): int
     {
-        return Resident::when($rwId, function ($query) use ($rwId) {
-            $query->where('rw_id', $rwId);
-        })->count();
+        // PERBAIKAN DI SINI: Menambahkan scope complete()
+        return Resident::complete()
+            ->when($rwId, function ($query) use ($rwId) {
+                $query->where('rw_id', $rwId);
+            })->count();
     }
 
     public function getTopReporters(int $rwId = null)

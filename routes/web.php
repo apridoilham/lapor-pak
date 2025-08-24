@@ -32,7 +32,7 @@ Route::middleware('guest')->group(function () {
     Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
 });
 
-Route::post('logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
+Route::match(['get', 'post'], 'logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
 Route::prefix('api')->group(function () {
     Route::get('/get-rts-by-rw/{rwId}', [DependentDropdownController::class, 'getRtsByRw']);
@@ -41,7 +41,9 @@ Route::prefix('api')->group(function () {
     Route::post('/check-email', [EmailCheckController::class, 'checkEmail']);
 });
 
-Route::middleware(['auth', 'role:resident', 'profile.completed'])->group(function () {
+// PERUBAHAN UTAMA DI SINI:
+// Urutan 'profile.completed' dipindahkan sebelum 'role:resident'
+Route::middleware(['auth', 'profile.completed', 'role:resident'])->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::get('/reports', [UserReportController::class, 'index'])->name('report.index');
     Route::get('/report/{code}', [UserReportController::class, 'show'])->name('report.show');
@@ -78,9 +80,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin|super-ad
     Route::get('/export-reports', [ReportExportController::class, 'create'])->name('report.export.create');
     Route::post('/export-reports', [ReportExportController::class, 'store'])->name('report.export.store');
     Route::get('/activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
-
     Route::resource('/resident', ResidentController::class)->except(['create', 'store', 'edit', 'update', 'destroy']);
-
     Route::middleware(['role:super-admin'])->group(function () {
         Route::resource('/report-category', ReportCategoryController::class);
         Route::resource('/rtrw', RtRwController::class);

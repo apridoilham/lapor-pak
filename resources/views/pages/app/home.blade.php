@@ -172,7 +172,8 @@
                 <a href="{{ route('report.show', ['code' => $report->code, '_ref' => request()->fullUrl()]) }}" class="report-card-professional">
                     <img src="{{ asset('storage/' . $report->image) }}" alt="{{ $report->title }}" class="card-image">
                     <div class="card-body">
-                        <div class="card-category-pill">{{ $report->reportCategory->name }}</div>
+                        {{-- PERBAIKAN DI SINI: Menggunakan optional() --}}
+                        <div class="card-category-pill">{{ optional($report->reportCategory)->name ?? 'Tanpa Kategori' }}</div>
                         <h6 class="card-title">{{ $report->title }}</h6>
                         <div class="card-meta-grid">
                             <div class="card-meta-item">
@@ -188,12 +189,12 @@
                     <div class="card-footer">
                         <div class="user-details">
                             @php
-                                $reporterAvatar = $report->resident->user->avatar;
+                                $reporterAvatar = optional($report->resident->user)->avatar ?? optional($report->resident)->avatar;
                                 if ($reporterAvatar && !filter_var($reporterAvatar, FILTER_VALIDATE_URL)) {
                                     $reporterAvatar = asset('storage/' . $reporterAvatar);
                                 }
                             @endphp
-                            @if($isOwner && $reporterAvatar)
+                            @if($reporterAvatar)
                                 <img src="{{ $reporterAvatar }}" alt="Avatar Pelapor" class="avatar">
                             @else
                                 <div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>

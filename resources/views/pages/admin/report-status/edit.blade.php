@@ -72,11 +72,11 @@
 
 @section('content')
     <div class="d-flex align-items-center mb-4">
-        <a href="{{ route('admin.report.show', $status->report->id) }}" class="btn btn-outline-primary btn-circle mr-3" title="Kembali">
+        <a href="{{ route('admin.report.show', $status->report->id) }}" class="btn btn-primary btn-circle mr-3" title="Kembali">
             <i class="fas fa-arrow-left"></i>
         </a>
         <div>
-            <h1 class="h3 mb-0 text-gray-900 font-weight-bold">Edit Progress Laporan</h1>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Edit Progress Laporan</h1>
             <p class="mb-0 text-muted">Untuk Laporan Kode: <strong>{{ $status->report->code }}</strong></p>
         </div>
     </div>
@@ -95,7 +95,7 @@
                     
                     <hr class="my-4">
 
-                    <form action="{{ route('admin.report-status.update', $status->id) }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('admin.report-status.update', $status->id) }}" method="POST" enctype="multipart/form-data" id="progress-form">
                         @csrf
                         @method('PUT')
                         <input type="hidden" name="report_id" value="{{ $status->report_id }}">
@@ -133,7 +133,7 @@
                         
                         <div class="text-right">
                             <a href="{{ route('admin.report.show', $status->report_id) }}" class="btn btn-secondary">Batal</a>
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary" id="save-btn">
                                 <i class="fas fa-save mr-2"></i>Simpan Perubahan
                             </button>
                         </div>
@@ -147,16 +147,40 @@
 @push('scripts')
 <script>
     function previewImage(event) {
-        const reader = new FileReader();
-        const imagePreview = document.getElementById('image-preview');
-        const imagePlaceholder = document.getElementById('image-placeholder');
+        if (event.target.files && event.target.files[0]) {
+            const reader = new FileReader();
+            const imagePreview = document.getElementById('image-preview');
+            const imagePlaceholder = document.getElementById('image-placeholder');
 
-        reader.onload = function(){
-            imagePreview.src = reader.result;
-            imagePreview.style.display = 'block';
-            imagePlaceholder.style.display = 'none';
+            reader.onload = function(e){
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+                if (imagePlaceholder) {
+                    imagePlaceholder.style.display = 'none';
+                }
+            }
+            reader.readAsDataURL(event.target.files[0]);
         }
-        reader.readAsDataURL(event.target.files[0]);
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const saveButton = document.getElementById('save-btn');
+        const descriptionTextarea = document.getElementById('description');
+
+        // Untuk halaman edit, kita buat tombol selalu aktif
+        // karena pengguna mungkin hanya ingin mengubah gambar.
+        // Jika ingin validasi yang lebih ketat, bisa ditambahkan di sini.
+        saveButton.disabled = false; 
+
+        // Jika Anda ingin tombol dinonaktifkan jika deskripsi dikosongkan:
+        /*
+        function checkEditFormValidity() {
+            const descriptionIsValid = descriptionTextarea.value.trim() !== '';
+            saveButton.disabled = !descriptionIsValid;
+        }
+        descriptionTextarea.addEventListener('input', checkEditFormValidity);
+        checkEditFormValidity();
+        */
+    });
 </script>
 @endpush

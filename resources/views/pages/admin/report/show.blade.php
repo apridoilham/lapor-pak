@@ -10,35 +10,28 @@
         --success-color: #1cc88a;
         --warning-color: #f6c23e;
         --danger-color: #e74a3b;
-        --info-color: #36b9cc;
-        --bg-main: #f8f9fc;
-        --bg-card: #ffffff;
         --border-color: #eaecf4;
         --text-dark: #3a3b45;
         --text-light: #858796;
-        --font-sans: 'Inter', sans-serif;
     }
-    
     .card {
         border-radius: .75rem !important;
         border: 1px solid var(--border-color);
         box-shadow: 0 0.25rem 1.25rem rgba(0,0,0,.06) !important;
     }
-    
     .report-main-image {
         width: 100%;
         max-height: 450px;
-        object-fit: contain;
-        background-color: #f8f9fc;
+        object-fit: contain; /* Agar gambar tidak terpotong */
+        background-color: #f8f9fc; /* Latar belakang jika gambar tidak penuh */
         border-radius: .5rem;
         cursor: pointer;
         border: 1px solid var(--border-color);
     }
-    
     #map {
-        height: 250px;
+        height: 220px;
         width: 100%;
-        border-radius: .5rem;
+        border-radius: 0.5rem;
         z-index: 1;
     }
 
@@ -86,9 +79,11 @@
         align-items: center;
         gap: 0.75rem;
     }
-    .info-card .avatar {
-        width: 32px;
-        height: 32px;
+    
+    /* PERBAIKAN UKURAN AVATAR DI SINI */
+    .reporter-card .avatar {
+        width: 42px;
+        height: 42px;
         object-fit: cover;
     }
 
@@ -96,7 +91,7 @@
         position: relative;
     }
     .timeline-item {
-        padding-left: 2.5rem;
+        padding-left: 3rem;
         position: relative;
         padding-bottom: 2.5rem;
     }
@@ -106,9 +101,9 @@
     .timeline-item::before {
         content: '';
         position: absolute;
-        left: 11px;
-        top: 5px;
-        bottom: -5px;
+        left: 17px;
+        top: 40px;
+        bottom: -10px;
         width: 2px;
         background-color: #f1f3f5;
     }
@@ -119,25 +114,52 @@
         position: absolute;
         left: 0;
         top: 0;
-        width: 24px;
-        height: 24px;
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         color: #fff;
     }
-    .timeline-content { margin-left: 0; }
+    .timeline-content .meta-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.25rem;
+    }
+    .timeline-content .status-title {
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 0.95rem;
+    }
+    .timeline-content .status-time {
+        font-size: 0.75rem;
+        color: var(--text-light);
+    }
+    .timeline-content .status-by {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        margin-bottom: 0.5rem;
+    }
+    .timeline-content .status-description {
+        font-size: 0.9rem;
+        color: #5a5c69;
+    }
     .proof-image { 
-        max-width: 200px;
+        max-width: 150px;
         height: auto;
         cursor: pointer; 
         border-radius: 8px; 
         margin-top: 1rem; 
         border: 1px solid var(--border-color);
     }
-    
-    .soft-badge { font-size: 0.9rem; font-weight: 600; padding: .4em .8em; border-radius: 20px; }
+    .soft-badge {
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: .4em .8em;
+        border-radius: 20px;
+    }
     .soft-badge.badge-success { background-color: #d1fae5; color: #065f46; }
     .soft-badge.badge-warning { background-color: #fef3c7; color: #92400e; }
     .soft-badge.badge-danger { background-color: #fee2e2; color: #991b1b; }
@@ -166,38 +188,26 @@
                  <p class="mb-0 text-muted small">Kode Laporan: <strong>{{ $report->code }}</strong></p>
             </div>
         </div>
-        <div>
-            @can('manageStatus', $report)
-                <a href="{{ route('admin.report-status.create', $report->id) }}" class="btn btn-primary shadow-sm">
-                    <i class="fas fa-plus fa-sm mr-2"></i>Update Status
-                </a>
-            @endcan
-        </div>
     </div>
 
     <div class="row">
         <div class="col-lg-7">
             <div class="card mb-4">
-                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Bukti Laporan</h6>
-                </div>
-                <div class="card-body">
-                    <img src="{{ asset('storage/' . $report->image) }}" alt="Foto Laporan" class="report-main-image">
-                </div>
+                <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Bukti Laporan</h6></div>
+                <div class="card-body"><img src="{{ asset('storage/' . $report->image) }}" alt="Foto Laporan" class="report-main-image"></div>
             </div>
             <div class="card mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-align-left mr-2"></i>Deskripsi Lengkap</h6>
-                </div>
-                <div class="card-body">
-                    <p class="text-gray-800" style="line-height: 1.8;">{{ $report->description }}</p>
-                </div>
+                <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-align-left mr-2"></i>Deskripsi Lengkap</h6></div>
+                <div class="card-body"><p class="text-gray-800" style="line-height: 1.8;">{{ $report->description }}</p></div>
             </div>
             <div class="card mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-tasks mr-2"></i>Riwayat Perkembangan Laporan
-                    </h6>
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-tasks mr-2"></i>Riwayat Perkembangan</h6>
+                    @can('manageStatus', $report)
+                        <a href="{{ route('admin.report-status.create', $report->id) }}" class="btn btn-primary btn-sm shadow-sm">
+                            <i class="fas fa-plus fa-sm mr-1"></i> Tambah Progress
+                        </a>
+                    @endcan
                 </div>
                 <div class="card-body">
                     <div class="timeline">
@@ -213,12 +223,12 @@
                                 @endphp
                                 <div class="timeline-icon {{ $iconInfo['bg'] }}"><i class="fas {{ $iconInfo['icon'] }} fa-sm"></i></div>
                                 <div class="timeline-content">
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <h6 class="font-weight-bold text-dark mb-0">{{ $status->status->label() }}</h6>
-                                        <small class="text-muted">{{ $status->created_at->isoFormat('D MMM YYYY, HH:mm') }}</small>
+                                    <div class="meta-info">
+                                        <p class="status-title mb-0">{{ $status->status->label() }}</p>
+                                        <p class="status-time mb-0">{{ $status->created_at->isoFormat('D MMM Y, HH:mm') }}</p>
                                     </div>
-                                    <p class="mb-2"><small class="text-muted">oleh <strong>@if($status->created_by_role === 'resident') Pelapor @else {{ ucfirst($status->created_by_role) }} @endif</strong></small></p>
-                                    <p class="text-gray-700">{{ $status->description }}</p>
+                                    <p class="status-by">oleh <strong>@if($status->created_by_role === 'resident') Pelapor @else {{ ucfirst($status->created_by_role) }} @endif</strong></p>
+                                    <p class="status-description">{{ $status->description }}</p>
                                     @if($status->image)
                                         <img src="{{ asset('storage/' . $status->image) }}" class="img-fluid proof-image" alt="Bukti Progress">
                                     @endif
@@ -245,9 +255,7 @@
 
         <div class="col-lg-5">
             <div class="card mb-4 info-card">
-                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Informasi Laporan</h6>
-                </div>
+                 <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Informasi Laporan</h6></div>
                 <div class="card-body">
                     <div class="info-item">
                         <div class="info-item-icon"><i class="fas fa-flag"></i></div>
@@ -272,7 +280,6 @@
                     </div>
                 </div>
             </div>
-            
             <div class="card mb-4 reporter-card">
                 <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Info Pelapor</h6></div>
                 <div class="card-body">
@@ -294,11 +301,8 @@
                     <a href="{{ route('admin.resident.show', $resident->id) }}" class="btn btn-outline-primary btn-block">Lihat Profil Lengkap</a>
                 </div>
             </div>
-
             <div class="card mb-4">
-                <div class="card-header py-3">
-                     <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-map-marked-alt mr-2"></i>Lokasi Kejadian</h6>
-                </div>
+                <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-map-marked-alt mr-2"></i>Lokasi Kejadian</h6></div>
                 <div class="card-body">
                     <p class="small text-muted">{{ $report->address }}</p>
                     <div id="map"></div>
@@ -311,7 +315,6 @@
         <button class="lightbox-close-btn" id="lightbox-close">&times;</button>
         <div class="lightbox-content"><img src="" alt="Gambar Laporan" id="lightbox-image"></div>
     </div>
-
 @endsection
 
 @section('scripts')
@@ -319,11 +322,9 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var mapInitialized = false;
-        
         function initializeMap() {
             if (document.getElementById('map') && !mapInitialized) {
                 var map = L.map('map').setView([{{ $report->latitude }}, {{ $report->longitude }}], 16);
-                // PERUBAHAN: Menggunakan tile layer standar berwarna
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 }).addTo(map);
@@ -332,7 +333,6 @@
                 setTimeout(() => map.invalidateSize(), 200);
             }
         }
-        
         initializeMap();
 
         document.querySelectorAll('.delete-form').forEach(form => {

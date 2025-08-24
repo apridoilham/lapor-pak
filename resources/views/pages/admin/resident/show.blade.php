@@ -59,7 +59,7 @@
                     <p class="text-muted mb-3">{{ $resident->user->email }}</p>
                     <hr class="mt-0 mb-3">
                     <ul class="profile-meta-list">
-                        <li><i class="fas fa-map-marker-alt fa-fw"></i> RT {{ $resident->rt->number }} / RW {{ $resident->rw->number }}</li>
+                        <li><i class="fas fa-map-marker-alt fa-fw"></i> RT {{ optional($resident->rt)->number ?? 'N/A' }} / RW {{ optional($resident->rw)->number ?? 'N/A' }}</li>
                         <li><i class="fas fa-phone fa-fw"></i> {{ $resident->phone ?? 'Belum diisi' }}</li>
                         <li><i class="fas fa-calendar-alt fa-fw"></i> Terdaftar {{ $resident->created_at->diffForHumans() }}</li>
                     </ul>
@@ -152,7 +152,7 @@
                             <tr>
                                 <td><a href="{{ route('admin.report.show', $report->id) }}" class="font-weight-bold">{{ $report->code }}</a></td>
                                 <td>{{ Str::limit($report->title, 35) }}</td>
-                                <td>{{ $report->reportCategory->name }}</td>
+                                <td>{{ optional($report->reportCategory)->name ?? 'Tanpa Kategori' }}</td>
                                 <td class="text-center">
                                     @if ($report->latestStatus)
                                         @php $status = $report->latestStatus->status; @endphp

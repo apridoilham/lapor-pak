@@ -28,7 +28,8 @@ class ReportsExport implements FromCollection, WithHeadings, WithMapping, Should
     {
         return [
             'Kode Laporan', 'Judul', 'Deskripsi Laporan', 'Nama Pelapor', 'Email Pelapor',
-            'Kategori', 'Status Terakhir', 'Catatan Status Terakhir', 'Alamat',
+            'No Telepon Pelapor', 'Alamat Pelapor', 'RT Pelapor', 'RW Pelapor',
+            'Kategori', 'Status Terakhir', 'Catatan Status Terakhir', 'Lokasi Kejadian',
             'Tanggal Dibuat', 'Tanggal Terakhir Diupdate',
         ];
     }
@@ -39,14 +40,18 @@ class ReportsExport implements FromCollection, WithHeadings, WithMapping, Should
             $report->code,
             $report->title,
             $report->description,
-            $report->resident->user->name,
-            $report->resident->user->email,
-            $report->reportCategory->name,
-            $report->latestStatus ? $report->latestStatus->status->value : 'Baru',
-            $report->latestStatus ? $report->latestStatus->description : '-',
+            optional($report->resident->user)->name ?? 'N/A',
+            optional($report->resident->user)->email ?? 'N/A',
+            optional($report->resident)->phone ?? '-',
+            optional($report->resident)->address ?? '-',
+            optional($report->resident->rt)->number ?? '-',
+            optional($report->resident->rw)->number ?? '-',
+            optional($report->reportCategory)->name ?? 'N/A',
+            optional($report->latestStatus)->status->label() ?? 'Baru',
+            optional($report->latestStatus)->description ?? '-',
             $report->address,
             $report->created_at->tz('Asia/Jakarta')->toDateTimeString(),
-            $report->latestStatus ? $report->latestStatus->created_at->tz('Asia/Jakarta')->toDateTimeString() : $report->created_at->tz('Asia/Jakarta')->toDateTimeString(),
+            optional($report->latestStatus)->created_at ? $report->latestStatus->created_at->tz('Asia/Jakarta')->toDateTimeString() : $report->created_at->tz('Asia/Jakarta')->toDateTimeString(),
         ];
     }
 }

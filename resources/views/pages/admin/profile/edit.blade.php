@@ -42,7 +42,7 @@
 
 @section('content')
     <div class="d-flex align-items-center mb-4">
-        <a href="{{ route('admin.profile.index') }}" class="btn btn-primary btn-circle mr-3" title="Kembali ke Profil">
+        <a href="{{ route('admin.profile.index') }}" class="btn btn-outline-primary btn-circle mr-3" title="Kembali ke Profil">
             <i class="fas fa-arrow-left"></i>
         </a>
         <div>
@@ -58,8 +58,15 @@
                 @method('PUT')
 
                 <div class="avatar-upload-container">
-                    <img src="{{ Auth::user()->avatar ? (filter_var(Auth::user()->avatar, FILTER_VALIDATE_URL) ? Auth::user()->avatar : asset('storage/' . Auth::user()->avatar)) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=1a202c&color=fff&size=150' }}"
-                         alt="avatar" class="avatar-preview" id="avatar-preview">
+                    @php
+                        $avatarUrl = Auth::user()->avatar;
+                        if ($avatarUrl && !filter_var($avatarUrl, FILTER_VALIDATE_URL)) {
+                            $avatarUrl = asset('storage/' . $avatarUrl);
+                        } elseif (empty($avatarUrl)) {
+                            $avatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=1a202c&color=fff&size=150';
+                        }
+                    @endphp
+                    <img src="{{ $avatarUrl }}" alt="avatar" class="avatar-preview" id="avatar-preview">
                     <label for="avatar-input" class="avatar-edit-button" title="Ubah Foto Profil">
                         <i class="fas fa-camera"></i>
                     </label>
@@ -85,7 +92,7 @@
                     <input type="text" class="form-control form-control-lg" id="rw" value="RW {{ $user->rw->number }}" disabled>
                 </div>
                 @endif
-
+                
                 <hr class="my-4">
 
                 <div class="d-flex justify-content-end">
@@ -99,7 +106,7 @@
     </div>
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('profile-edit-form');
@@ -116,18 +123,20 @@ document.addEventListener('DOMContentLoaded', function () {
         updateButton.disabled = !nameChanged && !avatarChanged;
     }
 
-    form.addEventListener('input', checkForChanges);
-
-    avatarInput.addEventListener('change', function(event) {
+    function previewImage(event) {
         if (event.target.files && event.target.files[0]) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 avatarPreview.src = e.target.result;
             }
             reader.readAsDataURL(event.target.files[0]);
-            checkForChanges();
+            checkForChanges(); // Panggil pengecekan saat gambar diubah
         }
-    });
+    }
+
+    // Tambahkan event listener ke setiap input
+    nameInput.addEventListener('input', checkForChanges);
+    avatarInput.addEventListener('change', previewImage);
 });
 </script>
-@endpush
+@endsection

@@ -32,7 +32,11 @@ class ReportStatusController extends Controller
     {
         $report = $this->reportRepository->getReportById($reportId);
         $this->authorize('manageStatus', $report);
-        $statuses = ReportStatusEnum::cases();
+
+        $statuses = array_filter(ReportStatusEnum::cases(), function($status) {
+            return $status !== ReportStatusEnum::DELIVERED;
+        });
+
         return view('pages.admin.report-status.create', compact('report', 'statuses'));
     }
 
@@ -57,7 +61,12 @@ class ReportStatusController extends Controller
     {
         $status = $this->reportStatusRepository->getReportStatusById($id);
         $this->authorize('manageStatus', $status->report);
-        $statuses = ReportStatusEnum::cases();
+
+        // PERBAIKAN DI SINI: Filter status agar 'Terkirim' tidak muncul
+        $statuses = array_filter(ReportStatusEnum::cases(), function($statusEnum) {
+            return $statusEnum !== ReportStatusEnum::DELIVERED;
+        });
+
         return view('pages.admin.report-status.edit', compact('status', 'statuses'));
     }
 

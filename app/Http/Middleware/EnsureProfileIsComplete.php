@@ -10,10 +10,16 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EnsureProfileIsComplete
 {
-
     public function handle(Request $request, Closure $next): Response
     {
         $user = Auth::user();
+
+        // PERBAIKAN DI SINI:
+        // Jika yang login adalah admin, dan mencoba akses halaman user,
+        // langsung arahkan ke dashboard admin.
+        if ($user && $user->hasAnyRole(['admin', 'super-admin'])) {
+            return redirect()->route('admin.dashboard');
+        }
 
         if ($user && $user->hasRole('resident')) {
             $resident = $user->resident;

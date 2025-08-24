@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="d-flex align-items-center mb-4">
-        <a href="{{ route('admin.report-category.index') }}" class="btn btn-outline-primary btn-circle mr-3">
+        <a href="{{ route('admin.report-category.show', $report_category) }}" class="btn btn-outline-primary btn-circle mr-3">
             <i class="fas fa-arrow-left"></i>
         </a>
         <div>
@@ -21,13 +21,13 @@
                     <h6 class="m-0 font-weight-bold text-primary">Formulir Edit Kategori</h6>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.report-category.update', $category->id)}}" method="POST" class="p-3">
+                    <form action="{{ route('admin.report-category.update', $report_category->id)}}" method="POST" class="p-3">
                         @csrf
                         @method('PUT')
                         <div class="form-group row">
                             <label for="name" class="col-sm-3 col-form-label font-weight-bold">Nama Kategori</label>
                             <div class="col-sm-9">
-                                <input type="text" class="form-control form-control-lg @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $category->name) }}" required>
+                                <input type="text" class="form-control form-control-lg @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $report_category->name) }}" required>
                                 @error('name')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
@@ -35,7 +35,7 @@
                         </div>
                         <hr class="my-4">
                         <div class="d-flex justify-content-end">
-                            <a href="{{ route('admin.report-category.index') }}" class="btn btn-secondary mr-2">Batal</a>
+                            <a href="{{ route('admin.report-category.show', $report_category) }}" class="btn btn-secondary mr-2">Batal</a>
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save mr-1"></i> Simpan Perubahan
                             </button>

@@ -115,7 +115,6 @@
     <div class="neumorphic-card">
         <div class="profile-info-main">
             @php
-                // PERBAIKAN DI SINI: Menggunakan logika avatar yang sudah disempurnakan
                 $avatarUrl = Auth::user()->avatar ?? optional(Auth::user()->resident)->avatar;
                 if ($avatarUrl && !filter_var($avatarUrl, FILTER_VALIDATE_URL)) {
                     $avatarUrl = asset('storage/' . $avatarUrl);
@@ -178,12 +177,12 @@
             <span>Ubah Profil & Alamat</span>
             <i class="fa-solid fa-chevron-right"></i>
         </a>
-        <a href="#" class="action-card" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+        <a href="#" class="action-card" onclick="event.preventDefault(); document.getElementById('logout-form-user').submit();">
             <div class="menu-icon icon-logout"><i class="fa-solid fa-right-from-bracket"></i></div>
             <span class="text-danger">Keluar</span>
             <i class="fa-solid fa-chevron-right"></i>
         </a>
-        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
+        <form id="logout-form-user" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
     </div>
 @endsection
 

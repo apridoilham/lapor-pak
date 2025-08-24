@@ -4,13 +4,6 @@
 
 @push('styles')
 <style>
-    .profile-card {
-        border-radius: .75rem;
-        transition: all 0.3s ease;
-    }
-    .profile-card .profile-avatar-wrapper {
-        position: relative;
-    }
     .profile-card .profile-avatar {
         width: 130px;
         height: 130px;
@@ -18,9 +11,6 @@
         object-fit: cover;
         border: 5px solid #fff;
         box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,.1);
-    }
-    .profile-card .card-body {
-        padding: 2rem;
     }
     .info-list-item {
         display: flex;
@@ -55,7 +45,7 @@
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-900 font-weight-bold">Profil Akun</h1>
         <a href="{{ route('admin.profile.edit') }}" class="btn btn-primary shadow-sm btn-edit-profile">
-            <i class="fas fa-pencil-alt fa-sm mr-2"></i>Ubah Profil & Password
+            <i class="fas fa-pencil-alt fa-sm mr-2"></i>Ubah Profil
         </a>
     </div>
 

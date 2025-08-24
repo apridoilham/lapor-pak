@@ -29,7 +29,7 @@
         color: #858796;
         margin-bottom: 0;
     }
-
+    
     .file-input-wrapper {
         position: relative;
         overflow: hidden;
@@ -72,11 +72,11 @@
 
 @section('content')
     <div class="d-flex align-items-center mb-4">
-        <a href="{{ route('admin.report.show', $report->id) }}" class="btn btn-outline-primary btn-circle mr-3" title="Kembali">
+        <a href="{{ route('admin.report.show', $report->id) }}" class="btn btn-primary btn-circle mr-3" title="Kembali">
             <i class="fas fa-arrow-left"></i>
         </a>
         <div>
-            <h1 class="h3 mb-0 text-gray-900 font-weight-bold">Tambah Progress Laporan</h1>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Tambah Progress Laporan</h1>
             <p class="mb-0 text-muted">Untuk Laporan Kode: <strong>{{ $report->code }}</strong></p>
         </div>
     </div>
@@ -95,14 +95,14 @@
 
                     <hr class="my-4">
                     
-                    <form action="{{ route('admin.report-status.store') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('admin.report-status.store') }}" method="POST" enctype="multipart/form-data" id="progress-form">
                         @csrf
                         <input type="hidden" name="report_id" value="{{ $report->id }}">
 
                         <div class="form-group">
                             <label for="image" class="font-weight-bold">Bukti Progress (Opsional)</label>
                             <div class="file-input-wrapper">
-                                <input type="file" name="image" id="image" class="@error('image') is-invalid @enderror" onchange="previewImage(event)">
+                                <input type="file" name="image" id="image" class="@error('image') is-invalid @enderror">
                                 <div id="image-placeholder" style="display: flex; flex-direction: column; align-items: center;">
                                     <i class="fas fa-camera fa-2x text-gray-400"></i>
                                     <p class="text-gray-500 mt-2">Klik untuk memilih gambar</p>
@@ -134,7 +134,7 @@
 
                         <div class="text-right">
                             <a href="{{ route('admin.report.show', $report->id) }}" class="btn btn-secondary">Batal</a>
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary" id="save-btn" disabled>
                                 <i class="fas fa-save mr-2"></i>Simpan Progress
                             </button>
                         </div>
@@ -147,17 +147,35 @@
 
 @push('scripts')
 <script>
-    function previewImage(event) {
-        const reader = new FileReader();
+    document.addEventListener('DOMContentLoaded', function() {
+        const saveButton = document.getElementById('save-btn');
+        const statusSelect = document.getElementById('status');
+        const descriptionTextarea = document.getElementById('description');
+        const imageInput = document.getElementById('image');
         const imagePreview = document.getElementById('image-preview');
         const imagePlaceholder = document.getElementById('image-placeholder');
 
-        reader.onload = function(){
-            imagePreview.src = reader.result;
-            imagePreview.style.display = 'block';
-            imagePlaceholder.style.display = 'none';
+        function checkFormValidity() {
+            const statusIsValid = statusSelect.value && statusSelect.value.trim() !== '';
+            const descriptionIsValid = descriptionTextarea.value.trim() !== '';
+            saveButton.disabled = !(statusIsValid && descriptionIsValid);
         }
-        reader.readAsDataURL(event.target.files[0]);
-    }
+
+        function previewImage(event) {
+            if (event.target.files && event.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e){
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    imagePlaceholder.style.display = 'none';
+                }
+                reader.readAsDataURL(event.target.files[0]);
+            }
+        }
+
+        statusSelect.addEventListener('change', checkFormValidity);
+        descriptionTextarea.addEventListener('input', checkFormValidity);
+        imageInput.addEventListener('change', previewImage);
+    });
 </script>
 @endpush

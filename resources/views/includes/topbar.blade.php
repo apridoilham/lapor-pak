@@ -68,20 +68,20 @@
             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <span class="mr-3 d-none d-lg-inline text-gray-800 font-weight-bold">{{ Auth::user()->name }}</span>
                 @php
-                    $topbarAvatar = Auth::user()->avatar;
-                    if ($topbarAvatar && !filter_var($topbarAvatar, FILTER_VALIDATE_URL)) {
-                        $topbarAvatar = asset('storage/' . $topbarAvatar);
-                    } elseif (empty($topbarAvatar)) {
-                        $topbarAvatar = 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=4e73df&color=fff&size=60';
+                    $avatarUrl = Auth::user()->avatar;
+                    if ($avatarUrl && !filter_var($avatarUrl, FILTER_VALIDATE_URL)) {
+                        $avatarUrl = asset('storage/' . $avatarUrl);
+                    } elseif (empty($avatarUrl)) {
+                        $avatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=4e73df&color=fff&size=60';
                     }
                 @endphp
-                <img class="img-profile rounded-circle" src="{{ $topbarAvatar }}" alt="Foto Profil">
+                <img class="img-profile rounded-circle" src="{{ $avatarUrl }}" alt="Foto Profil">
             </a>
             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
                 <div class="dropdown-header user-info-header d-flex align-items-center px-3 py-2">
-                    <img class="img-profile rounded-circle mr-3" width="40" src="{{ $topbarAvatar }}" alt="Foto Profil">
+                    <img class="img-profile rounded-circle mr-3" width="40" src="{{ $avatarUrl }}" alt="Foto Profil">
                     <div>
-                        <h6 class="font-weight-bold mb-0 text-gray-900">{{ Auth::user()->name }}</h6>
+                        <h6 class="font-weight-bold mb-0 text-gray-800">{{ Auth::user()->name }}</h6>
                         <small class="text-muted">Admin</small>
                     </div>
                 </div>

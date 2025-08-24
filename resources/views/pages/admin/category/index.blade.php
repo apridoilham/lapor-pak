@@ -40,7 +40,7 @@
             <p class="mb-0 text-muted">Buat, ubah, atau hapus kategori untuk pelaporan warga.</p>
         </div>
         <a href="{{ route('admin.report-category.create') }}" class="btn btn-primary shadow-sm">
-            <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Kategori Baru
+            <i class="fas fa-plus fa-sm text-white-50 mr-2"></i>Tambah Kategori Baru
         </a>
     </div>
 
@@ -78,18 +78,9 @@
                                         <span class="badge badge-pill badge-primary badge-report-count">{{ $category->reports_count }} Laporan</span>
                                     </td>
                                     <td class="text-center">
-                                        <a href="{{ route('admin.report-category.edit', $category->id) }}" class="btn btn-sm btn-outline-warning" title="Ubah">
-                                            <i class="fas fa-edit fa-sm mr-1"></i> Ubah
+                                        <a href="{{ route('admin.report-category.show', $category) }}" class="btn btn-sm btn-outline-info">
+                                            <i class="fas fa-eye fa-sm mr-1"></i> Detail
                                         </a>
-                                        <form action="{{ route('admin.report-category.destroy', $category->id) }}" method="POST" class="d-inline delete-form">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger ml-1" title="Hapus" 
-                                                    data-title="Hapus Kategori?" 
-                                                    data-text="Anda yakin ingin menghapus kategori {{ $category->name }}?">
-                                                <i class="fas fa-trash fa-sm mr-1"></i> Hapus
-                                            </button>
-                                        </form>
                                     </td>
                                 </tr>
                             @endforeach
@@ -100,28 +91,3 @@
         </div>
     </div>
 @endsection
-
-@push('scripts')
-<script>
-    document.querySelectorAll('.delete-form').forEach(form => {
-        form.addEventListener('submit', function(event) {
-            event.preventDefault();
-            const button = this.querySelector('button[type="submit"]');
-            Swal.fire({
-                title: button.dataset.title || 'Anda yakin?',
-                text: button.dataset.text || 'Tindakan ini tidak dapat dibatalkan!',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#e74a3b',
-                cancelButtonColor: '#858796',
-                confirmButtonText: 'Ya, Hapus!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    this.submit();
-                }
-            });
-        });
-    });
-</script>
-@endpush

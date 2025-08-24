@@ -32,34 +32,31 @@ class GoogleController extends Controller
 
             if (!empty($rawAvatarUrl) && strpos($rawAvatarUrl, '/picture/0') === false) {
                 try {
-                    $avatarContents = file_get_contents($rawAvatarUrl);
-                    $avatarName = 'assets/avatar/' . Str::random(40) . '.jpg';
-                    Storage::disk('public')->put($avatarName, $avatarContents);
-                    $localAvatarPath = $avatarName;
+                    $avatarContents = @file_get_contents($rawAvatarUrl);
+                    if ($avatarContents) {
+                        $avatarName = 'assets/avatar/' . Str::random(40) . '.jpg';
+                        Storage::disk('public')->put($avatarName, $avatarContents);
+                        $localAvatarPath = $avatarName;
+                    }
                 } catch (\Exception $e) {
                     $localAvatarPath = null;
                 }
             }
 
             if ($user) {
-                // Hapus avatar lama jika ada DAN BUKAN URL (path lokal)
-                if ($user->avatar && !filter_var($user->avatar, FILTER_VALIDATE_URL)) {
-                    Storage::disk('public')->delete($user->avatar);
-                }
-                
-                $updateData = [
-                    'name' => $googleUser->getName(),
-                    'google_id' => $googleUser->getId(),
-                ];
+                // PERBAIKAN FINAL DI SINI
+                $updateData = ['google_id' => $googleUser->getId()];
 
-                // Hanya update avatar jika berhasil diunduh
-                if ($localAvatarPath) {
+                // Hanya update nama & avatar jika masih menggunakan data default dari seeder
+                if ($user->name === 'Super Admin Haeritage 31' && empty($user->avatar)) {
+                    $updateData['name'] = $googleUser->getName();
                     $updateData['avatar'] = $localAvatarPath;
                 }
-
+                
                 $user->update($updateData);
 
             } else {
+                // Logika untuk user baru sudah benar
                 $user = User::create([
                     'name' => $googleUser->getName(),
                     'email' => $googleUser->getEmail(),

@@ -25,7 +25,7 @@
             <p class="mb-0 text-muted">Atur data wilayah untuk pendaftaran warga dan admin.</p>
         </div>
         <button type="button" class="btn btn-primary shadow-sm" data-toggle="modal" data-target="#addRwModal">
-            <i class="fas fa-plus fa-sm mr-2"></i>Tambah Wilayah RW
+            <i class="fas fa-plus fa-sm mr-2"></i>Tambah Wilayah RW Baru
         </button>
     </div>
 

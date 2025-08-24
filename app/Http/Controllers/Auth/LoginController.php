@@ -28,10 +28,12 @@ class LoginController extends Controller
         $credentials = $request->validated();
 
         if ($this->authRepository->login($credentials)) {
+            $request->session()->regenerate(); // Tambahkan ini untuk keamanan
+            
             $user = Auth::user();
 
             if ($user->hasAnyRole(['admin', 'super-admin'])) {
-                return redirect()->route('admin.dashboard');
+                return redirect()->intended(route('admin.dashboard'));
             }
 
             if ($user->hasRole('resident')) {
@@ -43,7 +45,7 @@ class LoginController extends Controller
                 }
             }
 
-            return redirect()->route('home');
+            return redirect()->intended('/');
         }
 
         return back()->withErrors([

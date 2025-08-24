@@ -12,8 +12,9 @@ use App\Models\Rt;
 use App\Models\Rw;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator; // Import Validator
 use Maatwebsite\Excel\Facades\Excel;
-use RealRashid\SweetAlert\Facades\Alert as Swal;
+use Carbon\Carbon;
 
 class ReportExportController extends Controller
 {
@@ -54,9 +55,8 @@ class ReportExportController extends Controller
 
     public function store(Request $request)
     {
-        $user = Auth::user();
-        $filters = $request->validate([
-            'start_date' => 'nullable|date',
+        $validator = Validator::make($request->all(), [
+            'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'resident_id' => 'nullable|exists:residents,id',
             'report_category_id' => 'nullable|exists:report_categories,id',
@@ -65,6 +65,13 @@ class ReportExportController extends Controller
             'rt_id' => 'nullable|exists:rts,id',
         ]);
 
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+
+        $filters = $validator->validated();
+        $user = Auth::user();
+
         if ($user->hasRole('admin')) {
             $filters['rw_id'] = $user->rw_id;
         }
@@ -72,11 +79,22 @@ class ReportExportController extends Controller
         $reportsToExport = $this->reportRepository->getFilteredReports($filters);
 
         if ($reportsToExport->isEmpty()) {
-            Swal::error('Tidak Ada Data', 'Tidak ada data laporan yang cocok dengan filter yang Anda pilih.');
-            return redirect()->back()->withInput();
+            return response()->json([
+                'message' => 'Tidak ada data laporan yang cocok dengan filter yang Anda pilih.'
+            ], 422);
         }
 
-        $fileName = 'laporan-custom-' . now()->format('d-m-Y-His') . '.xlsx';
+        $startDate = Carbon::parse($filters['start_date'])->format('d-m-Y');
+        $endDate = !empty($filters['end_date']) ? Carbon::parse($filters['end_date'])->format('d-m-Y') : null;
+
+        if ($endDate && $startDate !== $endDate) {
+            $dateRange = "{$startDate}_sampai_{$endDate}";
+        } else {
+            $dateRange = $startDate;
+        }
+
+        $fileName = "laporan-bsb-{$dateRange}.xlsx";
+        
         $export = new ReportsExport($filters);
         return Excel::download($export, $fileName);
     }
