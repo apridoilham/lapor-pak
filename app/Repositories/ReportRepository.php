@@ -145,10 +145,12 @@ class ReportRepository implements ReportRepositoryInterface
 
     public function countStatusesByResidentId(int $residentId): array
     {
-        $active = Report::where('resident_id', $residentId)->whereHas('latestStatus', fn(Builder $q) => $q->whereIn('status', [ReportStatusEnum::DELIVERED, ReportStatusEnum::IN_PROCESS]))->count();
-        $completed = Report::where('resident_id', $residentId)->whereHas('latestStatus', fn(Builder $q) => $q->where('status', ReportStatusEnum::COMPLETED))->count();
-        $rejected = Report::where('resident_id', $residentId)->whereHas('latestStatus', fn(Builder $q) => $q->where('status', ReportStatusEnum::REJECTED))->count();
-        return ['active' => $active, 'completed' => $completed, 'rejected' => $rejected];
+        return [
+            'delivered' => $this->countByStatus($residentId, ReportStatusEnum::DELIVERED),
+            'in_process' => $this->countByStatus($residentId, ReportStatusEnum::IN_PROCESS),
+            'completed' => $this->countByStatus($residentId, ReportStatusEnum::COMPLETED),
+            'rejected' => $this->countByStatus($residentId, ReportStatusEnum::REJECTED),
+        ];
     }
     
     public function countByStatus(int $residentId, ReportStatusEnum $status): int

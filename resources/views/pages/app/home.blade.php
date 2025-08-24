@@ -172,7 +172,6 @@
                 <a href="{{ route('report.show', ['code' => $report->code, '_ref' => request()->fullUrl()]) }}" class="report-card-professional">
                     <img src="{{ asset('storage/' . $report->image) }}" alt="{{ $report->title }}" class="card-image">
                     <div class="card-body">
-                        {{-- PERBAIKAN DI SINI: Menggunakan optional() --}}
                         <div class="card-category-pill">{{ optional($report->reportCategory)->name ?? 'Tanpa Kategori' }}</div>
                         <h6 class="card-title">{{ $report->title }}</h6>
                         <div class="card-meta-grid">
@@ -201,7 +200,8 @@
                             @endif
                             <span class="user-name">{{ $isOwner ? $report->resident->user->name : $report->resident->user->censored_name }}</span>
                         </div>
-                        @if($report->latestStatus)
+
+                        @if ($isOwner && $report->latestStatus)
                             @php $status = $report->latestStatus->status; @endphp
                             <div class="status-badge {{ $status->value }}">
                                 <span>{{ $status->label() }}</span>

@@ -41,9 +41,10 @@ class ProfileController extends Controller
 
         return view('pages.app.profile', [
             'user' => $user,
-            'activeReportsCount' => $stats['active'],
-            'completedReportsCount' => $stats['completed'],
-            'rejectedReportsCount' => $stats['rejected'],
+            'deliveredCount' => $stats['delivered'],
+            'inProcessCount' => $stats['in_process'],
+            'completedCount' => $stats['completed'],
+            'rejectedCount' => $stats['rejected'],
         ]);
     }
 
@@ -68,7 +69,6 @@ class ProfileController extends Controller
         if ($path = $this->handleFileUpload($request, 'avatar', 'assets/avatar', $resident->avatar)) {
             $validatedData['avatar'] = $path;
             
-            // PERBAIKAN DI SINI: Simpan juga path avatar baru ke tabel user
             $user->update(['avatar' => $path]);
         }
 

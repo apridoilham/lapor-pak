@@ -158,15 +158,19 @@
     
     <div class="neumorphic-card stats-summary-card">
         <div class="stat-item">
-            <p class="stat-count" data-count="{{ $activeReportsCount }}">0</p>
-            <p class="stat-label">Aktif</p>
+            <p class="stat-count" data-count="{{ $deliveredCount }}">0</p>
+            <p class="stat-label">Terkirim</p>
         </div>
         <div class="stat-item">
-            <p class="stat-count" data-count="{{ $completedReportsCount }}">0</p>
+            <p class="stat-count" data-count="{{ $inProcessCount }}">0</p>
+            <p class="stat-label">Diproses</p>
+        </div>
+        <div class="stat-item">
+            <p class="stat-count" data-count="{{ $completedCount }}">0</p>
             <p class="stat-label">Selesai</p>
         </div>
         <div class="stat-item">
-            <p class="stat-count" data-count="{{ $rejectedReportsCount }}">0</p>
+            <p class="stat-count" data-count="{{ $rejectedCount }}">0</p>
             <p class="stat-label">Ditolak</p>
         </div>
     </div>

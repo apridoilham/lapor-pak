@@ -22,8 +22,8 @@
     .report-main-image {
         width: 100%;
         max-height: 450px;
-        object-fit: contain; /* Agar gambar tidak terpotong */
-        background-color: #f8f9fc; /* Latar belakang jika gambar tidak penuh */
+        object-fit: contain;
+        background-color: #f8f9fc;
         border-radius: .5rem;
         cursor: pointer;
         border: 1px solid var(--border-color);
@@ -34,7 +34,6 @@
         border-radius: 0.5rem;
         z-index: 1;
     }
-
     .info-card .card-body {
         padding: 1.5rem;
     }
@@ -79,14 +78,11 @@
         align-items: center;
         gap: 0.75rem;
     }
-    
-    /* PERBAIKAN UKURAN AVATAR DI SINI */
     .reporter-card .avatar {
         width: 42px;
         height: 42px;
         object-fit: cover;
     }
-
     .timeline {
         position: relative;
     }
@@ -164,7 +160,6 @@
     .soft-badge.badge-warning { background-color: #fef3c7; color: #92400e; }
     .soft-badge.badge-danger { background-color: #fee2e2; color: #991b1b; }
     .soft-badge.badge-primary { background-color: #dbeafe; color: #1e40af; }
-
     .lightbox-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); display: flex; align-items: center; justify-content: center; z-index: 1051; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; backdrop-filter: blur(5px); }
     .lightbox-overlay.show { opacity: 1; visibility: visible; }
     .lightbox-content img { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 8px; }
@@ -317,23 +312,21 @@
     </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var mapInitialized = false;
-        function initializeMap() {
-            if (document.getElementById('map') && !mapInitialized) {
-                var map = L.map('map').setView([{{ $report->latitude }}, {{ $report->longitude }}], 16);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                }).addTo(map);
-                L.marker([{{ $report->latitude }}, {{ $report->longitude }}]).addTo(map);
-                mapInitialized = true;
-                setTimeout(() => map.invalidateSize(), 200);
-            }
+        if (document.getElementById('map')) {
+            var map = L.map('map').setView([{{ $report->latitude }}, {{ $report->longitude }}], 16);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            L.marker([{{ $report->latitude }}, {{ $report->longitude }}]).addTo(map);
+
+            setTimeout(function() {
+                map.invalidateSize();
+            }, 250);
         }
-        initializeMap();
 
         document.querySelectorAll('.delete-form').forEach(form => {
             form.addEventListener('submit', function(event) {
@@ -367,4 +360,4 @@
         }
     });
 </script>
-@endsection
+@endpush

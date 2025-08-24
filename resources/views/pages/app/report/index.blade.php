@@ -110,7 +110,10 @@
                     </div>
                 </div>
             </div>
-            <div class="d-grid mt-2">
+            <div class="d-grid gap-2 mt-3" style="grid-template-columns: {{ count(request()->except('page')) > 0 ? '1fr 2fr' : '1fr' }};">
+                @if(count(request()->except('page')) > 0)
+                    <a href="{{ route('report.index') }}" class="btn btn-outline-secondary">Reset</a>
+                @endif
                 <button type="submit" class="btn btn-primary">Terapkan Filter</button>
             </div>
         </form>
@@ -134,7 +137,6 @@
             </div>
             <div class="card-footer">
                 <div class="user-details">
-                    {{-- PERBAIKAN LOGIKA AVATAR DI SINI --}}
                     @php
                         $reporter = $report->resident->user;
                         $avatarUrl = $reporter->avatar ?? optional($reporter->resident)->avatar;
@@ -150,7 +152,7 @@
                     @endif
                     <span class="user-name">{{ $isOwner ? $report->resident->user->name : $report->resident->user->censored_name }}</span>
                 </div>
-                @if($report->latestStatus)
+                @if ($isOwner && $report->latestStatus)
                     @php $status = $report->latestStatus->status; @endphp
                     <div class="status-badge {{ $status->value }}">
                         <span>{{ $status->label() }}</span>
@@ -159,7 +161,7 @@
             </div>
         </a>
     @empty
-        <div class="d-flex flex-column justify-content-center align-items:center text-center py-5">
+        <div class="d-flex flex-column justify-content-center align-items-center text-center py-5">
             <div id="lottie-empty-list" style="width: 250px; height: 250px;"></div>
             <h5 class="mt-3 fw-bold">Laporan Tidak Ditemukan</h5>
             <p class="text-secondary px-4">Tidak ada laporan yang cocok dengan filter yang Anda pilih.</p>
