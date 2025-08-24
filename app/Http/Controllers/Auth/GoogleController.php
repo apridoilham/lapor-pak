@@ -44,10 +44,8 @@ class GoogleController extends Controller
             }
 
             if ($user) {
-                // PERBAIKAN FINAL DI SINI
                 $updateData = ['google_id' => $googleUser->getId()];
 
-                // Hanya update nama & avatar jika masih menggunakan data default dari seeder
                 if ($user->name === 'Super Admin Haeritage 31' && empty($user->avatar)) {
                     $updateData['name'] = $googleUser->getName();
                     $updateData['avatar'] = $localAvatarPath;
@@ -56,7 +54,6 @@ class GoogleController extends Controller
                 $user->update($updateData);
 
             } else {
-                // Logika untuk user baru sudah benar
                 $user = User::create([
                     'name' => $googleUser->getName(),
                     'email' => $googleUser->getEmail(),
@@ -70,7 +67,7 @@ class GoogleController extends Controller
                     $user->assignRole('resident');
                     $user->resident()->create([
                         'avatar' => $user->avatar,
-                        'address' => 'Alamat belum diatur',
+                        'address' => '',
                     ]);
                 }
             }
@@ -83,7 +80,7 @@ class GoogleController extends Controller
 
             if ($user->hasRole('resident')) {
                 $resident = $user->resident;
-                if (!$resident || !$resident->rt_id || !$resident->rw_id || $resident->address === 'Alamat belum diatur') {
+                if (!$resident || !$resident->rt_id || !$resident->rw_id || empty(trim($resident->address))) {
                     Swal::info('Selamat Datang!', 'Silakan lengkapi data RT dan RW Anda terlebih dahulu.');
                     return redirect()->route('profile.edit');
                 }

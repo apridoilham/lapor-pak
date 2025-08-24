@@ -52,9 +52,9 @@
 @section('content')
     @php
         $isProfileIncomplete = !$user->resident->rw_id 
-                               || !$user->resident->rt_id 
-                               || $user->resident->address === 'Alamat belum diatur'
-                               || !$user->resident->phone;
+                                 || !$user->resident->rt_id 
+                                 || empty(trim($user->resident->address))
+                                 || !$user->resident->phone;
 
         $originalDataForJs = [
             'name' => $user->name,
@@ -146,7 +146,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="address" class="form-label">Alamat Lengkap</label>
-                    <textarea name="address" id="address" class="form-control" rows="3" required>{{ old('address', $user->resident->address) }}</textarea>
+                    <textarea name="address" id="address" class="form-control" rows="3" required placeholder="Contoh: Jl. Merdeka No. 10, RT 01/RW 01...">{{ old('address', $user->resident->address) }}</textarea>
                     @error('address')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                 </div>
             </div>
@@ -315,5 +315,4 @@
             }
         });
     </script>
-
 @endsection

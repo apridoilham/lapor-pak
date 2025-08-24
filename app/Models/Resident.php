@@ -44,6 +44,7 @@ class Resident extends Model
     {
         $query->whereNotNull('rt_id')
               ->whereNotNull('rw_id')
-              ->where('address', '!=', 'Alamat belum diatur');
+              ->whereNotNull('address')
+              ->where('address', '!=', '');
     }
 }

@@ -28,7 +28,7 @@ class LoginController extends Controller
         $credentials = $request->validated();
 
         if ($this->authRepository->login($credentials)) {
-            $request->session()->regenerate(); // Tambahkan ini untuk keamanan
+            $request->session()->regenerate();
             
             $user = Auth::user();
 
@@ -39,7 +39,7 @@ class LoginController extends Controller
             if ($user->hasRole('resident')) {
                 $resident = $user->resident;
 
-                if (!$resident || !$resident->rt_id || !$resident->rw_id || $resident->address === 'Alamat belum diatur') {
+                if (!$resident || !$resident->rt_id || !$resident->rw_id || empty(trim($resident->address))) {
                     Swal::info('Selamat Datang!', 'Harap lengkapi data diri Anda terlebih dahulu untuk melanjutkan.');
                     return redirect()->route('profile.edit');
                 }
