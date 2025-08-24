@@ -34,6 +34,7 @@
     .notification-item .icon-container { width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.2rem; }
     .icon-container.comment { background-color: #E0F2FE; color: #0284C7; }
     .icon-container.status { background-color: #F0FDF4; color: #16A34A; }
+    .icon-container.deleted { background-color: #FEF2F2; color: #EF4444; }
     .notification-item .content { flex-grow: 1; }
     .notification-item .content p { margin: 0; font-size: 0.95rem; color: var(--text-dark); line-height: 1.5; }
     .notification-item .content .time { font-size: 0.8rem; color: var(--text-light); margin-top: 0.25rem; }
@@ -91,16 +92,20 @@
                     <h6 class="notification-group-title">{{ $date }}</h6>
                     @foreach($group as $notification)
                         @php
-                            $isComment = $notification->data['type'] === 'new_comment';
-                            $iconClass = $isComment ? 'comment' : 'status';
-                            $icon = $isComment ? 'fa-solid fa-comment-dots' : 'fa-solid fa-file-circle-check';
                             $actionUser = \App\Models\User::find($notification->data['action_by_user_id']);
-                            $message = '';
-                            if ($isComment) {
+                            $iconClass = 'status';
+                            $icon = 'fa-solid fa-file-circle-check';
+                            $message = $notification->data['message'] ?? '';
+
+                            if ($notification->data['type'] === 'new_comment') {
+                                $iconClass = 'comment';
+                                $icon = 'fa-solid fa-comment-dots';
                                 $message = '<strong>' . ($actionUser ? $actionUser->name : 'Seseorang') . '</strong> mengomentari laporan Anda.';
-                            } else {
-                                $statusEnum = \App\Enums\ReportStatusEnum::tryFrom($notification->data['status_message']);
-                                $message = 'Status laporan Anda diperbarui menjadi <strong>' . ($statusEnum ? $statusEnum->label() : '') . '</strong>.';
+                            } elseif ($notification->data['type'] === 'status_update') {
+                                // Logic has already been pre-built in the Notification class
+                            } elseif ($notification->data['type'] === 'progress_deleted') {
+                                $iconClass = 'deleted';
+                                $icon = 'fa-solid fa-trash-can';
                             }
                         @endphp
                         <div class="notification-item" data-id="{{ $notification->id }}">

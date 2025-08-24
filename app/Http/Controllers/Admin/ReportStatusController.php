@@ -99,7 +99,7 @@ class ReportStatusController extends Controller
             Storage::disk('public')->delete($status->image);
         }
 
-        $this->reportStatusRepository->deleteReportStatus($id);
+        $this->reportStatusRepository->deleteReportStatus($id, Auth::id());
 
         Swal::success('Success', 'Data progress laporan berhasil dihapus!')->timerProgressBar();
         return redirect()->route('admin.report.show', $status->report_id);

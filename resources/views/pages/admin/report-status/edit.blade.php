@@ -147,7 +147,7 @@
                         
                         <div class="text-right mt-3">
                             <a href="{{ route('admin.report.show', $status->report_id) }}" class="btn btn-secondary">Batal</a>
-                            <button type="submit" class="btn btn-primary" id="save-btn">
+                            <button type="submit" class="btn btn-primary" id="save-btn" disabled>
                                 <i class="fas fa-save mr-2"></i>Simpan Perubahan
                             </button>
                         </div>
@@ -161,11 +161,30 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const saveButton = document.getElementById('save-btn');
+        const statusSelect = document.getElementById('status');
+        const descriptionTextarea = document.getElementById('description');
         const imageInput = document.getElementById('image');
         const imagePreview = document.getElementById('image-preview');
         const imagePlaceholder = document.getElementById('image-placeholder');
-        const saveButton = document.getElementById('save-btn');
         const changeImageButton = document.getElementById('change-image-btn');
+
+        const initialValues = {
+            status: statusSelect.value,
+            description: descriptionTextarea.value.trim()
+        };
+
+        function checkForChanges() {
+            const statusChanged = statusSelect.value !== initialValues.status;
+            const descriptionChanged = descriptionTextarea.value.trim() !== initialValues.description;
+            const imageChanged = imageInput.files.length > 0;
+            saveButton.disabled = !(statusChanged || descriptionChanged || imageChanged);
+        }
+
+        [statusSelect, descriptionTextarea, imageInput].forEach(input => {
+            input.addEventListener('input', checkForChanges);
+            input.addEventListener('change', checkForChanges);
+        });
 
         const handleImagePreview = (event) => {
             const file = event.target.files[0];
@@ -191,8 +210,6 @@
                 imageInput.click();
             });
         }
-        
-        saveButton.disabled = false;
     });
 </script>
 @endpush

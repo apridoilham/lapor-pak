@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Events\ReportProgressDeleted;
 use App\Events\ReportStatusUpdated;
 use App\Listeners\LogSuccessfulLogin;
+use App\Listeners\SendReportProgressDeletedNotification;
 use App\Listeners\SendReportStatusNotification;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Registered;
@@ -22,6 +24,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         ReportStatusUpdated::class => [
             SendReportStatusNotification::class,
+        ],
+        ReportProgressDeleted::class => [
+            SendReportProgressDeletedNotification::class,
         ],
     ];
 

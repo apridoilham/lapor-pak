@@ -125,7 +125,7 @@
             </div>
 
             <h1>Selamat Datang</h1>
-            <p class="subtitle">Satu klik untuk masuk dan mulai melaporkan masalah di sekitar wilayah Kelurahan Bojongsari Baru.</p>
+            <p class="subtitle">Satu klik untuk masuk dan mulai melaporkan masalah anda di sekitar wilayah Kelurahan Bojongsari Baru.</p>
             
             @if($errors->any())
                 <div class="alert alert-danger mb-4">

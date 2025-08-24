@@ -12,5 +12,5 @@ interface ReportStatusRepositoryInterface
 
     public function updateReportStatus(array $data, int $id);
 
-    public function deleteReportStatus(int $id);
+    public function deleteReportStatus(int $id, ?int $actorId = null);
 }
