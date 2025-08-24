@@ -129,7 +129,7 @@
                     <i class="fa-solid fa-image fa-2x text-secondary"></i>
                     <p class="text-secondary small mt-2">Gambar pratinjau akan tampil di sini</p>
                 </div>
-                <img alt="Pratinjau Laporan" id="image-preview" class="img-fluid rounded-3 mb-3 border" style="display: none; width: 100%; height: 200px; object-fit: cover;">
+                <img alt="Pratinjau Laporan" id="image-preview" class="img-fluid rounded-3 mb-3 border" style="display: none; width: 100%; height: auto;">
             </div>
             @error('image')
                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -181,7 +181,6 @@
         <div class="mb-3">
             <label for="visibility" class="form-label fw-bold">Tampilkan Laporan Kepada</label>
             <select name="visibility" id="visibility" class="form-select @error('visibility') is-invalid @enderror" required>
-                {{-- PERUBAHAN 1: Menambahkan placeholder --}}
                 <option value="" selected disabled>Pilih visibilitas laporan</option>
                 @foreach(\App\Enums\ReportVisibilityEnum::cases() as $visibility)
                     <option value="{{ $visibility->value }}" {{ old('visibility') == $visibility->value ? 'selected' : '' }}>
@@ -201,18 +200,14 @@
 @endsection
 
 @section('scripts')
-    {{-- PERUBAHAN 2: Menambahkan SweetAlert2 --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('create-report-form');
             
-            // ... (Kode Javascript lain yang sudah ada tidak perlu diubah) ...
-            
-            // PERUBAHAN 3: Menambahkan event listener untuk alert konfirmasi
             form.addEventListener('submit', function(event) {
-                event.preventDefault(); // Mencegah form dikirim secara langsung
+                event.preventDefault();
 
                 Swal.fire({
                     title: 'Konfirmasi Laporan',
@@ -225,7 +220,7 @@
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        form.submit(); // Jika dikonfirmasi, kirim form
+                        form.submit();
                     }
                 });
             });

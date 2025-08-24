@@ -20,6 +20,7 @@ class UpdateUserReportRequest extends FormRequest
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:5000',
             'visibility' => ['required', Rule::enum(ReportVisibilityEnum::class)],
+            'image' => 'nullable|file|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];
     }
 }

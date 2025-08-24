@@ -14,6 +14,7 @@ use App\Models\Report;
 use App\Models\Rt;
 use App\Models\Rw;
 use App\Services\ReportService;
+use App\Traits\FileUploadTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -22,7 +23,7 @@ use RealRashid\SweetAlert\Facades\Alert as Swal;
 
 class ReportController extends Controller
 {
-    use AuthorizesRequests;
+    use AuthorizesRequests, FileUploadTrait;
 
     private ReportRepositoryInterface $reportRepository;
     private ReportCategoryRepositoryInterface $reportCategoryRepository;
@@ -123,7 +124,14 @@ class ReportController extends Controller
     public function update(UpdateUserReportRequest $request, Report $report)
     {
         $this->authorize('update', $report);
-        $this->reportRepository->updateReport($request->validated(), $report->id);
+
+        $validatedData = $request->validated();
+
+        if ($path = $this->handleFileUpload($request, 'image', 'assets/report/image', $report->image)) {
+            $validatedData['image'] = $path;
+        }
+
+        $this->reportRepository->updateReport($validatedData, $report->id);
         Swal::success('Berhasil', 'Laporan Anda telah berhasil diperbarui.');
         return redirect()->route('report.myreport');
     }
