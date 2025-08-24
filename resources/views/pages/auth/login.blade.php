@@ -17,7 +17,7 @@
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
 
     html, body {
-        height: 100%; /* Penting untuk layout flex full-height */
+        height: 100%;
         margin: 0;
         padding: 0;
         font-family: 'Plus Jakarta Sans', sans-serif;
@@ -26,12 +26,12 @@
 
     .login-screen {
         display: flex;
-        flex-direction: column; /* Mengatur item secara vertikal */
-        min-height: 100vh; /* Tinggi minimal seukuran layar */
+        flex-direction: column;
+        min-height: 100vh;
     }
 
     .login-main {
-        flex-grow: 1; /* Membuat area ini memanjang untuk mendorong footer ke bawah */
+        flex-grow: 1;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -50,11 +50,11 @@
     }
 
     .logo-container {
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
     }
 
     .logo-container img {
-        height: 90px;
+        height: 180px;
         width: auto;
     }
 
@@ -99,7 +99,7 @@
     }
 
     .login-footer {
-        flex-shrink: 0; /* Mencegah footer menyusut */
+        flex-shrink: 0;
         text-align: center;
         padding: 1.5rem;
     }
@@ -125,7 +125,7 @@
             </div>
 
             <h1>Selamat Datang</h1>
-            <p class="subtitle">Satu klik untuk masuk dan mulai melaporkan masalah di sekitar Anda.</p>
+            <p class="subtitle">Satu klik untuk masuk dan mulai melaporkan masalah di sekitar wilayah Kelurahan Bojongsari Baru.</p>
             
             @if($errors->any())
                 <div class="alert alert-danger mb-4">
@@ -143,7 +143,7 @@
     </main>
     
     <footer class="login-footer">
-        <p>Sebuah Inisiatif oleh <strong>KKN Kelompok 31 Depok - UIN Syarif Hidayatullah Jakarta 2025</strong></p>
+        <p>Sebuah Inisiatif oleh <strong>Kelompok KKN Depok 31 <br> UIN Syarif Hidayatullah Jakarta 2025</strong></p>
     </footer>
 
 </div>
