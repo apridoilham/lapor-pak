@@ -26,34 +26,50 @@
     </div>
 
     <div class="card shadow mb-4">
+        <div class="card-body">
+            <form action="{{ route('admin.report.index') }}" method="GET" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label for="sort" class="form-label font-weight-bold small">Urutkan Berdasarkan</label>
+                    <select name="sort" id="sort" class="form-control" onchange="this.form.submit()">
+                        <option value="latest_updated" {{ request('sort', 'latest_updated') == 'latest_updated' ? 'selected' : '' }}>Terakhir Diperbarui</option>
+                        <option value="latest_created" {{ request('sort') == 'latest_created' ? 'selected' : '' }}>Terbaru Dibuat</option>
+                        <option value="oldest_created" {{ request('sort') == 'oldest_created' ? 'selected' : '' }}>Terlama Dibuat</option>
+                        <option value="name_asc" {{ request('sort') == 'name_asc' ? 'selected' : '' }}>Nama Pelapor (A-Z)</option>
+                        <option value="name_desc" {{ request('sort') == 'name_desc' ? 'selected' : '' }}>Nama Pelapor (Z-A)</option>
+                    </select>
+                </div>
+                @if(Auth::user()->hasRole('super-admin'))
+                    <div class="col-md-3">
+                        <label for="rw_id_filter" class="form-label font-weight-bold small">Filter RW</label>
+                        <select name="rw" id="rw_id_filter" class="form-control">
+                            <option value="">Semua RW</option>
+                            @foreach ($rws as $rw)
+                                <option value="{{ $rw->id }}" {{ request('rw') == $rw->id ? 'selected' : '' }}>RW {{ $rw->number }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="rt_id_filter" class="form-label font-weight-bold small">Filter RT</label>
+                        <select name="rt" id="rt_id_filter" class="form-control" disabled>
+                            <option value="">Pilih RW terlebih dahulu</option>
+                        </select>
+                    </div>
+                @endif
+                <div class="col-md-3 d-flex">
+                    <button type="submit" class="btn btn-primary flex-grow-1 mr-2">
+                        <i class="fas fa-filter fa-sm"></i> Terapkan
+                    </button>
+                    <a href="{{ route('admin.report.index') }}" class="btn btn-secondary" title="Reset Filter">
+                        <i class="fas fa-sync-alt"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
             <h6 class="m-0 font-weight-bold text-primary">Daftar Semua Laporan</h6>
-            
-            <form action="{{ route('admin.report.index') }}" method="GET" class="d-flex align-items-center">
-                <label for="sort" class="small font-weight-bold text-muted mr-2 mb-0">Urutkan:</label>
-                <select name="sort" id="sort" class="form-control form-control-sm mr-3" style="width: auto;" onchange="this.form.submit()">
-                    <option value="latest_updated" {{ request('sort', 'latest_updated') == 'latest_updated' ? 'selected' : '' }}>Terakhir Diperbarui</option>
-                    <option value="latest_created" {{ request('sort') == 'latest_created' ? 'selected' : '' }}>Terbaru Dibuat</option>
-                    <option value="oldest_created" {{ request('sort') == 'oldest_created' ? 'selected' : '' }}>Terlama Dibuat</option>
-                    <option value="name_asc" {{ request('sort') == 'name_asc' ? 'selected' : '' }}>Nama Pelapor (A-Z)</option>
-                    <option value="name_desc" {{ request('sort') == 'name_desc' ? 'selected' : '' }}>Nama Pelapor (Z-A)</option>
-                </select>
-                
-                @if(Auth::user()->hasRole('super-admin'))
-                    <label class="small font-weight-bold text-muted mr-2 mb-0">Filter:</label>
-                    <select name="rw" id="rw_id_filter" class="form-control form-control-sm mr-2" style="width: auto;">
-                        <option value="">Semua RW</option>
-                        @foreach ($rws as $rw)
-                            <option value="{{ $rw->id }}" {{ request('rw') == $rw->id ? 'selected' : '' }}>RW {{ $rw->number }}</option>
-                        @endforeach
-                    </select>
-                    <select name="rt" id="rt_id_filter" class="form-control form-control-sm mr-2" style="width: auto;" disabled>
-                        <option value="">Pilih RT</option>
-                    </select>
-                    <button type="submit" class="btn btn-sm btn-primary" title="Terapkan Filter">Filter</button>
-                    <a href="{{ route('admin.report.index') }}" class="btn btn-sm btn-outline-secondary ml-1" title="Reset Filter"><i class="fas fa-sync-alt"></i></a>
-                @endif
-            </form>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -129,7 +145,7 @@
     </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     @if(Auth::user()->hasRole('super-admin'))
@@ -139,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function fetchRts(rwId, selectedRtId = null) {
         if (!rwId) {
-            rtSelect.innerHTML = '<option value="">Pilih RW</option>';
+            rtSelect.innerHTML = '<option value="">Pilih RW terlebih dahulu</option>';
             rtSelect.disabled = true;
             return;
         }
@@ -172,4 +188,4 @@ document.addEventListener('DOMContentLoaded', function () {
     @endif
 });
 </script>
-@endsection
+@endpush

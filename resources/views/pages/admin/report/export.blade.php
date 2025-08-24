@@ -162,7 +162,7 @@
     </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @include('sweetalert::alert')
     
@@ -177,7 +177,9 @@
             }
 
             toggleExportButtonState();
-            startDateInput.addEventListener('input', toggleExportButtonState);
+            ['input', 'change'].forEach(event => {
+                startDateInput.addEventListener(event, toggleExportButtonState);
+            });
 
             form.addEventListener('submit', function(event) {
                 event.preventDefault();
@@ -243,7 +245,6 @@
                     });
                 })
                 .finally(() => {
-                    exportButton.disabled = false;
                     exportButton.innerHTML = `<i class="fas fa-file-excel mr-2"></i> <span id="export-btn-text">Ekspor ke Excel</span>`;
                     toggleExportButtonState();
                 });
@@ -287,4 +288,4 @@
             @endif
         });
     </script>
-@endsection
+@endpush

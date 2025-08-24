@@ -19,7 +19,7 @@
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="d-flex align-items-center">
-            <a href="{{ route('admin.rtrw.index') }}" class="btn btn-primary btn-circle mr-3" title="Kembali">
+            <a href="{{ route('admin.rtrw.index') }}" class="btn btn-outline-primary btn-circle mr-3" title="Kembali">
                 <i class="fas fa-arrow-left"></i>
             </a>
             <div>

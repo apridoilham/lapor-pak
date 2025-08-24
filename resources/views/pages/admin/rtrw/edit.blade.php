@@ -73,13 +73,13 @@
         const rwError = document.getElementById('rw-error');
         
         const initialRwNumber = '{{ $rw->number }}';
-        const initialRtCount = '{{ $rtCount }}'.padStart(2, '0');
+        const initialRtCount = '{{ $rtCount }}';
         const rwIdToIgnore = {{ $rw->id }};
         let debounceTimer;
 
         function checkForChanges() {
             const currentRwValue = rwInput.value.padStart(2, '0');
-            const currentRtCountValue = rtCountInput.value.padStart(2, '0');
+            const currentRtCountValue = rtCountInput.value;
             
             const rwChanged = currentRwValue !== initialRwNumber;
             const rtCountChanged = currentRtCountValue !== initialRtCount;
@@ -91,12 +91,6 @@
         }
 
         rwInput.addEventListener('blur', function() {
-            if (this.value) {
-                this.value = this.value.padStart(2, '0');
-            }
-        });
-
-        rtCountInput.addEventListener('blur', function() {
             if (this.value) {
                 this.value = this.value.padStart(2, '0');
             }

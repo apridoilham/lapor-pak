@@ -78,7 +78,7 @@
 
 @section('content')
     <div class="d-flex align-items-center mb-4">
-        <a href="{{ route('admin.report.show', $report->id) }}" class="btn btn-primary btn-circle mr-3" title="Kembali">
+        <a href="{{ route('admin.report.show', $report->id) }}" class="btn btn-outline-primary btn-circle mr-3 title="Kembali">
             <i class="fas fa-arrow-left"></i>
         </a>
         <div>

@@ -47,7 +47,7 @@
                 <div class="col-md-3">
                     <label for="rt_id" class="form-label font-weight-bold small">Filter RT</label>
                     <select name="rt_id" id="rt_id" class="form-control" {{ !request('rw_id') ? 'disabled' : '' }}>
-                        <option value="">Semua RT</option>
+                        <option value="">Pilih RW terlebih dahulu</option>
                         @if(request('rw_id'))
                             @foreach($rts as $rt)
                                 <option value="{{ $rt->id }}" {{ request('rt_id') == $rt->id ? 'selected' : '' }}>RT {{ $rt->number }}</option>
