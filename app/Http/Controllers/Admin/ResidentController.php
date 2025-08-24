@@ -63,23 +63,16 @@ class ResidentController extends Controller
 
     public function show(Resident $resident)
     {
-        $resident->load('user', 'rt', 'rw');
-        $reports = $resident->reports()->with('latestStatus')->get();
+        $resident->load('user', 'rt', 'rw', 'reports.latestStatus');
+
+        $reportCounts = $resident->reports->groupBy('latestStatus.status.value')->map->count();
 
         $stats = [
-            'total' => $reports->count(),
-            'delivered' => $reports->filter(function ($report) {
-                return optional($report->latestStatus)->status === \App\Enums\ReportStatusEnum::DELIVERED;
-            })->count(),
-            'in_process' => $reports->filter(function ($report) {
-                return optional($report->latestStatus)->status === \App\Enums\ReportStatusEnum::IN_PROCESS;
-            })->count(),
-            'completed' => $reports->filter(function ($report) {
-                return optional($report->latestStatus)->status === \App\Enums\ReportStatusEnum::COMPLETED;
-            })->count(),
-            'rejected' => $reports->filter(function ($report) {
-                return optional($report->latestStatus)->status === \App\Enums\ReportStatusEnum::REJECTED;
-            })->count(),
+            'total' => $resident->reports->count(),
+            'delivered' => $reportCounts[\App\Enums\ReportStatusEnum::DELIVERED->value] ?? 0,
+            'in_process' => $reportCounts[\App\Enums\ReportStatusEnum::IN_PROCESS->value] ?? 0,
+            'completed' => $reportCounts[\App\Enums\ReportStatusEnum::COMPLETED->value] ?? 0,
+            'rejected' => $reportCounts[\App\Enums\ReportStatusEnum::REJECTED->value] ?? 0,
         ];
         
         return view('pages.admin.resident.show', compact('resident', 'stats'));

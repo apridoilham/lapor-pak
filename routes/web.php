@@ -41,8 +41,6 @@ Route::prefix('api')->group(function () {
     Route::post('/check-email', [EmailCheckController::class, 'checkEmail']);
 });
 
-// PERUBAHAN UTAMA DI SINI:
-// Urutan 'profile.completed' dipindahkan sebelum 'role:resident'
 Route::middleware(['auth', 'profile.completed', 'role:resident'])->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::get('/reports', [UserReportController::class, 'index'])->name('report.index');
@@ -74,7 +72,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin|super-ad
     Route::get('/profile', [AdminProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile/edit', [AdminProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/update', [AdminProfileController::class, 'update'])->name('profile.update');
-    Route::resource('/report', ReportController::class)->only(['index', 'show']);
+    Route::resource('/report', ReportController::class)->except(['create', 'store', 'edit']);
     Route::get('/report-status/{reportId}/create', [ReportStatusController::class, 'create'])->name('report-status.create');
     Route::resource('/report-status', ReportStatusController::class)->except('create', 'index', 'show');
     Route::get('/export-reports', [ReportExportController::class, 'create'])->name('report.export.create');

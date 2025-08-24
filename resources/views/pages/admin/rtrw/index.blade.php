@@ -77,7 +77,6 @@
         </div>
     </div>
 
-    {{-- Modal tidak berubah --}}
     <div class="modal fade" id="addRwModal" tabindex="-1" role="dialog" aria-labelledby="addRwModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -114,8 +113,7 @@
     </div>
 @endsection
 
-@section('scripts')
-{{-- Script tidak berubah --}}
+@push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const rwNumberInputModal = document.getElementById('rw_number_input_modal');
@@ -130,15 +128,14 @@
             tambahButton.disabled = !(isRwValid && isRtCountValid);
         }
 
-        [rwNumberInputModal, rtCountInput].forEach(input => {
-            input.addEventListener('input', checkModalFormValidity);
-        });
-
+        rtCountInput.addEventListener('input', checkModalFormValidity);
+        
         rwNumberInputModal.addEventListener('input', function() {
-            clearTimeout(debounceTimer);
             this.classList.remove('is-invalid');
             rwError.style.display = 'none';
+            checkModalFormValidity();
 
+            clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
                 if (this.value.length > 0) {
                     fetch('/api/check-rw', {
@@ -161,11 +158,6 @@
                 this.value = this.value.padStart(2, '0');
             }
         });
-        rtCountInput.addEventListener('blur', function() {
-            if (this.value) {
-                this.value = this.value.padStart(2, '0');
-            }
-        });
 
         @if ($errors->store->any())
             $('#addRwModal').modal('show');
@@ -174,4 +166,4 @@
         checkModalFormValidity();
     });
 </script>
-@endsection
+@endpush

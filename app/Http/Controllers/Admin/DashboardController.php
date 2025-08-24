@@ -22,22 +22,27 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $rwId = $user->hasRole('super-admin') ? null : $user->rw_id;
+        $isSuperAdmin = $user->hasRole('super-admin');
+        $rwId = $isSuperAdmin ? null : $user->rw_id;
 
         $reportCounts = $this->reportRepository->getStatusCounts($rwId);
         $totalReports = array_sum($reportCounts);
         $totalResidents = $this->residentRepository->countResidents($rwId);
 
-        $reportsByRw = $this->reportRepository->getReportCountsByRw();
-        $rwLabels = $reportsByRw->pluck('rw_number')->map(fn($num) => "RW {$num}");
-        $rwData = $reportsByRw->pluck('count');
+        $distributionChartTitle = 'Distribusi Laporan per RW';
+        if ($isSuperAdmin) {
+            $reportsByLocation = $this->reportRepository->getReportCountsByRw();
+            $locationLabels = $reportsByLocation->pluck('rw_number')->map(fn($num) => "RW {$num}");
+            $locationData = $reportsByLocation->pluck('count');
+        } else {
+            $distributionChartTitle = "Distribusi Laporan per RT di RW {$user->rw->number}";
+            $reportsByLocation = $this->reportRepository->getReportCountsByRt($rwId);
+            $locationLabels = $reportsByLocation->pluck('rt_number')->map(fn($num) => "RT {$num}");
+            $locationData = $reportsByLocation->pluck('count');
+        }
         
         $dailyReports = $this->reportRepository->getDailyReportCounts($rwId);
-
         $reportsByCategory = $this->reportRepository->getCategoryReportCounts($rwId);
-        $categoryLabels = $reportsByCategory->pluck('name');
-        $categoryData = $reportsByCategory->pluck('reports_count');
-        
         $latestReports = $this->reportRepository->getLatestReportsForAdmin($rwId, 5);
         $topReporters = $this->residentRepository->getTopReporters($rwId);
 
@@ -48,14 +53,13 @@ class DashboardController extends Controller
             'inProcessCount' => $reportCounts[ReportStatusEnum::IN_PROCESS->value] ?? 0,
             'completedCount' => $reportCounts[ReportStatusEnum::COMPLETED->value] ?? 0,
             'rejectedCount' => $reportCounts[ReportStatusEnum::REJECTED->value] ?? 0,
-
             'dailyLabels' => $dailyReports['labels'],
             'dailyData' => $dailyReports['counts'],
-            'categoryLabels' => $categoryLabels,
-            'categoryData' => $categoryData,
-            'rwLabels' => $rwLabels,
-            'rwData' => $rwData,
-
+            'categoryLabels' => $reportsByCategory->pluck('name'),
+            'categoryData' => $reportsByCategory->pluck('reports_count'),
+            'distributionChartTitle' => $distributionChartTitle,
+            'locationLabels' => $locationLabels,
+            'locationData' => $locationData,
             'latestReports' => $latestReports,
             'topReporters' => $topReporters,
         ]);

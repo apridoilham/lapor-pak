@@ -47,7 +47,8 @@ class UpdateReportTest extends TestCase
         ]);
     }
 
-    public function test_a_resident_can_update_their_own_report(): void
+    #[Test]
+    public function a_resident_can_update_their_own_report(): void
     {
         $newCategory = ReportCategory::factory()->create();
         $updatedData = [
@@ -71,9 +72,9 @@ class UpdateReportTest extends TestCase
         ]);
     }
 
-    public function test_a_user_cannot_update_other_users_report(): void
+    #[Test]
+    public function a_user_cannot_update_other_users_report(): void
     {
-        // Buat user lain
         $otherUser = User::factory()->create();
         $otherUser->assignRole('resident');
         Resident::factory()->for($otherUser)->create();
@@ -97,7 +98,8 @@ class UpdateReportTest extends TestCase
         ]);
     }
 
-    public function test_an_admin_can_update_a_report(): void
+    #[Test]
+    public function an_admin_can_update_a_report(): void
     {
         $updatedData = [
             'title' => 'Judul Laporan Sudah Diperbarui oleh Admin',
@@ -120,7 +122,8 @@ class UpdateReportTest extends TestCase
         ]);
     }
 
-    public function test_a_non_admin_user_cannot_update_a_report_via_admin_route(): void
+    #[Test]
+    public function a_non_admin_user_cannot_update_a_report_via_admin_route(): void
     {
         $otherUser = User::factory()->create();
         $otherUser->assignRole('resident');

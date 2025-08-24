@@ -55,7 +55,6 @@
         </div>
     </div>
 
-    {{-- Menggunakan grid 6 kolom di layar besar, dan 2 di layar kecil --}}
     <div class="row row-cols-2 row-cols-md-3 row-cols-xl-6">
         <div class="col mb-4">
             <div class="card stat-card-dashboard h-100 shadow-sm border-bottom-dark">
@@ -139,17 +138,17 @@
         <div class="col-lg-5">
              <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Distribusi Laporan per RW</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">{{ $distributionChartTitle }}</h6>
                 </div>
                 <div class="card-body">
-                    <div class="chart-bar" style="height: 300px;"><canvas id="reportsByRwChart"></canvas></div>
+                    <div class="chart-bar" style="height: 300px;"><canvas id="reportsByLocationChart"></canvas></div>
                 </div>
             </div>
         </div>
     </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script src="{{ asset('assets/admin/vendor/chart.js/Chart.min.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -158,8 +157,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var ctxLine = document.getElementById("weeklyReportsChart").getContext('2d');
     new Chart(ctxLine, { type: 'line', data: { labels: @json($dailyLabels), datasets: [{ label: "Laporan", lineTension: 0.3, backgroundColor: "rgba(78, 115, 223, 0.05)", borderColor: "rgba(78, 115, 223, 1)", pointRadius: 3, pointBackgroundColor: "rgba(78, 115, 223, 1)", pointBorderColor: "rgba(78, 115, 223, 1)", data: @json($dailyData) }] }, options: { maintainAspectRatio: false, scales: { yAxes: [{ ticks: { beginAtZero: true, callback: function(value) { if (Number.isInteger(value)) return value; } } }] }, legend: { display: false } } });
     
-    var ctxBar = document.getElementById("reportsByRwChart").getContext('2d');
-    new Chart(ctxBar, { type: 'bar', data: { labels: @json($rwLabels), datasets: [{ label: "Laporan", backgroundColor: "#4e73df", hoverBackgroundColor: "#2e59d9", borderColor: "#4e73df", data: @json($rwData) }] }, options: { maintainAspectRatio: false, scales: { yAxes: [{ ticks: { beginAtZero: true, callback: function(value) { if (Number.isInteger(value)) return value; } } }] }, legend: { display: false } } });
+    var ctxBar = document.getElementById("reportsByLocationChart").getContext('2d');
+    new Chart(ctxBar, { type: 'bar', data: { labels: @json($locationLabels), datasets: [{ label: "Laporan", backgroundColor: "#4e73df", hoverBackgroundColor: "#2e59d9", borderColor: "#4e73df", data: @json($locationData) }] }, options: { maintainAspectRatio: false, scales: { yAxes: [{ ticks: { beginAtZero: true, callback: function(value) { if (Number.isInteger(value)) return value; } } }] }, legend: { display: false } } });
 });
 </script>
-@endsection
+@endpush

@@ -22,7 +22,6 @@ class RtRwController extends Controller
 
     public function show(Rw $rtrw)
     {
-        // PERBAIKAN DI SINI: Memuat data warga (residents) beserta relasinya
         $rtrw->load(['rts', 'residents.user', 'residents.rt']);
         $residentCount = $rtrw->residents->count();
 
@@ -32,7 +31,6 @@ class RtRwController extends Controller
         ]);
     }
     
-    // ... sisa method tidak berubah ...
     public function store(Request $request)
     {
         if ($request->has('number')) {
@@ -75,27 +73,33 @@ class RtRwController extends Controller
     public function update(UpdateRtRwRequest $request, Rw $rtrw)
     {
         $validated = $request->validated();
-        DB::transaction(function () use ($validated, $rtrw) {
-            $newRwNumber = str_pad($validated['number'], 2, '0', STR_PAD_LEFT);
-            $newRtCount = (int) $validated['rt_count'];
-            $oldRtCount = $rtrw->rts()->count();
-            $rtrw->update(['number' => $newRwNumber]);
-            if ($newRtCount < $oldRtCount) {
-                $rtsToDelete = Rt::where('rw_id', $rtrw->id)
-                    ->where('number', '>', str_pad($newRtCount, 2, '0', STR_PAD_LEFT))
-                    ->withCount('residents')->get();
-                foreach ($rtsToDelete as $rt) {
-                    if ($rt->residents_count > 0) {
-                        throw new \Exception('Gagal mengurangi jumlah RT karena RT ' . $rt->number . ' masih memiliki data warga.');
+        try {
+            DB::transaction(function () use ($validated, $rtrw) {
+                $newRwNumber = str_pad($validated['number'], 2, '0', STR_PAD_LEFT);
+                $newRtCount = (int) $validated['rt_count'];
+                $oldRtCount = $rtrw->rts()->count();
+                $rtrw->update(['number' => $newRwNumber]);
+                if ($newRtCount < $oldRtCount) {
+                    $rtsToDelete = Rt::where('rw_id', $rtrw->id)
+                        ->where('number', '>', str_pad($newRtCount, 2, '0', STR_PAD_LEFT))
+                        ->withCount('residents')->get();
+                    foreach ($rtsToDelete as $rt) {
+                        if ($rt->residents_count > 0) {
+                            throw new \Exception('Gagal mengurangi jumlah RT karena RT ' . $rt->number . ' masih memiliki data warga.');
+                        }
+                    }
+                    $rtsToDelete->each->delete();
+                } elseif ($newRtCount > $oldRtCount) {
+                    for ($i = $oldRtCount + 1; $i <= $newRtCount; $i++) {
+                        Rt::create(['rw_id' => $rtrw->id, 'number' => str_pad($i, 2, '0', STR_PAD_LEFT)]);
                     }
                 }
-                $rtsToDelete->each->delete();
-            } elseif ($newRtCount > $oldRtCount) {
-                for ($i = $oldRtCount + 1; $i <= $newRtCount; $i++) {
-                    Rt::create(['rw_id' => $rtrw->id, 'number' => str_pad($i, 2, '0', STR_PAD_LEFT)]);
-                }
-            }
-        });
+            });
+        } catch (\Exception $e) {
+            Swal::error('Gagal', $e->getMessage());
+            return back()->withInput();
+        }
+        
         Swal::success('Berhasil', 'Data RW ' . str_pad($validated['number'], 2, '0', STR_PAD_LEFT) . ' berhasil diperbarui.');
         return redirect()->route('admin.rtrw.show', $rtrw);
     }
