@@ -70,17 +70,18 @@
     .comment-item { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; }
     .comment-avatar { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; object-fit: cover; }
     .comment-content { flex-grow: 1; }
-    .comment-bubble { padding: 0.75rem 1rem; border-radius: 18px; line-height: 1.6; font-size: 0.9rem; }
+    .comment-bubble { padding: 0.75rem 1rem 0.5rem; border-radius: 18px; line-height: 1.6; font-size: 0.9rem; position: relative; }
     .comment-item.is-other .comment-bubble { background-color: #F3F4F6; color: var(--text-dark); border-top-left-radius: 4px; }
     .comment-item.is-owner { flex-direction: row-reverse; }
-    .comment-item.is-owner .comment-bubble { background: linear-gradient(135deg, #1f2937, #374151); color: white; border-top-right-radius: 4px; }
+    .comment-item.is-owner .comment-bubble { background: var(--primary-gradient); color: white; border-top-right-radius: 4px; }
     .comment-bubble .comment-author { font-weight: 600; font-size: 0.9rem; }
     .comment-item.is-other .comment-author { color: var(--text-dark); }
     .comment-item.is-owner .comment-author { color: white; opacity: 0.9;}
-    .comment-bubble .comment-body { margin: 0.25rem 0; white-space: pre-wrap; word-wrap: break-word; }
-    .comment-bubble .comment-time { font-size: 0.75rem; margin-top: 0.5rem; }
+    .comment-bubble .comment-body { margin: 0.25rem 0 1rem; white-space: pre-wrap; word-wrap: break-word; }
+    .comment-meta-wrapper { position: absolute; bottom: 6px; right: 12px; }
+    .comment-meta { font-size: 0.75rem; }
     .comment-item.is-other .comment-meta { color: var(--text-light); }
-    .comment-item.is-owner .comment-meta { text-align: right; color: white; opacity: 0.7; }
+    .comment-item.is-owner .comment-meta { color: rgba(255, 255, 255, 0.8); }
     .lightbox-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; backdrop-filter: blur(5px); }
     .lightbox-overlay.show { opacity: 1; visibility: visible; }
     .lightbox-content img { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 8px; }
@@ -215,8 +216,10 @@
                                             {{ $isCommentOwner ? 'Anda' : ($isReportOwner ? $comment->user->name : $comment->user->censored_name) }}
                                         </p>
                                         <p class="comment-body">{{ $comment->body }}</p>
+                                        <div class="comment-meta-wrapper">
+                                            <span class="comment-meta">{{ $comment->created_at->format('H:i') }}</span>
+                                        </div>
                                     </div>
-                                    <p class="comment-meta">{{ $comment->created_at->diffForHumans() }}</p>
                                 </div>
                             </div>
                         @empty
@@ -292,6 +295,11 @@
                     }
                     
                     let authorName = isOwner ? 'Anda' : (isReportOwner ? comment.user.name : comment.user.censored_name);
+                    
+                    const now = new Date();
+                    const hours = now.getHours().toString().padStart(2, '0');
+                    const minutes = now.getMinutes().toString().padStart(2, '0');
+                    const newTimestamp = `${hours}:${minutes}`;
 
                     const item = document.createElement('div');
                     item.className = `comment-item ${isOwner ? 'is-owner' : 'is-other'}`;
@@ -301,8 +309,10 @@
                             <div class="comment-bubble">
                                 <p class="comment-author">${authorName}</p>
                                 <p class="comment-body">${comment.body.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>
+                                <div class="comment-meta-wrapper">
+                                    <span class="comment-meta">${newTimestamp}</span>
+                                </div>
                             </div>
-                            <p class="comment-meta">Baru saja</p>
                         </div>
                     `;
                     return item;
