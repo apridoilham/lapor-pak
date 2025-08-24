@@ -33,6 +33,11 @@ class ReportStatusController extends Controller
         $report = $this->reportRepository->getReportById($reportId);
         $this->authorize('manageStatus', $report);
 
+        if ($report->latestStatus && in_array($report->latestStatus->status, [ReportStatusEnum::COMPLETED, ReportStatusEnum::REJECTED])) {
+            Swal::error('Gagal', 'Tidak dapat menambahkan progress pada laporan yang sudah selesai atau ditolak.');
+            return redirect()->route('admin.report.show', $report->id);
+        }
+
         $statuses = array_filter(ReportStatusEnum::cases(), function($status) {
             return $status !== ReportStatusEnum::DELIVERED;
         });
@@ -62,7 +67,6 @@ class ReportStatusController extends Controller
         $status = $this->reportStatusRepository->getReportStatusById($id);
         $this->authorize('manageStatus', $status->report);
 
-        // PERBAIKAN DI SINI: Filter status agar 'Terkirim' tidak muncul
         $statuses = array_filter(ReportStatusEnum::cases(), function($statusEnum) {
             return $statusEnum !== ReportStatusEnum::DELIVERED;
         });

@@ -29,12 +29,11 @@
         color: #858796;
         margin-bottom: 0;
     }
-    
     .file-input-wrapper {
         position: relative;
         overflow: hidden;
         width: 100%;
-        height: 180px;
+        padding-top: 100%;
         background-color: #f8f9fc;
         border: 2px dashed #e3e6f0;
         border-radius: .5rem;
@@ -61,11 +60,18 @@
     #image-preview {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
         position: absolute;
         top: 0;
         left: 0;
         border-radius: .5rem;
+    }
+    #image-placeholder {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
     }
 </style>
 @endpush
@@ -100,38 +106,46 @@
                         @method('PUT')
                         <input type="hidden" name="report_id" value="{{ $status->report_id }}">
 
-                        <div class="form-group">
-                            <label for="image" class="font-weight-bold">Bukti Progress (Opsional)</label>
-                            <div class="file-input-wrapper">
-                                <input type="file" name="image" id="image" class="@error('image') is-invalid @enderror" onchange="previewImage(event)">
-                                <div id="image-placeholder" style="{{ $status->image ? 'display: none;' : 'display: flex; flex-direction: column; align-items: center;' }}">
-                                    <i class="fas fa-camera fa-2x text-gray-400"></i>
-                                    <p class="text-gray-500 mt-2">Klik untuk mengganti gambar</p>
+                        <div class="row">
+                            <div class="col-lg-5">
+                                <div class="form-group text-center">
+                                    <label for="image" class="font-weight-bold d-block mb-2">Bukti Progress (Opsional)</label>
+                                    <div class="file-input-wrapper">
+                                        <input type="file" name="image" id="image" class="@error('image') is-invalid @enderror" accept="image/*">
+                                        <div id="image-placeholder" style="{{ $status->image ? 'display: none;' : 'display: flex; flex-direction: column; align-items: center;' }}">
+                                            <i class="fas fa-camera fa-2x text-gray-400"></i>
+                                            <p class="text-gray-500 mt-2">Klik untuk mengganti gambar</p>
+                                        </div>
+                                        <img id="image-preview" src="{{ $status->image ? asset('storage/' . $status->image) : '' }}" style="{{ $status->image ? 'display: block;' : 'display: none;' }}" alt="Pratinjau Gambar"/>
+                                    </div>
+                                    @error('image') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                                    <button type="button" class="btn btn-outline-primary btn-sm mt-3" id="change-image-btn">
+                                        <i class="fas fa-sync-alt fa-sm mr-1"></i> Ganti Gambar
+                                    </button>
                                 </div>
-                                <img id="image-preview" src="{{ $status->image ? asset('storage/' . $status->image) : '' }}" style="{{ $status->image ? 'display: block;' : 'display: none;' }}" alt="Pratinjau Gambar"/>
                             </div>
-                             @error('image') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
-                        </div>
+                            <div class="col-lg-7">
+                                <div class="form-group">
+                                    <label for="status" class="font-weight-bold">Status Progress</label>
+                                    <select name="status" id="status" class="form-control @error('status') is-invalid @enderror" required>
+                                        @foreach ($statuses as $enumStatus)
+                                            <option value="{{ $enumStatus->value }}" @if (old('status', $status->status->value) == $enumStatus->value) selected @endif>
+                                                {{ $enumStatus->label() }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
 
-                        <div class="form-group">
-                            <label for="status" class="font-weight-bold">Status Progress</label>
-                            <select name="status" id="status" class="form-control @error('status') is-invalid @enderror" required>
-                                @foreach ($statuses as $enumStatus)
-                                    <option value="{{ $enumStatus->value }}" @if (old('status', $status->status->value) == $enumStatus->value) selected @endif>
-                                        {{ $enumStatus->label() }}
-                                    </option>
-                                @endforeach
-                            </select>
-                             @error('status') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="form-group">
-                            <label for="description" class="font-weight-bold">Catatan / Deskripsi Progress</label>
-                            <textarea name="description" id="description" class="form-control @error('description') is-invalid @enderror" rows="5" required>{{ old('description', $status->description) }}</textarea>
-                            @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                <div class="form-group">
+                                    <label for="description" class="font-weight-bold">Catatan / Deskripsi Progress</label>
+                                    <textarea name="description" id="description" class="form-control @error('description') is-invalid @enderror" rows="5" required>{{ old('description', $status->description) }}</textarea>
+                                    @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                            </div>
                         </div>
                         
-                        <div class="text-right">
+                        <div class="text-right mt-3">
                             <a href="{{ route('admin.report.show', $status->report_id) }}" class="btn btn-secondary">Batal</a>
                             <button type="submit" class="btn btn-primary" id="save-btn">
                                 <i class="fas fa-save mr-2"></i>Simpan Perubahan
@@ -146,41 +160,39 @@
 
 @push('scripts')
 <script>
-    function previewImage(event) {
-        if (event.target.files && event.target.files[0]) {
-            const reader = new FileReader();
-            const imagePreview = document.getElementById('image-preview');
-            const imagePlaceholder = document.getElementById('image-placeholder');
-
-            reader.onload = function(e){
-                imagePreview.src = e.target.result;
-                imagePreview.style.display = 'block';
-                if (imagePlaceholder) {
-                    imagePlaceholder.style.display = 'none';
-                }
-            }
-            reader.readAsDataURL(event.target.files[0]);
-        }
-    }
-
     document.addEventListener('DOMContentLoaded', function() {
+        const imageInput = document.getElementById('image');
+        const imagePreview = document.getElementById('image-preview');
+        const imagePlaceholder = document.getElementById('image-placeholder');
         const saveButton = document.getElementById('save-btn');
-        const descriptionTextarea = document.getElementById('description');
+        const changeImageButton = document.getElementById('change-image-btn');
 
-        // Untuk halaman edit, kita buat tombol selalu aktif
-        // karena pengguna mungkin hanya ingin mengubah gambar.
-        // Jika ingin validasi yang lebih ketat, bisa ditambahkan di sini.
-        saveButton.disabled = false; 
+        const handleImagePreview = (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (imagePreview && imagePlaceholder) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                        imagePlaceholder.style.display = 'none';
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        };
 
-        // Jika Anda ingin tombol dinonaktifkan jika deskripsi dikosongkan:
-        /*
-        function checkEditFormValidity() {
-            const descriptionIsValid = descriptionTextarea.value.trim() !== '';
-            saveButton.disabled = !descriptionIsValid;
+        if (imageInput) {
+            imageInput.addEventListener('change', handleImagePreview);
         }
-        descriptionTextarea.addEventListener('input', checkEditFormValidity);
-        checkEditFormValidity();
-        */
+
+        if (changeImageButton) {
+            changeImageButton.addEventListener('click', () => {
+                imageInput.click();
+            });
+        }
+        
+        saveButton.disabled = false;
     });
 </script>
 @endpush

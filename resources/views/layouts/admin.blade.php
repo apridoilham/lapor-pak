@@ -7,13 +7,12 @@
     <title>@yield('title', 'Admin Dashboard')</title>
 
     <link href="{{ asset('assets/admin/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
-    {{-- Mengganti font menjadi Inter untuk tampilan yang lebih modern --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <link href="{{ asset('assets/admin/css/sb-admin-2.min.css') }}" rel="stylesheet">
-    
+   
     <style>
         :root {
             --primary-blue: #0d6efd;
@@ -60,8 +59,8 @@
             box-shadow: var(--shadow-sm) !important;
         }
         .topbar {
-             box-shadow: var(--shadow-sm) !important;
-             border-bottom: 1px solid var(--card-border);
+           box-shadow: var(--shadow-sm) !important;
+           border-bottom: 1px solid var(--card-border);
         }
     </style>
     @stack('styles')
@@ -86,6 +85,6 @@
     <script src="{{ asset('assets/admin/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('assets/admin/vendor/jquery-easing/jquery.easing.min.js') }}"></script>
     <script src="{{ asset('assets/admin/js/sb-admin-2.min.js') }}"></script>
-    @yield('scripts')
+    @stack('scripts')
 </body>
 </html>
