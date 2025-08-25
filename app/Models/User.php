@@ -52,11 +52,6 @@ class User extends Authenticatable
         return $this->hasMany(LoginActivity::class);
     }
 
-    public function rw()
-    {
-        return $this->belongsTo(Rw::class);
-    }
-
     public function comments()
     {
         return $this->hasMany(Comment::class);

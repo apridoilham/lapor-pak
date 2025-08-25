@@ -91,13 +91,14 @@
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="number_modal" class="font-weight-bold small">Nomor RW Baru</label>
-                            <input type="text" name="number" id="rw_number_input_modal" class="form-control @error('number', 'store') is-invalid @enderror" placeholder="Contoh: 5" required maxlength="2" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="{{ old('number') }}">
+                            <input type="text" name="number" id="rw_number_input_modal" class="form-control @error('number', 'store') is-invalid @enderror" placeholder="Contoh: 5" required maxlength="2" value="{{ old('number') }}">
                             <div class="invalid-feedback" id="rw-error-modal">Nomor RW ini sudah ada.</div>
                             @error('number', 'store')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div class="form-group">
                             <label for="rt_count_modal" class="font-weight-bold small">Jumlah RT di Dalamnya</label>
-                            <input type="text" name="rt_count" id="rt_count_modal" class="form-control @error('rt_count', 'store') is-invalid @enderror" placeholder="Contoh: 10" required maxlength="2" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="{{ old('rt_count') }}">
+                            <input type="number" name="rt_count" id="rt_count_modal" class="form-control @error('rt_count', 'store') is-invalid @enderror" placeholder="Contoh: 10" required min="1" max="99" value="{{ old('rt_count') }}">
+                            <small class="form-text text-muted">Jumlah RT minimal 1 dan maksimal 99.</small>
                             @error('rt_count', 'store')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                     </div>
@@ -123,25 +124,24 @@
         let debounceTimer;
 
         function checkModalFormValidity() {
-            const isRwValid = rwNumberInputModal.value.trim() !== '' && !rwNumberInputModal.classList.contains('is-invalid');
-            const isRtCountValid = rtCountInput.value.trim() !== '';
-            tambahButton.disabled = !(isRwValid && isRtCountValid);
+            const isRwNumberValid = rwNumberInputModal.value.trim() !== '' && parseInt(rwNumberInputModal.value, 10) > 0;
+            const isRtCountValid = rtCountInput.value.trim() !== '' && parseInt(rtCountInput.value, 10) > 0;
+            const isRwNotTaken = !rwNumberInputModal.classList.contains('is-invalid');
+            tambahButton.disabled = !(isRwNumberValid && isRtCountValid && isRwNotTaken);
         }
-
-        rtCountInput.addEventListener('input', checkModalFormValidity);
         
         rwNumberInputModal.addEventListener('input', function() {
-            this.classList.remove('is-invalid');
+            rwNumberInputModal.classList.remove('is-invalid');
             rwError.style.display = 'none';
-            checkModalFormValidity();
-
+            
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
-                if (this.value.length > 0) {
+                const number = this.value.trim();
+                if (number.length > 0) {
                     fetch('/api/check-rw', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}'},
-                        body: JSON.stringify({ number: this.value })
+                        body: JSON.stringify({ number: number })
                     }).then(res => res.json()).then(data => {
                         if (data.is_taken) {
                             rwNumberInputModal.classList.add('is-invalid');
@@ -149,6 +149,8 @@
                         }
                         checkModalFormValidity();
                     });
+                } else {
+                    checkModalFormValidity();
                 }
             }, 500);
         });
@@ -158,10 +160,12 @@
                 this.value = this.value.padStart(2, '0');
             }
         });
+        
+        rtCountInput.addEventListener('input', checkModalFormValidity);
 
-        @if ($errors->store->any())
+        if ("{{ $errors->store->any() }}") {
             $('#addRwModal').modal('show');
-        @endif
+        }
         
         checkModalFormValidity();
     });

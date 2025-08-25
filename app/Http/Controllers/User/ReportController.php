@@ -60,13 +60,11 @@ class ReportController extends Controller
     {
         $residentId = Auth::user()->resident->id;
         $activeStatusValue = $request->query('status', ReportStatusEnum::DELIVERED->value);
+        
         $reports = $this->reportRepository->getReportByResidentId($residentId, $activeStatusValue);
-        $statusCounts = [
-            'delivered' => $this->reportRepository->countByStatus($residentId, ReportStatusEnum::DELIVERED),
-            'in_process' => $this->reportRepository->countByStatus($residentId, ReportStatusEnum::IN_PROCESS),
-            'completed' => $this->reportRepository->countByStatus($residentId, ReportStatusEnum::COMPLETED),
-            'rejected' => $this->reportRepository->countByStatus($residentId, ReportStatusEnum::REJECTED),
-        ];
+        
+        $statusCounts = $this->reportRepository->countStatusesByResidentId($residentId);
+
         return view('pages.app.report.my-report', compact('reports', 'statusCounts'));
     }
 
