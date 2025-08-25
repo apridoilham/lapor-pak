@@ -100,7 +100,7 @@
                             if ($notification->data['type'] === 'new_comment') {
                                 $iconClass = 'comment';
                                 $icon = 'fa-solid fa-comment-dots';
-                                $message = '<strong>' . ($actionUser ? $actionUser->name : 'Seseorang') . '</strong> mengomentari laporan Anda.';
+                                $message = '<strong>' . ($actionUser ? $actionUser->censored_name : 'Seseorang') . '</strong> mengomentari laporan Anda.';
                             } elseif ($notification->data['type'] === 'progress_deleted') {
                                 $iconClass = 'deleted';
                                 $icon = 'fa-solid fa-trash-can';

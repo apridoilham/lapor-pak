@@ -217,7 +217,7 @@
                                 }
                             @endphp
                             <div class="comment-item {{ $isCommentOwner ? 'is-owner' : 'is-other' }}">
-                                @if (($isCommentOwner || $isReportOwner) && $commenterAvatar)
+                                @if($isCommentOwner && $commenterAvatar)
                                     <img src="{{ $commenterAvatar }}" alt="avatar" class="comment-avatar">
                                 @else
                                     <div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>
@@ -225,7 +225,7 @@
                                 <div class="comment-content">
                                     <div class="comment-bubble">
                                         <p class="comment-author">
-                                            {{ $isCommentOwner ? 'Anda' : ($isReportOwner ? $comment->user->name : $comment->user->censored_name) }}
+                                            {{ $isCommentOwner ? 'Anda' : $comment->user->censored_name }}
                                         </p>
                                         <p class="comment-body">{{ $comment->body }}</p>
                                         <div class="comment-meta-wrapper">
@@ -300,20 +300,19 @@
 
                 const createCommentElement = (comment) => {
                     const isOwner = comment.user_id === {{ auth()->id() }};
-                    const isReportOwner = {{ $isReportOwner ? 'true' : 'false' }};
                     
                     let avatarHtml = '';
                     const userAvatar = comment.user.avatar || (comment.user.resident ? comment.user.resident.avatar : null);
                     const isAvatarUrl = userAvatar && userAvatar.startsWith('http');
                     
-                    if ((isOwner || isReportOwner) && userAvatar) {
+                    if (isOwner && userAvatar) {
                         const finalAvatarSrc = isAvatarUrl ? userAvatar : `/storage/${userAvatar}`;
                         avatarHtml = `<img src="${finalAvatarSrc}" alt="avatar" class="comment-avatar">`;
                     } else {
                         avatarHtml = `<div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>`;
                     }
                     
-                    let authorName = isOwner ? 'Anda' : (isReportOwner ? comment.user.name : comment.user.censored_name);
+                    let authorName = isOwner ? 'Anda' : comment.user.censored_name;
                     
                     const now = new Date();
                     const hours = now.getHours().toString().padStart(2, '0');
