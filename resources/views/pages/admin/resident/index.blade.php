@@ -29,8 +29,6 @@
                     <select name="sort" id="sort" class="form-control">
                         <option value="terbaru" {{ request('sort', 'terbaru') == 'terbaru' ? 'selected' : '' }}>Terbaru</option>
                         <option value="terlama" {{ request('sort') == 'terlama' ? 'selected' : '' }}>Terlama</option>
-                        <option value="nama_asc" {{ request('sort') == 'nama_asc' ? 'selected' : '' }}>Nama (A-Z)</option>
-                        <option value="nama_desc" {{ request('sort') == 'nama_desc' ? 'selected' : '' }}>Nama (Z-A)</option>
                         <option value="laporan_terbanyak" {{ request('sort') == 'laporan_terbanyak' ? 'selected' : '' }}>Laporan Terbanyak</option>
                         <option value="laporan_sedikit" {{ request('sort') == 'laporan_sedikit' ? 'selected' : '' }}>Laporan Terdikit</option>
                     </select>
@@ -107,7 +105,7 @@
                                     <span class="badge badge-pill badge-primary badge-report-count">{{ $resident->reports_count }} Laporan</span>
                                 </td>
                                 <td class="text-center">
-                                    <a href="{{ route('admin.resident.show', $resident->id) }}" class="btn btn-sm btn-outline-info">
+                                    <a href="{{ route('admin.resident.show', $resident->id) }}" class="btn btn-sm btn-outline-info" title="Lihat Detail Pelapor">
                                         <i class="fas fa-eye fa-sm mr-1"></i> Detail
                                     </a>
                                 </td>
@@ -154,7 +152,7 @@
                     data.forEach(rt => {
                         const option = document.createElement('option');
                         option.value = rt.id;
-                        option.textContent = `RT ${rt.number}`;
+                        option.textContent = `RT ${rt->number}`;
                         if (selectedRtId && rt.id == selectedRtId) {
                             option.selected = true;
                         }

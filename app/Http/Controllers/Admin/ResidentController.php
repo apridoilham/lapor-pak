@@ -21,26 +21,16 @@ class ResidentController extends Controller
         $query = Resident::complete()->with(['user', 'rt', 'rw'])->withCount('reports');
 
         if ($request->filled('rw_id')) {
-            $query->where('rw_id', $request->rw_id);
+            $query->where('residents.rw_id', $request->rw_id);
         }
         if ($request->filled('rt_id')) {
-            $query->where('rt_id', $request->rt_id);
+            $query->where('residents.rt_id', $request->rt_id);
         }
         
         $sortBy = $request->input('sort', 'terbaru');
         switch ($sortBy) {
             case 'terlama':
                 $query->oldest('created_at');
-                break;
-            case 'nama_asc':
-                $query->join('users', 'residents.user_id', '=', 'users.id')
-                        ->orderBy('users.name', 'asc')
-                        ->select('residents.*');
-                break;
-            case 'nama_desc':
-                $query->join('users', 'residents.user_id', '=', 'users.id')
-                        ->orderBy('users.name', 'desc')
-                        ->select('residents.*');
                 break;
             case 'laporan_terbanyak':
                 $query->orderBy('reports_count', 'desc');
