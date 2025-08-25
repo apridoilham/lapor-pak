@@ -63,8 +63,8 @@
                             }
                         @endphp
                         <img class="profile-avatar"
-                             src="{{ $avatarUrl }}"
-                             alt="Foto Profil {{ Auth::user()->name }}">
+                                src="{{ $avatarUrl }}"
+                                alt="Foto Profil {{ Auth::user()->name }}">
                     </div>
                     <h4 class="font-weight-bold text-gray-800 mt-3 mb-1">{{ $user->name }}</h4>
                     <p class="text-primary font-weight-bold">Admin</p>

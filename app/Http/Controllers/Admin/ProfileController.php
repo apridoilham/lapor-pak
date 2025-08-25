@@ -17,14 +17,14 @@ class ProfileController extends Controller
     public function index()
     {
         return view('pages.admin.profile.index', [
-            'user' => Auth::user()->load('rw'),
+            'user' => Auth::user(),
         ]);
     }
 
     public function edit()
     {
         return view('pages.admin.profile.edit', [
-            'user' => Auth::user()->load('rw'),
+            'user' => Auth::user(),
         ]);
     }
 
