@@ -13,12 +13,17 @@ class SendReportStatusNotification implements ShouldQueue
 
     public function __construct()
     {
-        
+        //
     }
 
     public function handle(ReportStatusUpdated $event): void
     {
-        $user = $event->report->resident->user;
-        $user->notify(new ReportStatusUpdatedNotification($event->report, $event->actorId, $event->changes));
+        $owner = $event->report->resident->user;
+
+        if ($owner->id === $event->actorId) {
+            return;
+        }
+
+        $owner->notify(new ReportStatusUpdatedNotification($event->report, $event->actorId, $event->changes));
     }
 }

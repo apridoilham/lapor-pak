@@ -26,81 +26,42 @@
         padding-bottom: 100px;
     }
 
-    .header-nav {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        color: var(--text-dark);
-    }
-    .header-nav a {
-        font-size: 1.5rem;
-        color: var(--text-dark);
-    }
-    .header-nav h1 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin: 0;
-    }
-    .text-description {
-        color: var(--text-light);
-    }
+    .header-nav { display: flex; align-items: center; gap: 1rem; color: var(--text-dark); }
+    .header-nav a { font-size: 1.5rem; color: var(--text-dark); }
+    .header-nav h1 { font-size: 1.5rem; font-weight: 700; margin: 0; }
+    .text-description { color: var(--text-light); }
 
-    form .mb-3 {
-        padding: 1.25rem;
-        background: var(--bg-white);
-        border: 1px solid var(--border-color);
-        border-radius: 16px;
-        box-shadow: var(--card-shadow);
-    }
-    .form-label {
-        font-weight: 600 !important;
-        color: var(--text-dark);
-    }
-    .form-control, .form-select {
-        border-radius: 12px;
-        background-color: var(--bg-body);
-        border-color: var(--border-color);
-        padding: 0.8rem 1rem;
-    }
-    .form-control:focus, .form-select:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
-    }
+    form .mb-3 { padding: 1.25rem; background: var(--bg-white); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: var(--card-shadow); }
+    .form-label { font-weight: 600 !important; color: var(--text-dark); }
+    .form-control, .form-select { border-radius: 12px; background-color: var(--bg-body); border-color: var(--border-color); padding: 0.8rem 1rem; }
+    .form-control:focus, .form-select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1); }
 
+    /* PERBAIKAN PADA IMAGE PREVIEW */
     #image-preview-container {
         width: 100%;
         border-radius: 12px;
         overflow: hidden;
+    }
+    #image-preview {
+        width: 100%;
+        height: auto; /* Memastikan tinggi otomatis sesuai aspek rasio */
+        object-fit: contain; /* Menampilkan seluruh gambar tanpa crop */
     }
     .image-placeholder-box {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 200px;
+        height: 200px; /* Tinggi hanya untuk placeholder */
         background-color: var(--bg-body);
         border: 2px dashed var(--border-color);
         border-radius: 12px;
     }
     
-    #map {
-        height: 250px;
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        z-index: 1;
-    }
+    #map { height: 250px; border: 1px solid var(--border-color); border-radius: 12px; z-index: 1; }
 
-    .d-grid .btn-primary {
-        padding: 0.9rem !important;
-        border-radius: 12px !important;
-        font-weight: 700;
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-    }
-    .d-grid .btn-primary:disabled {
-        background-color: #94a3b8;
-        border-color: #94a3b8;
-    }
+    .d-grid .btn-primary { padding: 0.9rem !important; border-radius: 12px !important; font-weight: 700; background-color: var(--primary-color); border-color: var(--primary-color); }
+    .d-grid .btn-primary:disabled { background-color: #94a3b8; border-color: #94a3b8; }
 </style>
 @endpush
 
@@ -129,7 +90,7 @@
                     <i class="fa-solid fa-image fa-2x text-secondary"></i>
                     <p class="text-secondary small mt-2">Gambar pratinjau akan tampil di sini</p>
                 </div>
-                <img alt="Pratinjau Laporan" id="image-preview" class="img-fluid rounded-3 mb-3 border" style="display: none; width: 100%; height: auto;">
+                <img alt="Pratinjau Laporan" id="image-preview" class="img-fluid rounded-3 mb-3 border" style="display: none;">
             </div>
             @error('image')
                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -166,7 +127,8 @@
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <label for="map" class="form-label fw-bold">Lokasi Laporan</label>
                 <button type="button" class="btn btn-outline-primary btn-sm" id="detect-location-btn">
-                    <i class="fa-solid fa-map-marker-alt"></i> Cek Lokasi Saya
+                    <i class="fa-solid fa-location-crosshairs"></i>
+                    <span class="ms-1">Cek Lokasi Saya</span>
                 </button>
             </div>
             <div id="map" class="rounded-3"></div>
@@ -174,8 +136,8 @@
 
         <div class="mb-3">
             <label for="address" class="form-label fw-bold">Alamat Lengkap</label>
-            <textarea class="form-control @error('address') is-invalid @enderror" id="address" name="address" rows="5" required>{{ old('address') }}</textarea>
-            @error('address')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            <textarea class="form-control @error('address') is-invalid @enderror" id="address" name="address" rows="3" required placeholder="Anda bisa mengisi alamat secara manual di sini...">{{ old('address') }}</textarea>
+            @error('address')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
         </div>
 
         <div class="mb-3">
@@ -199,16 +161,16 @@
     </form>
 @endsection
 
-@section('scripts')
+@push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // JavaScript logic remains the same, no changes needed here.
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('create-report-form');
             
             form.addEventListener('submit', function(event) {
                 event.preventDefault();
-
                 Swal.fire({
                     title: 'Konfirmasi Laporan',
                     html: "Anda dapat mengubah atau menghapus laporan ini **hanya sebelum** diproses oleh admin. Pastikan semua data sudah benar.",
@@ -233,9 +195,7 @@
                 requiredInputs.forEach(input => {
                     if (input.disabled) return;
                     if (input.type === 'file') {
-                        if (input.files.length === 0) {
-                            allFieldsFilled = false;
-                        }
+                        if (input.files.length === 0) allFieldsFilled = false;
                     } else if (input.value.trim() === '') {
                         allFieldsFilled = false;
                     }
@@ -263,14 +223,17 @@
                     }
                     return new Blob([ab], { type: mime });
                 }
+                
+                imagePreview.src = imageBase64;
+                imagePreview.style.display = 'block';
+                if(imagePlaceholder) { imagePlaceholder.style.display = 'none'; }
+
                 const blob = base64ToBlob(imageBase64, 'image/jpeg');
                 const file = new File([blob], 'captured_image.jpg', { type: 'image/jpeg' });
                 const dataTransfer = new DataTransfer();
                 dataTransfer.items.add(file);
                 imageInput.files = dataTransfer.files;
-                imagePreview.src = URL.createObjectURL(file);
-                imagePreview.style.display = 'block';
-                if(imagePlaceholder) { imagePlaceholder.style.display = 'none'; }
+                
                 checkFormValidity();
             } else {
                 if(imagePlaceholder) { imagePlaceholder.style.display = 'flex'; }
@@ -283,11 +246,17 @@
             const defaultLocation = [-6.3816, 106.7420]; 
             const map = L.map('map').setView(defaultLocation, 13);
             let marker = L.marker(defaultLocation, { draggable: true }).addTo(map);
+            let userHasTypedAddress = false;
+
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
             }).addTo(map);
 
-            function updateAddress(lat, lng) {
+            addressInput.addEventListener('input', () => { userHasTypedAddress = true; });
+
+            function updateAddress(lat, lng, overwrite = false) {
+                if (userHasTypedAddress && !overwrite) return;
+
                 fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
                     .then(response => response.json())
                     .then(data => {
@@ -297,36 +266,57 @@
                         }
                     }).catch(error => {
                         console.error('Error fetching address:', error);
-                        addressInput.value = 'Gagal mendapatkan alamat.';
                     });
             }
 
-            function updateInputs(latlng) {
+            function updateInputs(latlng, overwriteAddress = false) {
                 latitudeInput.value = latlng.lat.toFixed(8);
                 longitudeInput.value = latlng.lng.toFixed(8);
-                updateAddress(latlng.lat, latlng.lng);
+                updateAddress(latlng.lat, latlng.lng, overwriteAddress);
             }
 
-            marker.on('dragend', function(e) { updateInputs(e.target.getLatLng()); });
+            marker.on('dragend', function(e) {
+                userHasTypedAddress = false;
+                updateInputs(e.target.getLatLng(), true);
+            });
+
             function detectLocation() {
-                if ('geolocation' in navigator) {
-                    navigator.geolocation.getCurrentPosition(function(position) {
+                detectButton.disabled = true;
+                detectButton.querySelector('span').textContent = 'Mendeteksi...';
+
+                if (!navigator.geolocation) {
+                    Swal.fire('Gagal', 'Geolocation tidak didukung oleh browser Anda.', 'error');
+                    detectButton.disabled = false;
+                    detectButton.querySelector('span').textContent = 'Cek Lokasi Saya';
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
                         const lat = position.coords.latitude;
                         const lng = position.coords.longitude;
                         const newLatLng = new L.LatLng(lat, lng);
                         map.setView(newLatLng, 17);
                         marker.setLatLng(newLatLng);
-                        updateInputs(newLatLng);
-                    }, function(error) {
-                        alert('Gagal mendeteksi lokasi. Pastikan izin lokasi telah diberikan.');
-                        console.error(error);
-                    });
-                } else {
-                    alert('Geolocation tidak didukung oleh browser Anda.');
-                }
+                        userHasTypedAddress = false;
+                        updateInputs(newLatLng, true);
+                        detectButton.disabled = false;
+                        detectButton.querySelector('span').textContent = 'Cek Lokasi Saya';
+                    },
+                    (error) => {
+                        let message = 'Gagal mendeteksi lokasi. Silakan coba lagi.';
+                        if (error.code === 1) message = 'Anda telah memblokir izin akses lokasi.';
+                        if (error.code === 2) message = 'Gagal mendapatkan lokasi. Pastikan koneksi internet Anda stabil.';
+                        Swal.fire('Gagal', message, 'error');
+                        detectButton.disabled = false;
+                        detectButton.querySelector('span').textContent = 'Cek Lokasi Saya';
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
             }
+
             detectButton.addEventListener('click', detectLocation);
             detectLocation();
         });
     </script>
-@endsection
+@endpush

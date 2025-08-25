@@ -97,6 +97,11 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        transition: opacity 0.3s ease;
+    }
+    .btn-snap.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
     }
     .btn-snap-inner {
         width: 56px;
@@ -128,7 +133,7 @@
             <i class="fa-regular fa-image"></i>
         </button>
 
-        <button class="btn-snap" id="snap-button" title="Ambil Foto">
+        <button class="btn-snap disabled" id="snap-button" title="Ambil Foto">
             <div class="btn-snap-inner"></div>
         </button>
 
@@ -137,12 +142,11 @@
         </button>
     </div>
     
-    {{-- Input file tersembunyi untuk upload dari galeri --}}
     <input type="file" id="gallery-input" accept="image/*">
 </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const video = document.getElementById('video-webcam');
@@ -162,26 +166,46 @@
 
         async function startCamera(facingMode) {
             stopStream();
-
-            const constraints = {
-                video: {
-                    facingMode: { ideal: facingMode },
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
-                },
-                audio: false
-            };
+            snapButton.classList.add('disabled');
+            let constraints = { video: { facingMode: { exact: facingMode } }, audio: false };
 
             try {
                 stream = await navigator.mediaDevices.getUserMedia(constraints);
                 video.srcObject = stream;
+                currentFacingMode = facingMode;
             } catch (err) {
-                console.error("Error accessing camera:", err);
-                alert('Tidak dapat mengakses kamera. Pastikan Anda memberikan izin dan tidak ada aplikasi lain yang sedang menggunakannya.');
+                console.warn(`Gagal membuka kamera '${facingMode}', mencoba alternatif.`);
+                
+                if (err.name === "OverconstrainedError" || err.name === "NotFoundError" || err.name === "ConstraintNotSatisfiedError") {
+                    const alternativeFacingMode = (facingMode === 'environment') ? 'user' : 'environment';
+                    constraints = { video: { facingMode: { exact: alternativeFacingMode } }, audio: false };
+                    try {
+                        stream = await navigator.mediaDevices.getUserMedia(constraints);
+                        video.srcObject = stream;
+                        currentFacingMode = alternativeFacingMode;
+                    } catch (finalErr) {
+                        console.error("Gagal membuka kamera alternatif:", finalErr.name, finalErr.message);
+                        alert('Tidak ada kamera yang dapat diakses di perangkat ini.');
+                    }
+                } else {
+                    let message = 'Gagal mengakses kamera.';
+                    if (err.name === "NotAllowedError") {
+                        message = 'Anda telah memblokir izin kamera. Harap izinkan akses kamera melalui pengaturan browser.';
+                    } else if (err.name === "NotReadableError") {
+                        message = 'Kamera sedang digunakan oleh aplikasi lain atau terjadi error pada hardware.';
+                    }
+                    alert(message);
+                }
             }
         }
 
+        video.addEventListener('canplay', () => {
+            snapButton.classList.remove('disabled');
+        });
+
         function takeSnapshot() {
+            if (snapButton.classList.contains('disabled')) return;
+
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
@@ -196,8 +220,8 @@
         snapButton.addEventListener('click', takeSnapshot);
 
         flipCameraButton.addEventListener('click', () => {
-            currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
-            startCamera(currentFacingMode);
+            const newFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+            startCamera(newFacingMode);
         });
 
         galleryButton.addEventListener('click', () => {
@@ -219,4 +243,4 @@
         startCamera(currentFacingMode);
     });
 </script>
-@endsection
+@endpush

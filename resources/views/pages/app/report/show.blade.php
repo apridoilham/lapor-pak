@@ -29,9 +29,12 @@
     .hero-container { position: relative; }
     .hero-image {
         width: 100%;
-        height: auto;
+        height: auto; /* Memastikan rasio aspek asli */
+        max-height: 450px; /* Batas tinggi maksimal agar tidak terlalu panjang */
+        object-fit: contain; /* Menampilkan gambar utuh */
         display: block;
-        cursor: pointer;
+        cursor: pointer; /* Menambahkan cursor pointer */
+        background-color: #f0f0f0; /* Background jika gambar transparan */
     }
     .hero-gradient-overlay { position: absolute; bottom: 0; left: 0; right: 0; height: 150px; background: linear-gradient(180deg, rgba(249, 250, 251, 0) 0%, var(--bg-body) 100%); }
     .hero-overlay-header { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: 1.25rem; }
@@ -100,6 +103,9 @@
         </div>
         <div class="content-container">
             <h1 class="report-title">{{ $report->title }}</h1>
+            
+            @php $isReportOwner = auth()->check() && auth()->id() === $report->resident->user_id; @endphp
+
             <div class="info-grid {{ !$isReportOwner ? 'three-items' : '' }}">
                 @if ($isReportOwner)
                 <div class="info-card">
@@ -134,13 +140,13 @@
             </div>
             
             <div class="section">
-                <h5 class="section-title">Lokasi Kejadian</h5>
-                <p class="report-description-text">{{ $report->address }}</p>
+                <h5 class="section-title">Detail Laporan</h5>
+                <p class="report-description-text">{{ $report->description }}</p>
             </div>
 
             <div class="section">
-                <h5 class="section-title">Detail Laporan</h5>
-                <p class="report-description-text">{{ $report->description }}</p>
+                <h5 class="section-title">Lokasi Kejadian</h5>
+                <p class="report-description-text">{{ $report->address }}</p>
             </div>
 
             @if ($isReportOwner)
@@ -154,7 +160,13 @@
                                 <h6 class="m-0"><i class="fa-solid {{ $icon }} me-2"></i>{{ $status->status->label() }}</h6>
                             </div>
                             <div class="timeline-body">
-                                <p class="description">{{ $status->description }}</p>
+                                @if ($status->status === \App\Enums\ReportStatusEnum::COMPLETED && $status->created_by_role === 'resident')
+                                    <p class="description font-italic">"{{ $status->description }}"</p>
+                                    <p class="text-muted small mb-3">- Diselesaikan oleh Anda -</p>
+                                @else
+                                    <p class="description">{{ $status->description }}</p>
+                                @endif
+                                
                                 @if($status->image)
                                 <div class="proof-image-container">
                                     <img src="{{ asset('storage/' . $status->image) }}" class="proof-image" alt="Bukti Progress">
@@ -237,27 +249,37 @@
     </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // FUNGSI LIGHTBOX (UNTUK MEMPERBESAR GAMBAR)
             const lightbox = document.getElementById('lightbox');
             if(lightbox) {
+                // Mengambil SEMUA gambar yang bisa diklik (gambar utama + gambar di riwayat)
                 const allImages = document.querySelectorAll('.hero-image, .proof-image');
                 const lightboxImage = document.getElementById('lightbox-image');
                 const lightboxClose = document.getElementById('lightbox-close');
+
                 allImages.forEach(image => {
                     image.addEventListener('click', function() {
-                        lightboxImage.src = this.src;
-                        lightbox.classList.add('show');
+                        lightboxImage.src = this.src; // Set sumber gambar lightbox
+                        lightbox.classList.add('show'); // Tampilkan lightbox
                     });
                 });
+
                 const closeLightbox = () => lightbox.classList.remove('show');
+                
                 lightboxClose.addEventListener('click', closeLightbox);
-                lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
-                document.addEventListener('keydown', (e) => { if (e.key === "Escape" && lightbox.classList.contains('show')) closeLightbox(); });
+                lightbox.addEventListener('click', (e) => { 
+                    if (e.target === lightbox) closeLightbox(); 
+                });
+                document.addEventListener('keydown', (e) => { 
+                    if (e.key === "Escape" && lightbox.classList.contains('show')) closeLightbox(); 
+                });
             }
 
+            // FUNGSI UNTUK KOMENTAR (TIDAK ADA PERUBAHAN)
             const commentForm = document.getElementById('comment-form');
             if (commentForm) {
                 const commentBody = document.getElementById('comment-body');
@@ -360,4 +382,4 @@
             }
         });
     </script>
-@endsection
+@endpush

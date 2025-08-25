@@ -51,8 +51,8 @@
 
 @section('content')
     @php
-        $isProfileIncomplete = !$user->resident->rw_id 
-                                 || !$user->resident->rt_id 
+        $isProfileIncomplete = !$user->resident->rw_id
+                                 || !$user->resident->rt_id
                                  || empty(trim($user->resident->address))
                                  || !$user->resident->phone;
 
@@ -175,7 +175,7 @@
     </form>
 @endsection
 
-@section('scripts')
+@push('scripts')
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
@@ -241,11 +241,16 @@
                 const detectButton = document.getElementById('detect-location-btn');
                 const activeRtId = "{{ old('rt_id', $user->resident->rt_id) }}";
                 
-                const defaultLat = @json(optional($user->resident)->latitude ?? -6.3816);
-                const defaultLng = @json(optional($user->resident)->longitude ?? 106.7420);
+                const defaultLat = {{ optional($user->resident)->latitude ?? -6.3816 }};
+                const defaultLng = {{ optional($user->resident)->longitude ?? 106.7420 }};
                 
                 const map = L.map('map').setView([defaultLat, defaultLng], 15);
                 let marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
+
+                // FIX 1: Panggil map.invalidateSize() setelah jeda singkat untuk memastikan map tampil
+                setTimeout(() => {
+                    map.invalidateSize();
+                }, 200);
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
@@ -276,11 +281,10 @@
                     );
                 });
                 
-                const fetchRts = (rwId, selectedRtId = null, callback = null) => {
+                const fetchRts = (rwId, selectedRtId = null) => {
                     if (!rwId) { 
                         rtSelect.innerHTML = '<option value="">Pilih RW</option>'; 
                         rtSelect.disabled = true; 
-                        if (callback) callback();
                         return; 
                     }
                     fetch(`/api/get-rts-by-rw/${rwId}`)
@@ -299,20 +303,21 @@
                             } else {
                                 rtSelect.innerHTML = '<option value="" disabled selected>Tidak ada RT</option>';
                             }
-                            if (callback) callback();
+                            updateButtonState();
                         });
                 };
-
-                rwSelect.addEventListener('change', function() { fetchRts(this.value, null, updateButtonState); });
                 
+                rwSelect.addEventListener('change', function() { fetchRts(this.value); });
+                
+                // FIX 2: Panggil fetchRts() saat halaman dimuat jika RW sudah terpilih
                 if (rwSelect.value) {
-                    fetchRts(rwSelect.value, activeRtId, updateButtonState);
+                    fetchRts(rwSelect.value, activeRtId);
                 } else {
-                    updateButtonState();
+                   updateButtonState();
                 }
             } else {
                 updateButtonState();
             }
         });
     </script>
-@endsection
+@endpush

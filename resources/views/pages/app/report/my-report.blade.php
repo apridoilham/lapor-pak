@@ -57,7 +57,7 @@
     }
     .stat-card.active {
         background-color: var(--primary-color);
-        color: var(--white);
+        color: var(--bg-white);
         border-color: var(--primary-color);
         box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
         transform: translateY(-4px);
@@ -76,7 +76,7 @@
     .stat-card .card-icon.in_process { background-color: #fef3c7; color: #d97706; }
     .stat-card .card-icon.completed { background-color: #dcfce7; color: #16a34a; }
     .stat-card .card-icon.rejected { background-color: #fee2e2; color: #dc2626; }
-    .stat-card.active .card-icon { background-color: rgba(255,255,255,0.2); color: var(--white); }
+    .stat-card.active .card-icon { background-color: rgba(255,255,255,0.2); color: var(--bg-white); }
     
     .stat-card .card-title {
         font-size: 0.9rem;
@@ -91,7 +91,7 @@
         font-weight: 700;
         color: var(--text-dark);
     }
-    .stat-card.active .card-count { color: var(--white); }
+    .stat-card.active .card-count { color: var(--bg-white); }
 
     .content-title-header {
         font-weight: 700;
@@ -151,7 +151,7 @@
     .empty-state-container p { color: var(--text-light); max-width: 300px; margin: 0.5rem auto 1.5rem; }
     .empty-state-container .btn-create-report {
         background-color: var(--primary-color);
-        color: var(--white);
+        color: var(--bg-white);
         border-radius: 50px;
         padding: 0.75rem 1.5rem;
         font-weight: 600;
@@ -275,7 +275,9 @@
 
             document.querySelectorAll('.delete-form-myreport').forEach(form => {
                 form.addEventListener('submit', function(event) {
-                    event.preventDefault();
+                    event.preventDefault(); // Mencegah form dikirim secara otomatis
+                    
+                    // Menampilkan alert konfirmasi
                     Swal.fire({
                         title: 'Anda yakin ingin menghapus?',
                         text: "Laporan yang sudah dihapus tidak dapat dikembalikan.",
@@ -286,7 +288,9 @@
                         confirmButtonText: 'Ya, Hapus Saja!',
                         cancelButtonText: 'Batalkan'
                     }).then((result) => {
+                        // Cek apakah tombol konfirmasi yang ditekan
                         if (result.isConfirmed) {
+                            // JIKA "YA", LANJUTKAN PROSES HAPUS
                             form.submit();
                         }
                     });

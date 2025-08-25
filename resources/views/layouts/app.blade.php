@@ -29,7 +29,8 @@
         crossorigin="anonymous">
     </script>
 
-    @yield('scripts')
+    {{-- INI BAGIAN YANG DIPERBAIKI: dari @yield menjadi @stack --}}
+    @stack('scripts')
 </body>
 
 </html>
