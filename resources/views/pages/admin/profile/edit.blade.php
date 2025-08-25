@@ -86,7 +86,7 @@
                     <small class="form-text text-muted">Email tidak dapat diubah.</small>
                 </div>
 
-                @if ($user->rw)
+                @if (optional($user)->rw)
                 <div class="form-group">
                     <label for="rw" class="font-weight-bold">Wilayah RW</label>
                     <input type="text" class="form-control form-control-lg" id="rw" value="RW {{ $user->rw->number }}" disabled>
@@ -106,37 +106,37 @@
     </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('profile-edit-form');
-    const updateButton = document.getElementById('update-btn');
-    const nameInput = document.getElementById('name');
-    const avatarInput = document.getElementById('avatar-input');
-    const avatarPreview = document.getElementById('avatar-preview');
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('profile-edit-form');
+        const updateButton = document.getElementById('update-btn');
+        const nameInput = document.getElementById('name');
+        const avatarInput = document.getElementById('avatar-input');
+        const avatarPreview = document.getElementById('avatar-preview');
 
-    const initialName = nameInput.value;
+        const initialName = nameInput.value;
 
-    function checkForChanges() {
-        const nameChanged = nameInput.value !== initialName;
-        const avatarChanged = avatarInput.files.length > 0;
-        updateButton.disabled = !nameChanged && !avatarChanged;
-    }
-
-    function previewImage(event) {
-        if (event.target.files && event.target.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                avatarPreview.src = e.target.result;
-            }
-            reader.readAsDataURL(event.target.files[0]);
-            checkForChanges(); // Panggil pengecekan saat gambar diubah
+        function checkForChanges() {
+            const nameChanged = nameInput.value !== initialName;
+            const avatarChanged = avatarInput.files.length > 0;
+            updateButton.disabled = !nameChanged && !avatarChanged;
         }
-    }
 
-    // Tambahkan event listener ke setiap input
-    nameInput.addEventListener('input', checkForChanges);
-    avatarInput.addEventListener('change', previewImage);
-});
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    avatarPreview.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+                checkForChanges();
+            }
+        }
+
+        nameInput.addEventListener('input', checkForChanges);
+        avatarInput.addEventListener('change', previewImage);
+    });
 </script>
-@endsection
+@endpush
