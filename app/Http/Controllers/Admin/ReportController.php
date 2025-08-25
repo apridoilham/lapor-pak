@@ -23,31 +23,20 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        
-        $query = Report::with(['resident.user', 'resident.rt', 'resident.rw', 'reportCategory', 'latestStatus']);
 
-        if ($user->hasRole('super-admin')) {
-            $rwId = $request->query('rw');
-            $rtId = $request->query('rt');
-            if ($rtId) { $query->whereHas('resident', fn($q) => $q->where('rt_id', $rtId)); } 
-            elseif ($rwId) { $query->whereHas('resident', fn($q) => $q->where('rw_id', $rwId)); }
-        } else {
-            $query->whereHas('resident', fn($q) => $q->where('rw_id', $user->rw_id));
-            $rtId = $request->query('rt');
-            if ($rtId) { $query->whereHas('resident', fn($q) => $q->where('rt_id', $rtId)); }
-        }
+        $query = Report::with(['resident.user', 'resident.rt', 'resident.rw', 'reportCategory', 'latestStatus']);
 
         $sortBy = $request->query('sort', 'latest_updated');
         switch ($sortBy) {
             case 'name_asc':
                 $query->join('residents', 'reports.resident_id', '=', 'residents.id')
-                      ->join('users', 'residents.user_id', '=', 'users.id')
-                      ->orderBy('users.name', 'asc')->select('reports.*');
+                    ->join('users', 'residents.user_id', '=', 'users.id')
+                    ->orderBy('users.name', 'asc')->select('reports.*');
                 break;
             case 'name_desc':
                 $query->join('residents', 'reports.resident_id', '=', 'residents.id')
-                      ->join('users', 'residents.user_id', '=', 'users.id')
-                      ->orderBy('users.name', 'desc')->select('reports.*');
+                    ->join('users', 'residents.user_id', '=', 'users.id')
+                    ->orderBy('users.name', 'desc')->select('reports.*');
                 break;
             case 'oldest_created':
                 $query->orderBy('reports.created_at', 'asc');

@@ -28,7 +28,7 @@
     <div class="card shadow mb-4">
         <div class="card-body">
             <form action="{{ route('admin.report.index') }}" method="GET" class="row g-3 align-items-end">
-                <div class="col-md-3">
+                <div class="col-md-9">
                     <label for="sort" class="form-label font-weight-bold small">Urutkan Berdasarkan</label>
                     <select name="sort" id="sort" class="form-control" onchange="this.form.submit()">
                         <option value="latest_updated" {{ request('sort', 'latest_updated') == 'latest_updated' ? 'selected' : '' }}>Terakhir Diperbarui</option>
@@ -38,23 +38,6 @@
                         <option value="name_desc" {{ request('sort') == 'name_desc' ? 'selected' : '' }}>Nama Pelapor (Z-A)</option>
                     </select>
                 </div>
-                @if(Auth::user()->hasRole('super-admin'))
-                    <div class="col-md-3">
-                        <label for="rw_id_filter" class="form-label font-weight-bold small">Filter RW</label>
-                        <select name="rw" id="rw_id_filter" class="form-control">
-                            <option value="">Semua RW</option>
-                            @foreach ($rws as $rw)
-                                <option value="{{ $rw->id }}" {{ request('rw') == $rw->id ? 'selected' : '' }}>RW {{ $rw->number }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label for="rt_id_filter" class="form-label font-weight-bold small">Filter RT</label>
-                        <select name="rt" id="rt_id_filter" class="form-control" disabled>
-                            <option value="">Pilih RW terlebih dahulu</option>
-                        </select>
-                    </div>
-                @endif
                 <div class="col-md-3 d-flex">
                     <button type="submit" class="btn btn-primary flex-grow-1 mr-2">
                         <i class="fas fa-filter fa-sm"></i> Terapkan
@@ -107,7 +90,7 @@
                                 </td>
                                 <td>{{ Str::limit($report->title, 40) }}</td>
                                 <td class="text-center">
-                                     @if ($report->latestStatus)
+                                    @if ($report->latestStatus)
                                         @php $status = $report->latestStatus->status; @endphp
                                         <span class="soft-badge badge-{{ $status->colorClass() }}">{{ $status->label() }}</span>
                                     @else
@@ -147,45 +130,45 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    @if(Auth::user()->hasRole('super-admin'))
-    const rwSelect = document.getElementById('rw_id_filter');
-    const rtSelect = document.getElementById('rt_id_filter');
-    const currentRtId = "{{ request('rt') }}";
+    document.addEventListener('DOMContentLoaded', function () {
+        @if(Auth::user()->hasRole('super-admin'))
+        const rwSelect = document.getElementById('rw_id_filter');
+        const rtSelect = document.getElementById('rt_id_filter');
+        const currentRtId = "{{ request('rt') }}";
 
-    function fetchRts(rwId, selectedRtId = null) {
-        if (!rwId) {
-            rtSelect.innerHTML = '<option value="">Pilih RW terlebih dahulu</option>';
+        function fetchRts(rwId, selectedRtId = null) {
+            if (!rwId) {
+                rtSelect.innerHTML = '<option value="">Pilih RW terlebih dahulu</option>';
+                rtSelect.disabled = true;
+                return;
+            }
             rtSelect.disabled = true;
-            return;
-        }
-        rtSelect.disabled = true;
-        rtSelect.innerHTML = '<option value="">Memuat...</option>';
-        fetch(`/api/get-rts-by-rw/${rwId}`)
-            .then(response => response.json())
-            .then(data => {
-                rtSelect.innerHTML = '<option value="">Semua RT</option>';
-                data.forEach(rt => {
-                    const option = document.createElement('option');
-                    option.value = rt.id;
-                    option.textContent = `RT ${rt.number}`;
-                    if (selectedRtId && rt.id == selectedRtId) {
-                        option.selected = true;
-                    }
-                    rtSelect.appendChild(option);
+            rtSelect.innerHTML = '<option value="">Memuat...</option>';
+            fetch(`/api/get-rts-by-rw/${rwId}`)
+                .then(response => response.json())
+                .then(data => {
+                    rtSelect.innerHTML = '<option value="">Semua RT</option>';
+                    data.forEach(rt => {
+                        const option = document.createElement('option');
+                        option.value = rt.id;
+                        option.textContent = `RT ${rt.number}`;
+                        if (selectedRtId && rt.id == selectedRtId) {
+                            option.selected = true;
+                        }
+                        rtSelect.appendChild(option);
+                    });
+                    rtSelect.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Error fetching RT data:', error);
+                    rtSelect.innerHTML = '<option value="">Gagal memuat</option>';
                 });
-                rtSelect.disabled = false;
-            })
-            .catch(error => {
-                console.error('Error fetching RT data:', error);
-                rtSelect.innerHTML = '<option value="">Gagal memuat</option>';
-            });
-    }
+        }
 
-    rwSelect.addEventListener('change', function() { fetchRts(this.value); });
+        rwSelect.addEventListener('change', function() { fetchRts(this.value); });
 
-    if (rwSelect.value) { fetchRts(rwSelect.value, currentRtId); }
-    @endif
-});
+        if (rwSelect.value) { fetchRts(rwSelect.value, currentRtId); }
+        @endif
+    });
 </script>
 @endpush
