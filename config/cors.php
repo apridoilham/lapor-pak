@@ -3,7 +3,7 @@
 return [
     'paths' => ['api/*', 'sanctum/csrf-cookie', 'broadcasting/auth'],
     'allowed_methods' => ['*'],
-    'allowed_origins' => [env('APP_URL', 'http://localhost:8000')],
+    'allowed_origins' => [env('APP_URL', 'https://bsblapor.site')],
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
     'exposed_headers' => [],

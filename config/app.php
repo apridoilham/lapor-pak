@@ -1,10 +1,10 @@
 <?php
 
 return [
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'BSB Lapor'),
     'env' => env('APP_ENV', 'production'),
     'debug' => (bool) env('APP_DEBUG', false),
-    'url' => env('APP_URL', 'http://localhost'),
+    'url' => env('APP_URL', 'https://bsblapor.site'),
     'timezone' => 'Asia/Jakarta',
     'locale' => env('APP_LOCALE', 'id'),
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'id'),
