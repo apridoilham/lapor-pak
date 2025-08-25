@@ -29,12 +29,12 @@
     .hero-container { position: relative; }
     .hero-image {
         width: 100%;
-        height: auto; /* Memastikan rasio aspek asli */
-        max-height: 450px; /* Batas tinggi maksimal agar tidak terlalu panjang */
-        object-fit: contain; /* Menampilkan gambar utuh */
+        height: auto;
+        max-height: 450px;
+        object-fit: contain;
         display: block;
-        cursor: pointer; /* Menambahkan cursor pointer */
-        background-color: #f0f0f0; /* Background jika gambar transparan */
+        cursor: pointer;
+        background-color: #f0f0f0;
     }
     .hero-gradient-overlay { position: absolute; bottom: 0; left: 0; right: 0; height: 150px; background: linear-gradient(180deg, rgba(249, 250, 251, 0) 0%, var(--bg-body) 100%); }
     .hero-overlay-header { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: 1.25rem; }
@@ -217,7 +217,7 @@
                                 }
                             @endphp
                             <div class="comment-item {{ $isCommentOwner ? 'is-owner' : 'is-other' }}">
-                                @if($commenterAvatar)
+                                @if (($isCommentOwner || $isReportOwner) && $commenterAvatar)
                                     <img src="{{ $commenterAvatar }}" alt="avatar" class="comment-avatar">
                                 @else
                                     <div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>
@@ -253,18 +253,16 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // FUNGSI LIGHTBOX (UNTUK MEMPERBESAR GAMBAR)
             const lightbox = document.getElementById('lightbox');
             if(lightbox) {
-                // Mengambil SEMUA gambar yang bisa diklik (gambar utama + gambar di riwayat)
                 const allImages = document.querySelectorAll('.hero-image, .proof-image');
                 const lightboxImage = document.getElementById('lightbox-image');
                 const lightboxClose = document.getElementById('lightbox-close');
 
                 allImages.forEach(image => {
                     image.addEventListener('click', function() {
-                        lightboxImage.src = this.src; // Set sumber gambar lightbox
-                        lightbox.classList.add('show'); // Tampilkan lightbox
+                        lightboxImage.src = this.src;
+                        lightbox.classList.add('show');
                     });
                 });
 
@@ -279,7 +277,6 @@
                 });
             }
 
-            // FUNGSI UNTUK KOMENTAR (TIDAK ADA PERUBAHAN)
             const commentForm = document.getElementById('comment-form');
             if (commentForm) {
                 const commentBody = document.getElementById('comment-body');
@@ -309,7 +306,7 @@
                     const userAvatar = comment.user.avatar || (comment.user.resident ? comment.user.resident.avatar : null);
                     const isAvatarUrl = userAvatar && userAvatar.startsWith('http');
                     
-                    if (userAvatar) {
+                    if ((isOwner || isReportOwner) && userAvatar) {
                         const finalAvatarSrc = isAvatarUrl ? userAvatar : `/storage/${userAvatar}`;
                         avatarHtml = `<img src="${finalAvatarSrc}" alt="avatar" class="comment-avatar">`;
                     } else {

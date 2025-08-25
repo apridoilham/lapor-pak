@@ -35,11 +35,11 @@ class User extends Authenticatable
     {
         $name = $this->attributes['name'];
 
-        if (mb_strlen($name) <= 3) {
-            return mb_substr($name, 0, 1) . '***';
+        if (empty(trim($name))) {
+            return '***';
         }
 
-        return mb_substr($name, 0, 3) . '***';
+        return mb_substr($name, 0, 1) . '***';
     }
 
     public function resident()

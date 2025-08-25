@@ -175,7 +175,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="d-flex align-items-center">
-            <a href="{{ route('admin.report.index') }}" class="btn btn-outline-primary btn-circle mr-3" title="Kembali">
+            <a href="{{ route('admin.reports.index') }}" class="btn btn-outline-primary btn-circle mr-3" title="Kembali">
                 <i class="fas fa-arrow-left"></i>
             </a>
             <div>
@@ -293,7 +293,7 @@
                             <p class="text-muted mb-0 small">RT {{ $resident->rt->number }} / RW {{ $resident->rw->number }}</p>
                         </div>
                     </div>
-                    <a href="{{ route('admin.resident.show', $resident->id) }}" class="btn btn-outline-primary btn-block">Lihat Profil Lengkap</a>
+                    <a href="{{ route('admin.residents.show', $resident->id) }}" class="btn btn-outline-primary btn-block">Lihat Profil Lengkap</a>
                 </div>
             </div>
             <div class="card mb-4">
@@ -354,9 +354,14 @@
                 });
             });
             const closeLightbox = () => lightbox.classList.remove('show');
+            
             lightboxClose.addEventListener('click', closeLightbox);
-            lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
-            document.addEventListener('keydown', (e) => { if (e.key === "Escape" && lightbox.classList.contains('show')) closeLightbox(); });
+            lightbox.addEventListener('click', (e) => { 
+                if (e.target === lightbox) closeLightbox(); 
+            });
+            document.addEventListener('keydown', (e) => { 
+                if (e.key === "Escape" && lightbox.classList.contains('show')) closeLightbox(); 
+            });
         }
     });
 </script>

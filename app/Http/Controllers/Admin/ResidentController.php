@@ -7,24 +7,31 @@ use App\Models\Resident;
 use App\Models\Rt;
 use App\Models\Rw;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Enums\ReportStatusEnum;
 
 class ResidentController extends Controller
 {
     public function index(Request $request)
     {
-        $rws = Rw::orderBy('number')->get();
+        $user = auth()->user();
+        $rws = $user->hasRole('super-admin') ? Rw::orderBy('number')->get() : collect();
         $rts = collect();
-        if ($request->filled('rw_id')) {
+
+        $query = Resident::with(['user', 'rt', 'rw'])->withCount('reports');
+
+        if ($user->hasRole('admin')) {
+            $query->where('rw_id', $user->rw_id);
+            $rts = Rt::where('rw_id', $user->rw_id)->orderBy('number')->get();
+        }
+
+        if ($request->filled('rw_id') && $user->hasRole('super-admin')) {
+            $query->where('rw_id', $request->rw_id);
             $rts = Rt::where('rw_id', $request->rw_id)->orderBy('number')->get();
         }
 
-        $query = Resident::complete()->with(['user', 'rt', 'rw'])->withCount('reports');
-
-        if ($request->filled('rw_id')) {
-            $query->where('residents.rw_id', $request->rw_id);
-        }
         if ($request->filled('rt_id')) {
-            $query->where('residents.rt_id', $request->rt_id);
+            $query->where('rt_id', $request->rt_id);
         }
         
         $sortBy = $request->input('sort', 'terbaru');
@@ -45,7 +52,6 @@ class ResidentController extends Controller
         }
 
         $perPage = $request->input('per_page', 10);
-
         $residents = $query->paginate($perPage)->withQueryString();
 
         return view('pages.admin.resident.index', compact('residents', 'rws', 'rts', 'perPage'));
@@ -53,16 +59,21 @@ class ResidentController extends Controller
 
     public function show(Resident $resident)
     {
-        $resident->load('user', 'rt', 'rw', 'reports.latestStatus');
+        $resident->load('user', 'rt', 'rw', 'reports.latestStatus', 'reports.reportCategory');
 
-        $reportCounts = $resident->reports->groupBy('latestStatus.status.value')->map->count();
-
+        $reportCounts = DB::table('reports')
+            ->select(DB::raw('COALESCE(latest_statuses.status, "delivered") as final_status'), DB::raw('count(*) as count'))
+            ->leftJoin(DB::raw('(SELECT report_id, status FROM report_statuses WHERE id IN (SELECT MAX(id) FROM report_statuses GROUP BY report_id)) as latest_statuses'), 'reports.id', '=', 'latest_statuses.report_id')
+            ->where('reports.resident_id', $resident->id)
+            ->groupBy('final_status')
+            ->pluck('count', 'final_status');
+            
         $stats = [
             'total' => $resident->reports->count(),
-            'delivered' => $reportCounts[\App\Enums\ReportStatusEnum::DELIVERED->value] ?? 0,
-            'in_process' => $reportCounts[\App\Enums\ReportStatusEnum::IN_PROCESS->value] ?? 0,
-            'completed' => $reportCounts[\App\Enums\ReportStatusEnum::COMPLETED->value] ?? 0,
-            'rejected' => $reportCounts[\App\Enums\ReportStatusEnum::REJECTED->value] ?? 0,
+            'delivered' => $reportCounts['delivered'] ?? 0,
+            'in_process' => $reportCounts['in_process'] ?? 0,
+            'completed' => $reportCounts['completed'] ?? 0,
+            'rejected' => $reportCounts['rejected'] ?? 0,
         ];
         
         return view('pages.admin.resident.show', compact('resident', 'stats'));

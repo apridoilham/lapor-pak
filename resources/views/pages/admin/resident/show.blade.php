@@ -33,7 +33,7 @@
 
 @section('content')
     <div class="d-flex align-items-center mb-4">
-        <a href="{{ route('admin.resident.index') }}" class="btn btn-outline-primary btn-circle mr-3">
+        <a href="{{ route('admin.residents.index') }}" class="btn btn-outline-primary btn-circle mr-3">
             <i class="fas fa-arrow-left"></i>
         </a>
         <div>
@@ -150,7 +150,7 @@
                     <tbody>
                         @forelse ($resident->reports as $report)
                             <tr>
-                                <td><a href="{{ route('admin.report.show', $report->id) }}" class="font-weight-bold">{{ $report->code }}</a></td>
+                                <td><a href="{{ route('admin.reports.show', $report->id) }}" class="font-weight-bold">{{ $report->code }}</a></td>
                                 <td>{{ Str::limit($report->title, 35) }}</td>
                                 <td>{{ optional($report->reportCategory)->name ?? 'Tanpa Kategori' }}</td>
                                 <td class="text-center">
@@ -163,7 +163,7 @@
                                 </td>
                                 <td>{{ ($report->latestStatus ? $report->latestStatus->updated_at : $report->created_at)->isoFormat('D MMM Y, HH:mm') }}</td>
                                 <td class="text-right">
-                                    <a href="{{ route('admin.report.show', $report->id) }}" class="btn btn-sm btn-outline-info" title="Lihat Detail Laporan">
+                                    <a href="{{ route('admin.reports.show', $report->id) }}" class="btn btn-sm btn-outline-info" title="Lihat Detail Laporan">
                                         <i class="fas fa-eye fa-sm mr-1"></i>Detail
                                     </a>
                                 </td>

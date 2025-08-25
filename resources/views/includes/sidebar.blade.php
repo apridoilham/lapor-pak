@@ -13,13 +13,13 @@
     </li>
     <hr class="sidebar-divider">
     <div class="sidebar-heading">Manajemen Data</div>
-    <li class="nav-item {{ request()->routeIs('admin.resident.*') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('admin.resident.index') }}">
+    <li class="nav-item {{ request()->routeIs('admin.residents.*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('admin.residents.index') }}">
             <i class="fas fa-fw fa-users"></i>
             <span>Data Pelapor</span></a>
     </li>
-    <li class="nav-item {{ (request()->routeIs('admin.report.*') && !request()->routeIs('admin.report.export.*')) ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('admin.report.index') }}">
+    <li class="nav-item {{ (request()->routeIs('admin.reports.*') && !request()->routeIs('admin.report.export.*')) ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('admin.reports.index') }}">
             <i class="fas fa-fw fa-file-alt"></i>
             <span>Data Laporan</span></a>
     </li>
@@ -29,8 +29,8 @@
                 <i class="fas fa-fw fa-map-signs"></i>
                 <span>Data RT & RW</span></a>
         </li>
-        <li class="nav-item {{ request()->routeIs('admin.report-category.*') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('admin.report-category.index') }}">
+        <li class="nav-item {{ request()->routeIs('admin.report-categories.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.report-categories.index') }}">
                 <i class="fas fa-fw fa-tags"></i>
                 <span>Data Kategori</span></a>
         </li>

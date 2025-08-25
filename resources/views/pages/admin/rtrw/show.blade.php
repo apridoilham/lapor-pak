@@ -92,7 +92,6 @@
         </div>
     </div>
 
-    {{-- KARTU BARU UNTUK DAFTAR WARGA --}}
     <div class="card shadow border-0 mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">Daftar Warga Terdaftar di RW {{ $rw->number }}</h6>
@@ -129,7 +128,7 @@
                                 </td>
                                 <td class="text-center">RT {{ optional($resident->rt)->number }}</td>
                                 <td class="text-center">
-                                    <a href="{{ route('admin.resident.show', $resident->id) }}" class="btn btn-sm btn-outline-info" title="Lihat Detail Pelapor">
+                                    <a href="{{ route('admin.residents.show', $resident->id) }}" class="btn btn-sm btn-outline-info" title="Lihat Detail Pelapor">
                                         <i class="fas fa-eye fa-sm mr-1"></i>Detail
                                     </a>
                                 </td>

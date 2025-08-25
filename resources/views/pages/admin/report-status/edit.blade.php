@@ -78,7 +78,7 @@
 
 @section('content')
     <div class="d-flex align-items-center mb-4">
-        <a href="{{ route('admin.report.show', $status->report->id) }}" class="btn btn-primary btn-circle mr-3" title="Kembali">
+        <a href="{{ route('admin.reports.show', $status->report->id) }}" class="btn btn-primary btn-circle mr-3" title="Kembali">
             <i class="fas fa-arrow-left"></i>
         </a>
         <div>
@@ -146,7 +146,7 @@
                         </div>
                         
                         <div class="text-right mt-3">
-                            <a href="{{ route('admin.report.show', $status->report_id) }}" class="btn btn-secondary">Batal</a>
+                            <a href="{{ route('admin.reports.show', $status->report_id) }}" class="btn btn-secondary">Batal</a>
                             <button type="submit" class="btn btn-primary" id="save-btn" disabled>
                                 <i class="fas fa-save mr-2"></i>Simpan Perubahan
                             </button>

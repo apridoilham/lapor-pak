@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UpsertReportStatusRequest;
 use App\Interfaces\ReportRepositoryInterface;
 use App\Interfaces\ReportStatusRepositoryInterface;
+use App\Models\Report;
 use App\Traits\FileUploadTrait;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
@@ -28,17 +29,16 @@ class ReportStatusController extends Controller
         $this->reportStatusRepository = $reportStatusRepository;
     }
 
-    public function create($reportId)
+    public function create(Report $report)
     {
-        $report = $this->reportRepository->getReportById($reportId);
         $this->authorize('manageStatus', $report);
 
         if ($report->latestStatus && in_array($report->latestStatus->status, [ReportStatusEnum::COMPLETED, ReportStatusEnum::REJECTED])) {
             Swal::error('Gagal', 'Tidak dapat menambahkan progress pada laporan yang sudah selesai atau ditolak.');
-            return redirect()->route('admin.report.show', $report->id);
+            return redirect()->route('admin.reports.show', $report->id);
         }
 
-        $statuses = array_filter(ReportStatusEnum::cases(), function($status) {
+        $statuses = array_filter(ReportStatusEnum::cases(), function ($status) {
             return $status !== ReportStatusEnum::DELIVERED;
         });
 
@@ -59,7 +59,7 @@ class ReportStatusController extends Controller
         $this->reportStatusRepository->createReportStatus($data, Auth::id());
 
         Swal::success('Success', 'Data Progress laporan berhasil ditambahkan!')->timerProgressBar();
-        return redirect()->route('admin.report.show', $request->report_id);
+        return redirect()->route('admin.reports.show', $request->report_id);
     }
 
     public function edit(string $id)
@@ -67,7 +67,7 @@ class ReportStatusController extends Controller
         $status = $this->reportStatusRepository->getReportStatusById($id);
         $this->authorize('manageStatus', $status->report);
 
-        $statuses = array_filter(ReportStatusEnum::cases(), function($statusEnum) {
+        $statuses = array_filter(ReportStatusEnum::cases(), function ($statusEnum) {
             return $statusEnum !== ReportStatusEnum::DELIVERED;
         });
 
@@ -87,7 +87,7 @@ class ReportStatusController extends Controller
         $this->reportStatusRepository->updateReportStatus($data, $id, Auth::id());
 
         Swal::success('Success', 'Data progress laporan berhasil diubah!')->timerProgressBar();
-        return redirect()->route('admin.report.show', $request->report_id);
+        return redirect()->route('admin.reports.show', $request->report_id);
     }
 
     public function destroy(string $id)
@@ -102,6 +102,6 @@ class ReportStatusController extends Controller
         $this->reportStatusRepository->deleteReportStatus($id, Auth::id());
 
         Swal::success('Success', 'Data progress laporan berhasil dihapus!')->timerProgressBar();
-        return redirect()->route('admin.report.show', $status->report_id);
+        return redirect()->route('admin.reports.show', $status->report_id);
     }
 }

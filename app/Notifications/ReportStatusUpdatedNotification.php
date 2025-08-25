@@ -4,11 +4,11 @@ namespace App\Notifications;
 
 use App\Models\Report;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
 
-class ReportStatusUpdatedNotification extends Notification implements ShouldQueue
+class ReportStatusUpdatedNotification extends Notification implements ShouldBroadcast
 {
     use Queueable;
 
@@ -25,47 +25,48 @@ class ReportStatusUpdatedNotification extends Notification implements ShouldQueu
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return ['database', 'broadcast'];
     }
 
-    public function toMail(object $notifiable): MailMessage
+    public function broadcastAs(): string
     {
-        $status = $this->report->latestStatus;
-
-        return (new MailMessage)
-                    ->subject('Update Status Laporan Anda: ' . $this->report->code)
-                    ->greeting('Halo, ' . $notifiable->name . '.')
-                    ->line('Ada pembaruan untuk laporan Anda dengan judul "' . $this->report->title . '".')
-                    ->line('Status Terbaru: ' . $status->status->label())
-                    ->line('Catatan: ' . $status->description)
-                    ->action('Lihat Laporan', route('report.show', $this->report->code))
-                    ->line('Terima kasih telah menggunakan aplikasi kami!');
+        return 'report.status.updated';
     }
 
-    public function toArray(object $notifiable): array
+    private function generateMessage(): string
     {
         $reportTitle = \Str::limit($this->report->title, 20);
         $statusLabel = $this->report->latestStatus->status->label();
-        $message = '';
-        
+
         if (isset($this->changes['status'])) {
-            $message = 'Status pada laporan Anda (' . $reportTitle . ') diubah dari <strong>' . $this->changes['status']['from'] . '</strong> menjadi <strong>' . $this->changes['status']['to'] . '</strong>.';
+            return 'Status pada laporan Anda (' . $reportTitle . ') diubah dari <strong>' . $this->changes['status']['from'] . '</strong> menjadi <strong>' . $this->changes['status']['to'] . '</strong>.';
         } elseif (isset($this->changes['description_updated'])) {
-            $message = 'Catatan pada progress laporan (' . $reportTitle . ') dengan status <strong>' . $statusLabel . '</strong> telah diperbarui oleh admin.';
+            return 'Catatan pada progress laporan (' . $reportTitle . ') dengan status <strong>' . $statusLabel . '</strong> telah diperbarui oleh admin.';
         } elseif (isset($this->changes['image_updated'])) {
-            $message = 'Admin menambahkan gambar bukti baru pada progress laporan (' . $reportTitle . ') dengan status <strong>' . $statusLabel . '</strong>.';
-        } else {
-            $message = 'Status laporan Anda (' . $reportTitle . ') diperbarui menjadi <strong>' . $statusLabel . '</strong>.';
+            return 'Admin menambahkan gambar bukti baru pada progress laporan (' . $reportTitle . ') dengan status <strong>' . $statusLabel . '</strong>.';
         }
 
+        return 'Status laporan Anda (' . $reportTitle . ') diperbarui menjadi <strong>' . $statusLabel . '</strong>.';
+    }
+
+    public function toDatabase(object $notifiable): array
+    {
         return [
             'type' => 'status_update',
             'report_id' => $this->report->id,
             'report_code' => $this->report->code,
-            'status_message' => $statusLabel,
+            'status_message' => $this->report->latestStatus->status->label(),
             'changes' => $this->changes,
-            'message' => $message,
+            'message' => $this->generateMessage(),
             'action_by_user_id' => $this->actorId,
         ];
+    }
+
+    public function toBroadcast(object $notifiable): BroadcastMessage
+    {
+        return new BroadcastMessage([
+            'message' => $this->generateMessage(),
+            'report_code' => $this->report->code,
+        ]);
     }
 }

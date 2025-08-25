@@ -33,7 +33,7 @@ class ReportCategoryController extends Controller
     {
         $this->reportCategoryRepository->createReportCategory($request->validated());
         Swal::success('Berhasil', 'Kategori Laporan baru berhasil ditambahkan.');
-        return redirect()->route('admin.report-category.index');
+        return redirect()->route('admin.report-categories.index');
     }
 
     public function show(ReportCategory $report_category)
@@ -51,8 +51,7 @@ class ReportCategoryController extends Controller
     {
         $this->reportCategoryRepository->updateReportCategory($request->validated(), $report_category->id);
         Swal::success('Berhasil', 'Kategori Laporan berhasil diperbarui.');
-        // PERUBAHAN DI SINI: Arahkan ke halaman detail
-        return redirect()->route('admin.report-category.show', $report_category);
+        return redirect()->route('admin.report-categories.show', $report_category);
     }
 
     public function destroy(ReportCategory $report_category)
@@ -64,6 +63,6 @@ class ReportCategoryController extends Controller
 
         $this->reportCategoryRepository->deleteReportCategory($report_category->id);
         Swal::success('Berhasil', 'Kategori Laporan berhasil dihapus.');
-        return redirect()->route('admin.report-category.index');
+        return redirect()->route('admin.report-categories.index');
     }
 }

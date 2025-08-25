@@ -3,15 +3,11 @@
 namespace App\Events;
 
 use App\Models\Report;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ReportProgressDeleted implements ShouldBroadcast
+class ReportProgressDeleted
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -24,12 +20,5 @@ class ReportProgressDeleted implements ShouldBroadcast
         $this->report = $report;
         $this->actorId = $actorId;
         $this->deletedStatusLabel = $deletedStatusLabel;
-    }
-
-    public function broadcastOn(): array
-    {
-        return [
-            new PrivateChannel('channel-name'),
-        ];
     }
 }

@@ -11,6 +11,7 @@ use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Illuminate\Notifications\Events\BroadcastNotificationCreated;
 use Illuminate\Support\Facades\Event;
 
 class EventServiceProvider extends ServiceProvider
@@ -28,11 +29,14 @@ class EventServiceProvider extends ServiceProvider
         ReportProgressDeleted::class => [
             SendReportProgressDeletedNotification::class,
         ],
+        BroadcastNotificationCreated::class => [
+            // Listener ini kosong untuk mencegah event di-broadcast
+        ],
     ];
 
     public function boot(): void
     {
-        
+        //
     }
 
     public function shouldDiscoverEvents(): bool

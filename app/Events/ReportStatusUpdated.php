@@ -4,12 +4,10 @@ namespace App\Events;
 
 use App\Models\Report;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ReportStatusUpdated implements ShouldBroadcast
+class ReportStatusUpdated
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -22,12 +20,5 @@ class ReportStatusUpdated implements ShouldBroadcast
         $this->report = $report;
         $this->actorId = $actorId;
         $this->changes = $changes;
-    }
-
-    public function broadcastOn(): array
-    {
-        return [
-            new PrivateChannel('channel-name'),
-        ];
     }
 }

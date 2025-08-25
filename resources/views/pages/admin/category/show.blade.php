@@ -22,7 +22,7 @@
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="d-flex align-items-center">
-            <a href="{{ route('admin.report-category.index') }}" class="btn btn-outline-primary btn-circle mr-3" title="Kembali">
+            <a href="{{ route('admin.report-categories.index') }}" class="btn btn-outline-primary btn-circle mr-3" title="Kembali">
                 <i class="fas fa-arrow-left"></i>
             </a>
             <div>
@@ -31,10 +31,10 @@
             </div>
         </div>
         <div>
-            <a href="{{ route('admin.report-category.edit', $report_category) }}" class="btn btn-sm btn-outline-warning shadow-sm">
+            <a href="{{ route('admin.report-categories.edit', $report_category) }}" class="btn btn-sm btn-outline-warning shadow-sm">
                 <i class="fas fa-edit fa-sm mr-2"></i>Ubah Kategori
             </a>
-            <form action="{{ route('admin.report-category.destroy', $report_category) }}" method="POST" class="d-inline delete-form">
+            <form action="{{ route('admin.report-categories.destroy', $report_category) }}" method="POST" class="d-inline delete-form">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm"
@@ -84,7 +84,7 @@
                     <tbody>
                         @forelse ($report_category->reports as $report)
                             <tr>
-                                <td><a href="{{ route('admin.report.show', $report->id) }}" class="font-weight-bold">{{ $report->code }}</a></td>
+                                <td><a href="{{ route('admin.reports.show', $report->id) }}" class="font-weight-bold">{{ $report->code }}</a></td>
                                 <td>
                                     <div class="d-flex align-items-center">
                                         @php
@@ -119,7 +119,7 @@
                                     <div class="small text-muted">{{ $displayTime->format('H:i') }} WIB</div>
                                 </td>
                                 <td class="text-center">
-                                    <a href="{{ route('admin.report.show', $report->id) }}" class="btn btn-sm btn-outline-info">
+                                    <a href="{{ route('admin.reports.show', $report->id) }}" class="btn btn-sm btn-outline-info">
                                         <i class="fas fa-eye fa-sm mr-1"></i>Lihat
                                     </a>
                                 </td>

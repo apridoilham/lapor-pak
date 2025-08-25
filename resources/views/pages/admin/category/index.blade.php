@@ -39,7 +39,7 @@
             <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Manajemen Kategori</h1>
             <p class="mb-0 text-muted">Buat, ubah, atau hapus kategori untuk pelaporan warga.</p>
         </div>
-        <a href="{{ route('admin.report-category.create') }}" class="btn btn-primary shadow-sm">
+        <a href="{{ route('admin.report-categories.create') }}" class="btn btn-primary shadow-sm">
             <i class="fas fa-plus fa-sm text-white-50 mr-2"></i>Tambah Kategori Baru
         </a>
     </div>
@@ -54,7 +54,7 @@
                     <i class="fas fa-tags fa-4x text-gray-300 mb-3"></i>
                     <h5 class="font-weight-bold">Belum Ada Kategori</h5>
                     <p class="text-muted">Silakan tambahkan kategori laporan pertama Anda.</p>
-                    <a href="{{ route('admin.report-category.create') }}" class="btn btn-primary mt-2">
+                    <a href="{{ route('admin.report-categories.create') }}" class="btn btn-primary mt-2">
                         <i class="fas fa-plus mr-1"></i> Buat Kategori Baru
                     </a>
                 </div>
@@ -78,7 +78,7 @@
                                         <span class="badge badge-pill badge-primary badge-report-count">{{ $category->reports_count }} Laporan</span>
                                     </td>
                                     <td class="text-center">
-                                        <a href="{{ route('admin.report-category.show', $category) }}" class="btn btn-sm btn-outline-info">
+                                        <a href="{{ route('admin.report-categories.show', $category) }}" class="btn btn-sm btn-outline-info">
                                             <i class="fas fa-eye fa-sm mr-1"></i> Detail
                                         </a>
                                     </td>

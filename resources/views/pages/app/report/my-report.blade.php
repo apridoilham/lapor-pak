@@ -15,7 +15,6 @@
         --font-sans: 'Inter', 'Poppins', 'Segoe UI', sans-serif;
     }
 
-    /* Pengaturan Dasar & Font */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     html, body { background-color: var(--bg-body); }
     body {
@@ -201,7 +200,7 @@
     <div class="report-list-container">
         @forelse ($reports as $report)
             <div class="report-list-item">
-                <a href="{{ route('report.show', ['code' => $report->code, '_ref' => request()->fullUrl()]) }}" class="report-link-wrapper">
+                <a href="{{ route('report.show', ['report' => $report, '_ref' => request()->fullUrl()]) }}" class="report-link-wrapper">
                     <img src="{{ asset('storage/' . $report->image) }}" alt="Thumbnail" class="item-thumbnail">
                     <div class="item-details">
                         <p class="item-title">{{ Str::limit($report->title, 50) }}</p>
@@ -275,9 +274,8 @@
 
             document.querySelectorAll('.delete-form-myreport').forEach(form => {
                 form.addEventListener('submit', function(event) {
-                    event.preventDefault(); // Mencegah form dikirim secara otomatis
+                    event.preventDefault();
                     
-                    // Menampilkan alert konfirmasi
                     Swal.fire({
                         title: 'Anda yakin ingin menghapus?',
                         text: "Laporan yang sudah dihapus tidak dapat dikembalikan.",
@@ -288,9 +286,7 @@
                         confirmButtonText: 'Ya, Hapus Saja!',
                         cancelButtonText: 'Batalkan'
                     }).then((result) => {
-                        // Cek apakah tombol konfirmasi yang ditekan
                         if (result.isConfirmed) {
-                            // JIKA "YA", LANJUTKAN PROSES HAPUS
                             form.submit();
                         }
                     });

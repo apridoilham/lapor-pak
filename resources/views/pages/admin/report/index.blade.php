@@ -27,7 +27,7 @@
 
     <div class="card shadow mb-4">
         <div class="card-body">
-            <form action="{{ route('admin.report.index') }}" method="GET" class="row g-3 align-items-end">
+            <form action="{{ route('admin.reports.index') }}" method="GET" class="row g-3 align-items-end">
                 <div class="col-md-9">
                     <label for="sort" class="form-label font-weight-bold small">Urutkan Berdasarkan</label>
                     <select name="sort" id="sort" class="form-control" onchange="this.form.submit()">
@@ -42,7 +42,7 @@
                     <button type="submit" class="btn btn-primary flex-grow-1 mr-2">
                         <i class="fas fa-filter fa-sm"></i> Terapkan
                     </button>
-                    <a href="{{ route('admin.report.index') }}" class="btn btn-secondary" title="Reset Filter">
+                    <a href="{{ route('admin.reports.index') }}" class="btn btn-secondary" title="Reset Filter">
                         <i class="fas fa-sync-alt"></i>
                     </a>
                 </div>
@@ -70,7 +70,7 @@
                     <tbody>
                         @forelse ($reports as $report)
                             <tr>
-                                <td><a href="{{ route('admin.report.show', $report->id) }}" class="font-weight-bold">{{ $report->code }}</a></td>
+                                <td><a href="{{ route('admin.reports.show', $report->id) }}" class="font-weight-bold">{{ $report->code }}</a></td>
                                 <td>
                                     <div class="d-flex align-items-center">
                                         @php
@@ -105,7 +105,7 @@
                                     <div class="small text-muted">{{ $displayTime->format('H:i') }} WIB</div>
                                 </td>
                                 <td class="text-center">
-                                    <a href="{{ route('admin.report.show', $report->id) }}" class="btn btn-sm btn-outline-info">
+                                    <a href="{{ route('admin.reports.show', $report->id) }}" class="btn btn-sm btn-outline-info">
                                         <i class="fas fa-eye fa-sm mr-1"></i>Detail
                                     </a>
                                 </td>
@@ -127,48 +127,3 @@
         </div>
     </div>
 @endsection
-
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        @if(Auth::user()->hasRole('super-admin'))
-        const rwSelect = document.getElementById('rw_id_filter');
-        const rtSelect = document.getElementById('rt_id_filter');
-        const currentRtId = "{{ request('rt') }}";
-
-        function fetchRts(rwId, selectedRtId = null) {
-            if (!rwId) {
-                rtSelect.innerHTML = '<option value="">Pilih RW terlebih dahulu</option>';
-                rtSelect.disabled = true;
-                return;
-            }
-            rtSelect.disabled = true;
-            rtSelect.innerHTML = '<option value="">Memuat...</option>';
-            fetch(`/api/get-rts-by-rw/${rwId}`)
-                .then(response => response.json())
-                .then(data => {
-                    rtSelect.innerHTML = '<option value="">Semua RT</option>';
-                    data.forEach(rt => {
-                        const option = document.createElement('option');
-                        option.value = rt.id;
-                        option.textContent = `RT ${rt.number}`;
-                        if (selectedRtId && rt.id == selectedRtId) {
-                            option.selected = true;
-                        }
-                        rtSelect.appendChild(option);
-                    });
-                    rtSelect.disabled = false;
-                })
-                .catch(error => {
-                    console.error('Error fetching RT data:', error);
-                    rtSelect.innerHTML = '<option value="">Gagal memuat</option>';
-                });
-        }
-
-        rwSelect.addEventListener('change', function() { fetchRts(this.value); });
-
-        if (rwSelect.value) { fetchRts(rwSelect.value, currentRtId); }
-        @endif
-    });
-</script>
-@endpush

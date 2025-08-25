@@ -169,7 +169,7 @@
 
             @forelse($reports as $report)
                 @php $isOwner = Auth::check() && Auth::id() === $report->resident->user_id; @endphp
-                <a href="{{ route('report.show', ['code' => $report->code, '_ref' => request()->fullUrl()]) }}" class="report-card-professional">
+                <a href="{{ route('report.show', ['report' => $report, '_ref' => request()->fullUrl()]) }}" class="report-card-professional">
                     <img src="{{ asset('storage/' . $report->image) }}" alt="{{ $report->title }}" class="card-image">
                     <div class="card-body">
                         <div class="card-category-pill">{{ optional($report->reportCategory)->name ?? 'Tanpa Kategori' }}</div>
@@ -188,20 +188,22 @@
                     <div class="card-footer">
                         <div class="user-details">
                             @php
-                                $reporterAvatar = optional($report->resident->user)->avatar ?? optional($report->resident)->avatar;
+                                $reporter = $report->resident->user;
+                                $reporterAvatar = $reporter->avatar ?? optional($reporter->resident)->avatar;
+
                                 if ($reporterAvatar && !filter_var($reporterAvatar, FILTER_VALIDATE_URL)) {
                                     $reporterAvatar = asset('storage/' . $reporterAvatar);
                                 }
                             @endphp
-                            @if($reporterAvatar)
+                            @if($isOwner && $reporterAvatar)
                                 <img src="{{ $reporterAvatar }}" alt="Avatar Pelapor" class="avatar">
                             @else
                                 <div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>
                             @endif
-                            <span class="user-name">{{ $isOwner ? $report->resident->user->name : $report->resident->user->censored_name }}</span>
+                            <span class="user-name">{{ $isOwner ? $reporter->name : $reporter->censored_name }}</span>
                         </div>
 
-                        @if ($isOwner && $report->latestStatus)
+                        @if ($report->latestStatus)
                             @php $status = $report->latestStatus->status; @endphp
                             <div class="status-badge {{ $status->value }}">
                                 <span>{{ $status->label() }}</span>

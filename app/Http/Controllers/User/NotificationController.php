@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\Auth;
-use RealRashid\SweetAlert\Facades\Alert as Swal;
 
 class NotificationController extends Controller
 {
@@ -14,7 +13,7 @@ class NotificationController extends Controller
     {
         $user = Auth::user();
         $notifications = $user->notifications()->latest()->get(); 
-        
+
         return view('pages.app.notifications.index', compact('notifications'));
     }
 
@@ -26,7 +25,12 @@ class NotificationController extends Controller
 
         $notification->markAsRead();
 
-        $baseUrl = route('report.show', ['code' => $notification->data['report_code'], '_ref' => route('notifications.index')]);
+        $reportCode = $notification->data['report_code'];
+        $baseUrl = route('report.show', [
+            'report' => $reportCode, 
+            '_ref' => route('notifications.index')
+        ]);
+        
         $fragment = '#komentar';
 
         if (isset($notification->data['type']) && $notification->data['type'] === 'status_update') {

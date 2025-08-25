@@ -121,7 +121,7 @@
 
     @forelse($reports as $report)
         @php $isOwner = Auth::check() && Auth::id() === $report->resident->user_id; @endphp
-        <a href="{{ route('report.show', ['code' => $report->code, '_ref' => request()->fullUrl()]) }}" class="report-card-professional">
+        <a href="{{ route('report.show', ['report' => $report, '_ref' => request()->fullUrl()]) }}" class="report-card-professional">
             <img src="{{ asset('storage/' . $report->image) }}" alt="{{ $report->title }}" class="card-image">
             <div class="card-body">
                 <div class="card-top-info">
@@ -139,20 +139,20 @@
                 <div class="user-details">
                     @php
                         $reporter = $report->resident->user;
-                        $avatarUrl = $reporter->avatar ?? optional($reporter->resident)->avatar;
+                        $reporterAvatar = $reporter->avatar ?? optional($reporter->resident)->avatar;
 
-                        if ($avatarUrl && !filter_var($avatarUrl, FILTER_VALIDATE_URL)) {
-                            $avatarUrl = asset('storage/' . $avatarUrl);
+                        if ($reporterAvatar && !filter_var($reporterAvatar, FILTER_VALIDATE_URL)) {
+                            $reporterAvatar = asset('storage/' . $reporterAvatar);
                         }
                     @endphp
-                    @if($avatarUrl)
-                        <img src="{{ $avatarUrl }}" alt="Avatar Pelapor" class="avatar">
+                    @if($isOwner && $reporterAvatar)
+                        <img src="{{ $reporterAvatar }}" alt="Avatar Pelapor" class="avatar">
                     @else
                         <div class="avatar-placeholder"><i class="fa-solid fa-user"></i></div>
                     @endif
-                    <span class="user-name">{{ $isOwner ? $report->resident->user->name : $report->resident->user->censored_name }}</span>
+                    <span class="user-name">{{ $isOwner ? $reporter->name : $reporter->censored_name }}</span>
                 </div>
-                @if ($isOwner && $report->latestStatus)
+                @if ($report->latestStatus)
                     @php $status = $report->latestStatus->status; @endphp
                     <div class="status-badge {{ $status->value }}">
                         <span>{{ $status->label() }}</span>

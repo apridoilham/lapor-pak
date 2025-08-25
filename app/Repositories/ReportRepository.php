@@ -35,7 +35,7 @@ class ReportRepository implements ReportRepositoryInterface
                 $q->orWhere(function ($q2) use ($user) {
                     $q2->where('visibility', ReportVisibilityEnum::RT)
                         ->whereHas('resident', function ($q3) use ($user) {
-                            $q3->where('rt_id', $user->resident->rt->id);
+                            $q3->where('rt_id', $user->resident->rt_id);
                         });
                 });
                 $q->orWhere(function ($q2) use ($user) {
@@ -89,7 +89,7 @@ class ReportRepository implements ReportRepositoryInterface
     
     public function getLatestReportsForUser(Request $request): LengthAwarePaginator
     {
-        $query = Report::with('resident.user', 'reportCategory', 'latestStatus');
+        $query = Report::with(['resident.user', 'reportCategory', 'latestStatus']);
         $this->applyVisibilityFilter($query);
         
         if ($categoryName = $request->input('category')) {
@@ -105,13 +105,13 @@ class ReportRepository implements ReportRepositoryInterface
             });
         }
 
-        return $query->latest('updated_at')->paginate(10)->withQueryString();
+        return $query->latest('created_at')->paginate(10)->withQueryString();
     }
 
     public function getAllReportsForAdmin(Request $request, int $rwId = null, int $rtId = null): EloquentCollection
     {
         $query = Report::with('resident.user', 'reportCategory', 'latestStatus')->whereHas('resident');
-        if ($rtId) { $query->whereHas('resident', fn($q) => $q->where('rt_id', $rtId)); }    
+        if ($rtId) { $query->whereHas('resident', fn($q) => $q->where('rt_id', $rtId)); }     
         elseif ($rwId) { $query->whereHas('resident', fn($q) => $q->where('rw_id', $rwId)); }
         return $query->latest()->get();
     }
@@ -125,13 +125,17 @@ class ReportRepository implements ReportRepositoryInterface
 
     public function getReportByResidentId(int $residentId, ?string $status): EloquentCollection
     {
-        $query = Report::where('resident_id', $residentId)->with('latestStatus');
-        if ($status) { $query->whereHas('latestStatus', fn(Builder $q) => $q->where('status', $status)); }
-        return $query->latest()->get();
+        $query = Report::where('resident_id', $residentId)
+            ->with(['latestStatus', 'reportCategory'])
+            ->whereHas('latestStatus', function(Builder $q) use ($status) {
+                $q->where('status', $status);
+            });
+            
+        return $query->latest('updated_at')->get();
     }
 
     public function getReportById(int $id) { return Report::with('resident.user', 'resident.rt', 'resident.rw', 'reportCategory', 'reportStatuses')->findOrFail($id); }
-    public function getReportByCode(string $code) { return Report::with('resident.user', 'resident.rt', 'resident.rw', 'reportCategory', 'reportStatuses')->where('code', $code)->firstOrFail(); }
+    public function getReportByCode(string $code) { return Report::with('resident.user', 'resident.rt', 'resident.rw', 'reportCategory', 'reportStatuses', 'comments.user.resident')->where('code', $code)->firstOrFail(); }
 
     public function createReport(array $data)
     {
@@ -141,26 +145,29 @@ class ReportRepository implements ReportRepositoryInterface
     }
 
     public function updateReport(array $data, int $id) { return Report::findOrFail($id)->update($data); }
-    public function deleteReport(int $id) { return Report::findOrFail($id)->delete(); }
+    public function deleteReport(int $id) {
+        $report = Report::findOrFail($id);
+        if ($report->image) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($report->image);
+        }
+        return $report->delete();
+    }
 
     public function countStatusesByResidentId(int $residentId): array
     {
-        $counts = Report::where('resident_id', $residentId)
+        $counts = DB::table('reports')
+            ->select(DB::raw('COALESCE(latest_statuses.status, "delivered") as final_status'), DB::raw('count(*) as count'))
             ->leftJoin(DB::raw('(SELECT report_id, status FROM report_statuses WHERE id IN (SELECT MAX(id) FROM report_statuses GROUP BY report_id)) as latest_statuses'), 'reports.id', '=', 'latest_statuses.report_id')
-            ->select('latest_statuses.status', DB::raw('count(*) as count'))
-            ->groupBy('latest_statuses.status')
-            ->pluck('count', 'status')
-            ->toArray();
-    
-        $deliveredCount = Report::where('resident_id', $residentId)
-            ->doesntHave('latestStatus')
-            ->count();
+            ->where('reports.resident_id', $residentId)
+            ->groupBy('final_status')
+            ->pluck('count', 'final_status')
+            ->all();
     
         $allStatuses = [
-            ReportStatusEnum::DELIVERED->value => $deliveredCount,
-            ReportStatusEnum::IN_PROCESS->value => 0,
-            ReportStatusEnum::COMPLETED->value => 0,
-            ReportStatusEnum::REJECTED->value => 0,
+            'delivered' => 0,
+            'in_process' => 0,
+            'completed' => 0,
+            'rejected' => 0,
         ];
     
         return array_merge($allStatuses, $counts);
@@ -168,16 +175,18 @@ class ReportRepository implements ReportRepositoryInterface
     
     public function countByStatus(int $residentId, ReportStatusEnum $status): int
     {
-        $query = Report::where('resident_id', $residentId)->latest();
-        if ($status === ReportStatusEnum::DELIVERED) {
-            return $query->doesntHave('latestStatus')->count();
-        }
-        return $query->whereHas('latestStatus', fn (Builder $q) => $q->where('status', $status))->count();
+        $query = Report::where('resident_id', $residentId);
+        
+        $query->whereHas('latestStatus', function (Builder $q) use ($status) {
+            $q->where('status', $status);
+        });
+
+        return $query->count();
     }
 
     public function getFilteredReports(array $filters): EloquentCollection
     {
-        $query = Report::with('resident.user', 'reportCategory', 'latestStatus');
+        $query = Report::with('resident.user', 'resident.rt', 'resident.rw', 'reportCategory', 'latestStatus');
         if (!empty($filters['start_date'])) { $query->whereDate('created_at', '>=', $filters['start_date']); }
         if (!empty($filters['end_date'])) { $query->whereDate('created_at', '<=', $filters['end_date']); }
         if (!empty($filters['resident_id'])) { $query->where('resident_id', $filters['resident_id']); }
@@ -203,14 +212,15 @@ class ReportRepository implements ReportRepositoryInterface
         $query = Report::query()->whereHas('resident')->when($rwId, fn($q) => $q->whereHas('resident', fn($q) => $q->where('rw_id', $rwId)));
         $now = Carbon::now('Asia/Jakarta');
         $reports = $query->whereBetween('created_at', [$now->copy()->subDays(6)->startOfDay(), $now->copy()->endOfDay()])
-            ->select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
-            ->groupBy('date')->orderBy('date', 'ASC')->get();
+            ->select(DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d') as date"), DB::raw('count(*) as count'))
+            ->groupBy('date')->orderBy('date', 'ASC')->get()->keyBy('date');
+        
         $labels = collect(); $counts = collect();
         for ($i = 6; $i >= 0; $i--) {
             $date = $now->copy()->subDays($i);
-            $labels->push($date->isoFormat('dddd, D MMMM'));
-            $found = $reports->firstWhere('date', $date->format('Y-m-d'));
-            $counts->push($found ? $found->count : 0);
+            $dateString = $date->format('Y-m-d');
+            $labels->push($date->isoFormat('dddd, D MMM'));
+            $counts->push($reports->get($dateString)->count ?? 0);
         }
         return collect(['labels' => $labels, 'counts' => $counts]);
     }
@@ -230,16 +240,23 @@ class ReportRepository implements ReportRepositoryInterface
             $query->whereHas('resident', fn($q) => $q->where('rw_id', $rwId));
         }
 
-        $allReports = $query->get()->groupBy(fn($report) => optional($report->latestStatus)->status->value ?? ReportStatusEnum::DELIVERED->value);
+        $allReports = $query->with('latestStatus')->get();
 
         $statusCounts = [
-            ReportStatusEnum::DELIVERED->value => $allReports[ReportStatusEnum::DELIVERED->value] ?? collect(),
-            ReportStatusEnum::IN_PROCESS->value => $allReports[ReportStatusEnum::IN_PROCESS->value] ?? collect(),
-            ReportStatusEnum::COMPLETED->value => $allReports[ReportStatusEnum::COMPLETED->value] ?? collect(),
-            ReportStatusEnum::REJECTED->value => $allReports[ReportStatusEnum::REJECTED->value] ?? collect(),
+            ReportStatusEnum::DELIVERED->value => 0,
+            ReportStatusEnum::IN_PROCESS->value => 0,
+            ReportStatusEnum::COMPLETED->value => 0,
+            ReportStatusEnum::REJECTED->value => 0,
         ];
+
+        foreach ($allReports as $report) {
+            $status = optional($report->latestStatus)->status->value ?? ReportStatusEnum::DELIVERED->value;
+            if (isset($statusCounts[$status])) {
+                $statusCounts[$status]++;
+            }
+        }
         
-        return array_map(fn($collection) => $collection->count(), $statusCounts);
+        return $statusCounts;
     }
 
     public function getReportCountsByRt(int $rwId): EloquentCollection

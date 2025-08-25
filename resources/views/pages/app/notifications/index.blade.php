@@ -22,7 +22,7 @@
     .page-header .btn-select { font-size: 0.9rem; font-weight: 600; color: var(--primary-color); background: transparent; border: none; padding: 0.5rem; }
     .filter-tabs { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
     .filter-tabs .tab-item { flex-grow: 1; text-align: center; padding: 0.6rem 1rem; border-radius: 20px; font-size: 0.9rem; font-weight: 600; color: var(--text-light); text-decoration: none; background-color: var(--bg-body); border: 1px solid var(--border-color); transition: all 0.2s ease; }
-    .filter-tabs .tab-item.active { background-color: var(--primary-color); color: var(--white); border-color: var(--primary-color); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
+    .filter-tabs .tab-item.active { background-color: var(--primary-color); color: var(--bg-white); border-color: var(--primary-color); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
     .notifications-container { padding: 1.5rem; padding-bottom: 100px; }
     .notification-group-title { font-size: 0.85rem; font-weight: 600; color: var(--text-light); text-transform: uppercase; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); }
     .notification-item { display: flex; align-items: flex-start; gap: 1rem; text-decoration: none; color: inherit; padding: 1rem 0; transition: background-color 0.2s; }
@@ -92,7 +92,7 @@
                     <h6 class="notification-group-title">{{ $date }}</h6>
                     @foreach($group as $notification)
                         @php
-                            $actionUser = \App\Models\User::find($notification->data['action_by_user_id']);
+                            $actionUser = isset($notification->data['action_by_user_id']) ? \App\Models\User::find($notification->data['action_by_user_id']) : null;
                             $iconClass = 'status';
                             $icon = 'fa-solid fa-file-circle-check';
                             $message = $notification->data['message'] ?? '';
@@ -130,90 +130,100 @@
 @endsection
 
 @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var lottieContainer = document.getElementById('lottie-empty');
-            if (lottieContainer) {
-                bodymovin.loadAnimation({ container: lottieContainer, renderer: 'svg', loop: true, autoplay: true, path: '{{ asset('assets/app/lottie/empty-notification.json') }}' });
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const lottieContainer = document.getElementById('lottie-empty');
+        if (lottieContainer) {
+            lottie.loadAnimation({
+                container: lottieContainer,
+                renderer: 'svg',
+                loop: true,
+                autoplay: true,
+                path: '{{ asset('assets/app/lottie/empty-notification.json') }}'
+            });
+        }
+
+        const container = document.getElementById('notification-page-container');
+        const toggleButton = document.getElementById('select-mode-toggle');
+        const selectAllButton = document.getElementById('select-all-btn');
+        const readButton = document.getElementById('read-selected-btn');
+        const deleteButton = document.getElementById('delete-selected-btn');
+        const checkboxes = document.querySelectorAll('.notification-checkbox');
+
+        let isSelectionMode = false;
+
+        function updateButtonStates() {
+            const selectedCheckboxes = document.querySelectorAll('.notification-checkbox:checked');
+            const hasSelection = selectedCheckboxes.length > 0;
+            readButton.disabled = !hasSelection;
+            deleteButton.disabled = !hasSelection;
+
+            if (checkboxes.length > 0 && selectedCheckboxes.length === checkboxes.length) {
+                selectAllButton.textContent = 'Batal Pilih Semua';
+            } else {
+                selectAllButton.textContent = 'Pilih Semua';
             }
+        }
 
-            const container = document.getElementById('notification-page-container');
-            const toggleBtn = document.getElementById('select-mode-toggle');
-            const selectAllBtn = document.getElementById('select-all-btn');
-            const readBtn = document.getElementById('read-selected-btn');
-            const deleteBtn = document.getElementById('delete-selected-btn');
-            const checkboxes = document.querySelectorAll('.notification-checkbox');
-            let isSelectionMode = false;
-
-            const updateActionButtons = () => {
-                const selectedCount = document.querySelectorAll('.notification-checkbox:checked').length;
-                if(readBtn) readBtn.disabled = selectedCount === 0;
-                if(deleteBtn) deleteBtn.disabled = selectedCount === 0;
-            };
-
-            if(toggleBtn) {
-                toggleBtn.addEventListener('click', () => {
-                    isSelectionMode = !isSelectionMode;
-                    container.classList.toggle('selection-mode', isSelectionMode);
-                    toggleBtn.textContent = isSelectionMode ? 'Batal' : 'Pilih';
-                    if (!isSelectionMode) {
-                        checkboxes.forEach(cb => cb.checked = false);
-                        updateActionButtons();
-                    }
-                });
+        function toggleSelectionMode() {
+            isSelectionMode = !isSelectionMode;
+            container.classList.toggle('selection-mode', isSelectionMode);
+            toggleButton.textContent = isSelectionMode ? 'Batal' : 'Pilih';
+            if (!isSelectionMode) {
+                checkboxes.forEach(cb => cb.checked = false);
+                updateButtonStates();
             }
+        }
 
-            checkboxes.forEach(cb => cb.addEventListener('change', updateActionButtons));
+        function handleSelectAll() {
+            const allSelected = document.querySelectorAll('.notification-checkbox:checked').length === checkboxes.length;
+            checkboxes.forEach(cb => cb.checked = !allSelected);
+            updateButtonStates();
+        }
 
-            if(selectAllBtn) {
-                selectAllBtn.addEventListener('click', () => {
-                    const areAllChecked = document.querySelectorAll('.notification-checkbox:checked').length === checkboxes.length;
-                    checkboxes.forEach(cb => cb.checked = !areAllChecked);
-                    updateActionButtons();
+        async function performBulkAction(url, method) {
+            const selectedIds = Array.from(document.querySelectorAll('.notification-checkbox:checked')).map(cb => cb.value);
+            if (selectedIds.length === 0) return;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ ids: selectedIds })
                 });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    Swal.fire({ icon: 'success', title: 'Berhasil!', text: result.message, timer: 1500, showConfirmButton: false })
+                        .then(() => window.location.reload());
+                } else {
+                    throw new Error(result.message || 'Terjadi kesalahan');
+                }
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Gagal', text: error.message });
             }
+        }
 
-            const performBulkAction = (url, successMessage) => {
-                const selectedIds = Array.from(document.querySelectorAll('.notification-checkbox:checked')).map(cb => cb.value);
-                if (selectedIds.length === 0) return;
+        if (toggleButton) {
+            toggleButton.addEventListener('click', toggleSelectionMode);
+        }
+        if (selectAllButton) {
+            selectAllButton.addEventListener('click', handleSelectAll);
+        }
+        if (readButton) {
+            readButton.addEventListener('click', () => performBulkAction('{{ route("notifications.read.selected") }}'));
+        }
+        if (deleteButton) {
+            deleteButton.addEventListener('click', () => performBulkAction('{{ route("notifications.delete.selected") }}'));
+        }
 
-                Swal.fire({
-                    title: 'Anda yakin?',
-                    text: `Anda akan ${successMessage.toLowerCase()} ${selectedIds.length} notifikasi.`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Ya, Lanjutkan!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        fetch(url, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
-                            body: JSON.stringify({ ids: selectedIds })
-                        })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Server merespons dengan error!');
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            Swal.fire('Berhasil!', data.message, 'success').then(() => window.location.reload());
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            Swal.fire('Gagal!', 'Terjadi kesalahan saat memproses permintaan Anda.', 'error');
-                        });
-                    }
-                });
-            };
-            
-            if(readBtn) readBtn.addEventListener('click', () => performBulkAction('{{ route("notifications.read.selected") }}', 'Menandai sudah dibaca'));
-            if(deleteBtn) deleteBtn.addEventListener('click', () => performBulkAction('{{ route("notifications.delete.selected") }}', 'Menghapus'));
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateButtonStates);
         });
-    </script>
+    });
+</script>
 @endpush

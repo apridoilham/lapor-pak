@@ -23,7 +23,7 @@
 
     <div class="card shadow mb-4">
         <div class="card-body">
-            <form action="{{ route('admin.resident.index') }}" method="GET" class="row g-3 align-items-end">
+            <form action="{{ route('admin.residents.index') }}" method="GET" class="row g-3 align-items-end">
                 <div class="col-md-3">
                     <label for="sort" class="form-label font-weight-bold small">Urutkan Berdasarkan</label>
                     <select name="sort" id="sort" class="form-control">
@@ -57,7 +57,7 @@
                     <button type="submit" class="btn btn-primary flex-grow-1 mr-2">
                         <i class="fas fa-filter fa-sm"></i> Terapkan
                     </button>
-                    <a href="{{ route('admin.resident.index') }}" class="btn btn-secondary" title="Reset Filter">
+                    <a href="{{ route('admin.residents.index') }}" class="btn btn-secondary" title="Reset Filter">
                         <i class="fas fa-sync-alt"></i>
                     </a>
                 </div>
@@ -105,7 +105,7 @@
                                     <span class="badge badge-pill badge-primary badge-report-count">{{ $resident->reports_count }} Laporan</span>
                                 </td>
                                 <td class="text-center">
-                                    <a href="{{ route('admin.resident.show', $resident->id) }}" class="btn btn-sm btn-outline-info" title="Lihat Detail Pelapor">
+                                    <a href="{{ route('admin.residents.show', $resident->id) }}" class="btn btn-sm btn-outline-info" title="Lihat Detail Pelapor">
                                         <i class="fas fa-eye fa-sm mr-1"></i> Detail
                                     </a>
                                 </td>
@@ -152,7 +152,7 @@
                     data.forEach(rt => {
                         const option = document.createElement('option');
                         option.value = rt.id;
-                        option.textContent = `RT ${rt->number}`;
+                        option.textContent = `RT ${rt.number}`;
                         if (selectedRtId && rt.id == selectedRtId) {
                             option.selected = true;
                         }
