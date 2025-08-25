@@ -101,8 +101,6 @@
                                 $iconClass = 'comment';
                                 $icon = 'fa-solid fa-comment-dots';
                                 $message = '<strong>' . ($actionUser ? $actionUser->name : 'Seseorang') . '</strong> mengomentari laporan Anda.';
-                            } elseif ($notification->data['type'] === 'status_update') {
-                                // Logic has already been pre-built in the Notification class
                             } elseif ($notification->data['type'] === 'progress_deleted') {
                                 $iconClass = 'deleted';
                                 $icon = 'fa-solid fa-trash-can';
@@ -131,7 +129,7 @@
     </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
     <script>
@@ -218,4 +216,4 @@
             if(deleteBtn) deleteBtn.addEventListener('click', () => performBulkAction('{{ route("notifications.delete.selected") }}', 'Menghapus'));
         });
     </script>
-@endsection
+@endpush

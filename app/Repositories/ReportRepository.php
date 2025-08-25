@@ -155,7 +155,12 @@ class ReportRepository implements ReportRepositoryInterface
     
     public function countByStatus(int $residentId, ReportStatusEnum $status): int
     {
-        return Report::where('resident_id', $residentId)->whereHas('latestStatus', fn(Builder $q) => $q->where('status', $status->value))->count();
+        return Report::where('resident_id', $residentId)
+        ->whereHas('reportStatuses', function (Builder $query) use ($status) {
+            $query->where('status', $status->value)
+                ->whereRaw('id = (select max(id) from report_statuses where report_id = reports.id)');
+        })
+        ->count();
     }
 
     public function getFilteredReports(array $filters): EloquentCollection

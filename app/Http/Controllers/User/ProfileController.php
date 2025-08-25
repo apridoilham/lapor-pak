@@ -37,6 +37,7 @@ class ProfileController extends Controller
             return redirect()->route('profile.edit');
         }
 
+        // Bagian ini akan berfungsi dengan benar setelah ReportRepository diperbaiki
         $stats = $this->reportRepository->countStatusesByResidentId($user->resident->id);
 
         return view('pages.app.profile', [

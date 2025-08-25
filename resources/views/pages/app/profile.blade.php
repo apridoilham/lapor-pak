@@ -190,7 +190,7 @@
     </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const counters = document.querySelectorAll('.stat-count');
@@ -211,4 +211,4 @@
             });
         });
     </script>
-@endsection
+@endpush
